@@ -1,0 +1,9 @@
+target:
+    - i686-elf
+
+Steps:
+1- boot-loader (GRUB) will pass control to our kernel.
+2- we need to set some headers so the boot-loader will recognize us as multi-boot code.
+
+TODO:
+- build a cross-compiler.
