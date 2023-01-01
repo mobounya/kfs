@@ -44,7 +44,7 @@ iso: grub.cfg all
 	@mkdir -p isodir/boot/grub
 	@cp $(NAME) isodir/boot/$(NAME)
 	@cp grub.cfg isodir/boot/grub/grub.cfg
-	@grub-mkrescue -o $(ISO) isodir
+	@grub-mkrescue --compress=xz -o $(ISO) isodir
 	@echo "$(GREEN)Done creating bootable iso file$(NC)"
 
 iso-clean:

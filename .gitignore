@@ -3,3 +3,4 @@ isodir
 *.bin
 *.iso
 .idea
+.vscode
