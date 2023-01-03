@@ -6,7 +6,7 @@ LINKER_SCRIPT = linker.ld
 
 TARGET = i686-elf
 
-COMPILER_FLAGS = -std=gnu99 -ffreestanding -O2 -Wall -Wextra
+COMPILER_FLAGS = -ffreestanding -O2 -Wall -Wextra -fno-exceptions -fno-rtti -nostdlib -nodefaultlibs -fno-stack-protector
 
 LINKER_FLAGS = -ffreestanding -O2 -nostdlib
 
@@ -26,7 +26,7 @@ all : $(NAME)
 
 $(NAME) : $(BOOT_FILES) $(KERNEL_FILES)
 	@echo "$(RED)Linking kernel and boot files...$(NC)"
-	@$(TARGET)-gcc -T $(LINKER_SCRIPT) -o $@ $(LINKER_FLAGS) $(KERNEL_OBJECTS) $(BOOT_OBJECTS) -lgcc
+	@$(TARGET)-c++ -T $(LINKER_SCRIPT) -o $@ $(LINKER_FLAGS) $(KERNEL_OBJECTS) $(BOOT_OBJECTS) -lgcc
 	@echo "$(GREEN)Done linking kernel and boot files...$(NC)"
 
 $(BOOT_FILES) : % : %.s
@@ -34,9 +34,9 @@ $(BOOT_FILES) : % : %.s
 	@$(TARGET)-as $< -o $@.o
 	@echo "$(GREEN)Done making boot files$(NC)"
 
-$(KERNEL_FILES) : % : %.c
+$(KERNEL_FILES) : % : %.cpp
 	@echo "$(RED)Compiling kernel files...$(NC)"
-	@$(TARGET)-gcc -c $< -o $@.o $(COMPILER_FLAGS)
+	@$(TARGET)-g++ -c $< -o $@.o $(COMPILER_FLAGS)
 	@echo "$(GREEN)Done compiling kernel files$(NC)"
 
 iso: grub.cfg all

@@ -46,11 +46,6 @@ typedef enum VGA_BG_COLOR {
     BG_GRAY,
 } VGA_BG_COLOR;
 
-typedef enum bool {
-    FALSE,
-    TRUE
-} bool;
-
 static size_t current_index = 0;
 
 size_t ft_strlen(const char *str)
@@ -97,7 +92,7 @@ void vga_write_string(const char *string, VGA_BG_COLOR bg_color, VGA_FG_COLOR fg
         vga_attribute attr = 0;
         attr = vga_set_foreground_color(attr, fg_color);
         attr = vga_set_background_color(attr, bg_color);
-        if (blink == TRUE)
+        if (blink == true)
             attr = vga_set_blink(attr);
         vga_char c = vga_create_char(attr, string[i]);
         vga_write_char(c, current_index / VGA_WIDTH, current_index % VGA_WIDTH);
@@ -107,10 +102,10 @@ void vga_write_string(const char *string, VGA_BG_COLOR bg_color, VGA_FG_COLOR fg
     }
 }
 
-void kernel_main(void)
+extern "C" void kernel_main(void)
 {
     const char *str = "42";
 
     current_index = (VGA_WIDTH * (VGA_HEIGHT / 2)) + (VGA_WIDTH / 2) - ft_strlen(str);
-    vga_write_string(str, BG_GRAY, GREEN, TRUE);
+    vga_write_string(str, BG_GRAY, GREEN, true);
 }
