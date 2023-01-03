@@ -26,7 +26,7 @@ all : $(NAME)
 
 $(NAME) : $(BOOT_FILES) $(KERNEL_FILES)
 	@echo "$(RED)Linking kernel and boot files...$(NC)"
-	$(TARGET)-gcc -T $(LINKER_SCRIPT) -o $@ $(LINKER_FLAGS) $(KERNEL_OBJECTS) $(BOOT_OBJECTS) -lgcc
+	@$(TARGET)-gcc -T $(LINKER_SCRIPT) -o $@ $(LINKER_FLAGS) $(KERNEL_OBJECTS) $(BOOT_OBJECTS) -lgcc
 	@echo "$(GREEN)Done linking kernel and boot files...$(NC)"
 
 $(BOOT_FILES) : % : %.s

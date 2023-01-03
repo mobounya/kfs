@@ -14,7 +14,7 @@ typedef uint8_t vga_attribute;
  * List of available colors.
  * */
 
-typedef enum VGA_COLOR {
+typedef enum VGA_FG_COLOR {
     BLACK,
     BLUE,
     GREEN,
@@ -31,7 +31,20 @@ typedef enum VGA_COLOR {
     LIGHT_RED,
     LIGHT_MAGENTA,
     LIGHT_YELLOW
-} VGA_COLOR;
+} VGA_FG_COLOR;
+
+/* Same as VGA_FG_COLOR colors, except that background colors don't have light versions */
+
+typedef enum VGA_BG_COLOR {
+    BG_BLACK,
+    BG_BLUE,
+    BG_GREEN,
+    BFG_CYAN,
+    BG_RED,
+    BG_MAGENTA,
+    BG_YELLOW,
+    BG_GRAY,
+} VGA_BG_COLOR;
 
 typedef enum bool {
     FALSE,
@@ -53,13 +66,13 @@ void vga_write_char(vga_char c, size_t y, size_t x)
     vga_buffer[index] = c;
 }
 
-vga_attribute vga_set_foreground_color(vga_attribute attr, VGA_COLOR color)
+vga_attribute vga_set_foreground_color(vga_attribute attr, VGA_FG_COLOR color)
 {
     attr |= color;
     return attr;
 }
 
-vga_attribute vga_set_background_color(vga_attribute attr, VGA_COLOR color)
+vga_attribute vga_set_background_color(vga_attribute attr, VGA_BG_COLOR color)
 {
     attr |= color << 4;
     return attr;
@@ -77,7 +90,7 @@ vga_char vga_create_char(vga_attribute attr, char ascii_char)
     return c;
 }
 
-void vga_write_string(const char *string, VGA_COLOR bg_color, VGA_COLOR fg_color, bool blink)
+void vga_write_string(const char *string, VGA_BG_COLOR bg_color, VGA_FG_COLOR fg_color, bool blink)
 {
     for (size_t i = 0; string[i] != '\0'; i++)
     {
@@ -99,5 +112,5 @@ void kernel_main(void)
     const char *str = "42";
 
     current_index = (VGA_WIDTH * (VGA_HEIGHT / 2)) + (VGA_WIDTH / 2) - ft_strlen(str);
-    vga_write_string(str, LIGHT_YELLOW, BLACK, TRUE);
+    vga_write_string(str, BG_GRAY, GREEN, TRUE);
 }
