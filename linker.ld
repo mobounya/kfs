@@ -5,10 +5,16 @@ SECTIONS
 		boot.o (.multiboot_header)
 	}
 
-	.text : 
+	.text :
 	{
 		boot.o (.text)
 		kernel.o (.text)
+	}
+
+	.rodata :
+	{
+		boot.o (.rodata)
+		kernel.o (.rodata)
 	}
 
 	.data :
