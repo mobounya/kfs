@@ -11,7 +11,6 @@
 .long FLAGS
 .long CHECKSUM
 
-
 /* Initializing a 16 KiB memory area we will use as a stack */
 .section .bss
 .align 16
@@ -19,15 +18,9 @@ stack_bottom:
 .skip 16384, 0    # skipping 16 KiB and fill it with value 0
 stack_top:
 
-
 .section .text
 .global _start
 
 _start:
     mov $stack_top, %esp # esp now will point to the top of the stack.
     call kernel_main
-
-    /* They say you should halt the system if returned from kernel IDK */
-    cli
-1:  hlt
-    jmp 1b
