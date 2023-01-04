@@ -1,4 +1,4 @@
-# KFS_1
+# [KFS_1](https://cdn.intra.42.fr/pdf/pdf/60900/en.subject.pdf)
 
 This project is based on the Bare Bones tutorial in the [osdev wiki](https://wiki.osdev.org/Bare_Bones).
 
@@ -11,11 +11,11 @@ For linking and writing ld scripts, checkout these resources:
 
 ### Multiboot specification
 
-Check out the [GNU specification](https://www.gnu.org/software/grub/manual/multiboot/multiboot.html) for writing a Multiboot compatible kernel.
+[GNU Multiboot specification](https://www.gnu.org/software/grub/manual/multiboot/multiboot.html)
 
 ### VGA text mode
 
-Use the VGA text mode to write characters to the screens.
+Write to screen using the VGA text mode:
 * https://en.wikipedia.org/wiki/VGA_text_mode
 * https://en.wikipedia.org/wiki/List_of_8-bit_computer_hardware_graphics#IBM_PC/XT_and_compatible_systems
 
