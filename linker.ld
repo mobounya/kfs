@@ -19,7 +19,7 @@ SECTIONS
 
 	.data :
 	{
-		boot.o (.text)
+		boot.o (.data)
 		kernel.o (.data)
 	}
 
