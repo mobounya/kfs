@@ -3,8 +3,12 @@
 #include <stdint.h>
 #include <stddef.h>
 
+#include "not_libc.hpp"
+
 #define VGA_WIDTH 80
 #define VGA_HEIGHT 25
+
+#define VGA_BUFFER_SIZE (VGA_WIDTH * VGA_HEIGHT)
 
 typedef uint16_t vga_char;
 typedef uint8_t vga_attribute;
@@ -55,12 +59,17 @@ enum BLINK {
 class TEXT_MODE
 {
     private:
-        uint16_t *vga_buffer;
+        vga_char screen_buffer[VGA_BUFFER_SIZE];
+        vga_char *vga_buffer;
         size_t current_index = 0;
+
+        void init_screen_buffer();
+        void write_char(vga_char c);
+        void flush_buffer_to_screen();
+        void shift_screen_buffer(size_t size);
     public:
         TEXT_MODE();
         void set_start(size_t y, size_t x);
-        void write_char(vga_char c, size_t y, size_t x);
         void write_string(const char *string, BG_COLOR bg_color, FG_COLOR fg_color, bool blink);
         vga_char create_char(vga_attribute attr, char ascii_char);
         vga_attribute set_foreground_color(vga_attribute attr, FG_COLOR color);

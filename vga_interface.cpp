@@ -5,6 +5,42 @@ namespace VGA
     TEXT_MODE::TEXT_MODE()
     {
         this->vga_buffer = (uint16_t *)0xB8000;
+        this->current_index = 0;
+        init_screen_buffer();
+    }
+
+    void  TEXT_MODE::init_screen_buffer()
+    {
+        vga_attribute attr = 0;
+        attr = set_background_color(attr, BG_COLOR::BG_BLACK);
+        attr = set_foreground_color(attr, FG_COLOR::BLACK);
+        vga_char c = create_char(attr, ' ');
+        for (size_t y = 0; y < VGA_HEIGHT; y++)
+        {
+            for (size_t x = 0; x < VGA_WIDTH; x++)
+                screen_buffer[y * VGA_WIDTH + x]= c;
+        }
+    }
+
+    void TEXT_MODE::flush_buffer_to_screen()
+    {
+        for (size_t i = 0; i < VGA_BUFFER_SIZE; i++)
+            vga_buffer[i] = screen_buffer[i];
+    }
+
+    void TEXT_MODE::shift_screen_buffer(size_t size)
+    {
+        // We already have enough space, don't do anything.
+        if (current_index + size < VGA_BUFFER_SIZE)
+            return;
+
+        // calculate how many bytes do we need to reserve.
+        size = (current_index + size) % VGA_BUFFER_SIZE;
+    
+        size_t index = size;
+        for (size_t i = 0; index < current_index; i++, index++)
+            screen_buffer[i] = screen_buffer[index];
+        current_index -= size;
     }
 
     void TEXT_MODE::set_start(size_t y, size_t x)
@@ -12,14 +48,14 @@ namespace VGA
         this->current_index = (y * VGA_WIDTH) + x;
     }
 
-    void TEXT_MODE::write_char(vga_char c, size_t y, size_t x)
+    void TEXT_MODE::write_char(vga_char c)
     {
-        size_t index = (y * VGA_WIDTH) + x;
-        vga_buffer[index] = c;
+        screen_buffer[current_index] = c;
     }
 
     void TEXT_MODE::write_string(const char *string, BG_COLOR bg_color, FG_COLOR fg_color, bool blink)
     {
+        shift_screen_buffer(ft_strlen(string));
         for (size_t i = 0; string[i] != '\0'; i++)
         {
             vga_attribute attr = 0;
@@ -28,11 +64,10 @@ namespace VGA
             if (blink == true)
                 attr = set_blink(attr);
             vga_char c = create_char(attr, string[i]);
-            this->write_char(c, current_index / VGA_WIDTH, current_index % VGA_WIDTH);
+            this->write_char(c);
             current_index++;
-            if (current_index == VGA_WIDTH * VGA_HEIGHT)
-                current_index = 0;
         }
+        flush_buffer_to_screen();
     }
 
     vga_char TEXT_MODE::create_char(vga_attribute attr, char ascii_char)
