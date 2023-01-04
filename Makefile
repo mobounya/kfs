@@ -10,7 +10,7 @@ COMPILER_FLAGS = -ffreestanding -O2 -Wall -Wextra -fno-exceptions -fno-rtti -nos
 
 LINKER_FLAGS = -ffreestanding -O2 -nostdlib
 
-KERNEL_FILES = kernel vga_interface
+KERNEL_FILES = kernel vga_interface not_libc
 
 KERNEL_OBJECTS = $(addsuffix .o, $(KERNEL_FILES))
 
