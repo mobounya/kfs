@@ -24,3 +24,6 @@ stack_top:
 _start:
     mov $stack_top, %esp # esp now will point to the top of the stack.
     call kernel_main
+    cli
+1:	hlt
+	jmp 1b
