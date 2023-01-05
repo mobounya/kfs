@@ -55,7 +55,7 @@ namespace VGA
 
     void TEXT_MODE::write_string(const char *string, BG_COLOR bg_color, FG_COLOR fg_color, bool blink)
     {
-        shift_screen_buffer(ft_strlen(string));
+        shift_screen_buffer(strlen(string));
         for (size_t i = 0; string[i] != '\0'; i++)
         {
             vga_attribute attr = 0;

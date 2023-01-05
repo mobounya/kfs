@@ -2,4 +2,6 @@
 
 #include <stddef.h>
 
-size_t ft_strlen(const char *str);
+size_t strlen(const char *str);
+
+int strcmp(const char *s1, const char *s2);

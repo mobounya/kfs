@@ -19,7 +19,7 @@ extern "C" void kernel_main(void)
 
     for (size_t i = 0; i < size; ++i)
     {
-        vga_interface.set_start((VGA_HEIGHT - size) / 2 + i, (VGA_WIDTH / 2) - (ft_strlen(str[i]) / 2));
+        vga_interface.set_start((VGA_HEIGHT - size) / 2 + i, (VGA_WIDTH / 2) - (strlen(str[i]) / 2));
         vga_interface.write_string(str[i], VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::TRUE);
     }
 }
