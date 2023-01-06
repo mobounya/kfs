@@ -12,7 +12,7 @@ extern "C" void kernel_main(void)
         "  +#+  +:+       +#+     ",
         "+#+#+#+#+#+   +#+        ",
         "     #+#    #+#          ",
-        "    ###   ########.fr    "
+        "    ###   ########       "
     };
     const size_t size = sizeof(str) / sizeof(const char *);
     VGA::TEXT_MODE vga_interface = VGA::TEXT_MODE();
