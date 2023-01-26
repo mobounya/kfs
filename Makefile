@@ -6,9 +6,9 @@ LINKER_SCRIPT = linker.ld
 
 TARGET = i686-elf
 
-COMPILER_FLAGS = -ffreestanding -O2 -Wall -Wextra -fno-exceptions -fno-rtti -nostdlib -nodefaultlibs -fno-stack-protector
+COMPILER_FLAGS = -ffreestanding -Wall -Wextra -fno-exceptions -fno-rtti -nostdlib -nodefaultlibs -fno-stack-protector
 
-LINKER_FLAGS = -ffreestanding -O2 -nostdlib
+LINKER_FLAGS = -ffreestanding -nostdlib
 
 KERNEL_FILES = kernel vga_interface not_libc
 

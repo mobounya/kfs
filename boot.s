@@ -5,7 +5,7 @@
 .set CHECKSUM, -(MAGIC + FLAGS)                    # If you add this checksum to MAGIC and FLAGS you need to get "0" to prove we are multiboot.
 
 /* Section for the multiboot header */
-.section multiboot_header
+.section .multiboot_header
 .align 4
 .long MAGIC
 .long FLAGS
@@ -22,8 +22,130 @@ stack_top:
 .global _start
 
 _start:
+    cli
+    lgdt [GDT_descriptor]
+    mov $0x10, %esp
+    mov %esp, %ds
+    mov $0x18, %esp
+    mov %esp, %ss
+    ljmp $0x08, $.call_kernel
+
+.call_kernel:
     mov $stack_top, %esp # esp now will point to the top of the stack.
     call kernel_main
-    cli
 1:	hlt
 	jmp 1b
+
+padding:
+    .skip 0x2ff # make GDB_start start from 0x800
+
+GDT_start:
+    GDT_null:
+        .8byte 0x0
+
+    kernel_code_descriptor:
+        # first 2 bytes of the limit
+        .2byte 0xffff
+
+        # first 3 bytes of base address
+        .2byte 0x00
+        .byte 0x0
+
+        # access/type byte
+        .byte 0b10011010
+
+        # 4 bit flag and last 4 bits of limit
+        .byte 0b11001111
+
+        # last 1 byte of base address
+        .byte 0x0
+
+    kernel_data_descriptor:
+        # first 2 bytes of the limit
+        .2byte 0xffff
+
+        # first 3 bytes of base address
+        .2byte 0x0
+        .byte 0x0
+
+        # access/type byte
+        .byte 0b10010010
+
+        # 4 bit flag and last 4 bits of limit
+        .byte 0b11001111
+
+        # last 1 byte of base address
+        .byte 0x0
+    
+    kernel_stack_descriptor:
+        # first 2 bytes of the limit
+        .2byte 0xffff
+
+        # first 3 bytes of base address
+        .2byte 0x0
+        .byte 0x0
+
+        # access/type byte
+        .byte 0b10010010
+
+        # 4 bit flag and last 4 bits of limit
+        .byte 0b11001111
+
+        # last 1 byte of base address
+        .byte 0x0
+    
+    user_code_descriptor:
+        # first 2 bytes of the limit
+        .2byte 0xffff
+
+        # first 3 bytes of base address
+        .2byte 0x00
+        .byte 0x0
+
+        # access/type byte
+        .byte 0b11111110
+
+        # 4 bit flag and last 4 bits of limit
+        .byte 0b11001111
+
+        # last 1 byte of base address
+        .byte 0x0
+    
+    user_data_descriptor:
+        # first 2 bytes of the limit
+        .2byte 0xffff
+
+        # first 3 bytes of base address
+        .2byte 0x00
+        .byte 0x0
+
+        # access/type byte
+        .byte 0b11110010
+
+        # 4 bit flag and last 4 bits of limit
+        .byte 0b11001111
+
+        # last 1 byte of base address
+        .byte 0x0
+    
+    user_stack_descriptor:
+        # first 2 bytes of the limit
+        .2byte 0xffff
+
+        # first 3 bytes of base address
+        .2byte 0x0
+        .byte 0x0
+
+        # access/type byte
+        .byte 0b11110010
+
+        # 4 bit flag and last 4 bits of limit
+        .byte 0b11001111
+
+        # last 1 byte of base address
+        .byte 0x0
+GDT_end:
+
+GDT_descriptor:
+    .2byte  GDT_end - GDT_start - 1
+    .4byte  GDT_start
