@@ -3,8 +3,6 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#include "not_libc.hpp"
-
 #define VGA_WIDTH 80
 #define VGA_HEIGHT 25
 

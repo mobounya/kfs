@@ -3,23 +3,15 @@
 #include "vga_interface.hpp"
 #include "not_libc.hpp"
 
+
 extern "C" void kernel_main(void)
 {
-    const char *str[] = {
-        "        :::      ::::::::",
-        "      :+:      :+:    :+:",
-        "    +:+ +:+         +:+  ",
-        "  +#+  +:+       +#+     ",
-        "+#+#+#+#+#+   +#+        ",
-        "     #+#    #+#          ",
-        "    ###   ########       "
-    };
-    const size_t size = sizeof(str) / sizeof(const char *);
-    VGA::TEXT_MODE vga_interface = VGA::TEXT_MODE();
+    char str[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    long c = 4242;
+    int a = 42;
+    int b = 1337;
 
-    for (size_t i = 0; i < size; ++i)
-    {
-        vga_interface.set_start((VGA_HEIGHT - size) / 2 + i, (VGA_WIDTH / 2) - (strlen(str[i]) / 2));
-        vga_interface.write_string(str[i], VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::TRUE);
-    }
+    VGA::TEXT_MODE vga_interface = VGA::TEXT_MODE();
+    vga_interface.write_string("Dumping last 368 bytes of the stack starting from b:\n\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::GRAY, false);
+    dump_memory(vga_interface, ((void *)&b), 368);
 }

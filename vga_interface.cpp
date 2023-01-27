@@ -1,4 +1,5 @@
 #include "vga_interface.hpp"
+#include "not_libc.hpp"
 
 namespace VGA
 {
@@ -64,8 +65,15 @@ namespace VGA
             if (blink == true)
                 attr = set_blink(attr);
             vga_char c = create_char(attr, string[i]);
-            this->write_char(c);
-            current_index++;
+            if (string[i] == '\n')
+            {
+                current_index = (current_index / VGA_WIDTH + 1) * VGA_WIDTH; 
+            }
+            else
+            {
+                this->write_char(c);
+                current_index++;
+            }
         }
         flush_buffer_to_screen();
     }
