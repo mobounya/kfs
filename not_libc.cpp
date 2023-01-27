@@ -49,6 +49,25 @@ void dump_memory(VGA::TEXT_MODE &vga_interface, void *ptr, size_t size)
             }
             vga_interface.write_string("\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::BLACK, false);
         }
+        else if (i == size)
+        {
+            size_t j = (i / 16) * 16;
+            for (size_t k = i; k % 16 != 0; ++k)
+                vga_interface.write_string("   ", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::BLACK, false);
+            vga_interface.write_string("                ", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::BLACK, false);
+            while (j < i)
+            {
+                char str[2];
+                if (data[j] >= 32 && data[j] <= 126)
+                    str[0] = data[j];
+                else
+                    str[0] = '.';
+                str[1] = '\0';
+                vga_interface.write_string(str, VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::GRAY, false);
+                j++;
+            }
+            vga_interface.write_string("\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::BLACK, false);
+        }
         else
             vga_interface.write_string(" ", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::BLACK, false);
     }
