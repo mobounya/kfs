@@ -34,7 +34,7 @@ all : $(NAME)
 
 $(NAME) : $(ASM_OBJ) $(CPP_OBJ)
 	@echo "$(RED)Linking kernel and boot files...$(NC)"
-	@$(TARGET)-g++ $(LINKER_FLAGS) -o $@ $(ASM_OBJ) $(CPP_OBJ) -lgcc
+	@$(TARGET)-g++ -T $(LINKER_SCRIPT) $(LINKER_FLAGS) -o $@ $(ASM_OBJ) $(CPP_OBJ) -lgcc
 	@echo "$(GREEN)Done linking kernel and boot files...$(NC)"
 
 $(ASM_OBJ) : $(ASM_SRC)

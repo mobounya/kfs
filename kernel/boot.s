@@ -36,9 +36,6 @@ _start:
 1:	hlt
 	jmp 1b
 
-padding:
-    .skip 0x2ff # make GDB_start start from 0x800
-
 GDT_start:
     GDT_null:
         .8byte 0x0
