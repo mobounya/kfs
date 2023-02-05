@@ -6,17 +6,25 @@ LINKER_SCRIPT = linker.ld
 
 TARGET = i686-elf
 
-COMPILER_FLAGS = -ffreestanding -Wall -Wextra -fno-exceptions -fno-rtti -nostdlib -nodefaultlibs -fno-stack-protector
+COMPILER_FLAGS = -Inot_libc/ -Ikernel/ -ffreestanding -Wall -Wextra -fno-exceptions -fno-rtti -nostdlib -nodefaultlibs -fno-stack-protector
 
 LINKER_FLAGS = -ffreestanding -nostdlib
 
-KERNEL_FILES = kernel vga_interface not_libc
+NOT_LIBC_FILES = $(addprefix not_libc/, not_libc)
+NOT_LIBC_SRC = $(addsuffix .cpp, $(NOT_LIBC_FILES))
+NOT_LIBC_OBJ = $(addsuffix .o, $(NOT_LIBC_FILES))
 
-KERNEL_OBJECTS = $(addsuffix .o, $(KERNEL_FILES))
+KERNEL_FILES = $(addprefix kernel/, kernel vga_interface)
+KERNEL_SRC = $(addsuffix .cpp, $(KERNEL_FILES))
+KERNEL_OBJ = $(addsuffix .o, $(KERNEL_FILES))
 
-BOOT_FILES = boot
+ASM_FILES = $(addprefix kernel/, boot)
+ASM_SRC = $(addsuffix .s, $(ASM_FILES))
+ASM_OBJ = $(addsuffix .o, $(ASM_FILES))
 
-BOOT_OBJECTS = $(addsuffix .o, $(BOOT_FILES))
+CPP_FILES = $(NOT_LIBC_FILES) $(KERNEL_FILES)
+CPP_SRC = $(NOT_LIBC_SRC) $(KERNEL_SRC)
+CPP_OBJ = $(NOT_LIBC_OBJ) $(KERNEL_OBJ)
 
 RED = \033[1;31m
 GREEN = \033[1;32m
@@ -24,19 +32,19 @@ NC = \033[1;0m
 
 all : $(NAME)
 
-$(NAME) : $(BOOT_FILES) $(KERNEL_FILES)
+$(NAME) : $(ASM_OBJ) $(CPP_OBJ)
 	@echo "$(RED)Linking kernel and boot files...$(NC)"
-	@$(TARGET)-c++ -T $(LINKER_SCRIPT) -o $@ $(LINKER_FLAGS) $(KERNEL_OBJECTS) $(BOOT_OBJECTS) -lgcc
+	@$(TARGET)-g++ $(LINKER_FLAGS) -o $@ $(ASM_OBJ) $(CPP_OBJ) -lgcc
 	@echo "$(GREEN)Done linking kernel and boot files...$(NC)"
 
-$(BOOT_FILES) : % : %.s
+$(ASM_OBJ) : $(ASM_SRC)
 	@echo "$(RED)Making boot files...$(NC)"
-	@$(TARGET)-as $< -o $@.o
+	@$(TARGET)-as $*.s -o $@
 	@echo "$(GREEN)Done making boot files$(NC)"
 
-$(KERNEL_FILES) : % : %.cpp
+$(CPP_OBJ) : $(CPP_SRC)
 	@echo "$(RED)Compiling kernel files...$(NC)"
-	@$(TARGET)-g++ -c $< -o $@.o $(COMPILER_FLAGS)
+	@$(TARGET)-g++ $(COMPILER_FLAGS) -c $*.cpp -o $@
 	@echo "$(GREEN)Done compiling kernel files$(NC)"
 
 iso: grub.cfg all
@@ -52,7 +60,7 @@ iso-clean:
 	rm -f $(ISO)
 
 clean:
-	rm -f $(KERNEL_OBJECTS) $(BOOT_OBJECTS)
+	rm -f $(CPP_OBJ) $(ASM_OBJ)
 
 fclean: clean
 	rm -f $(NAME)
