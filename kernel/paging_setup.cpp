@@ -5,7 +5,7 @@
     each entry is 32 bits (4 bytes); there are thus 1024 entries in each structure.
     Note: page_directory_entry size is 4 bytes.
 */
-paging_structure page_directory[1024];
+paging_structure_entry page_directory[1024];
 uint16_t index = 0;
 
 /*
@@ -20,10 +20,10 @@ void enable_paging()
     );
 }
 
-paging_structure create_page_directory_entry(bool present, bool read_write, bool u_s, bool pwt, bool cache_disbled, bool page_size,
+paging_structure_entry create_page_directory_entry(bool present, bool read_write, bool u_s, bool pwt, bool cache_disbled, bool page_size,
                                                    uint32_t address)
 {
-    paging_structure entry;
+    paging_structure_entry entry;
 
     entry.present = present;
     entry.read_write = read_write;
@@ -38,10 +38,10 @@ paging_structure create_page_directory_entry(bool present, bool read_write, bool
     return entry;
 }
 
-paging_structure create_page_table_entry(bool present, bool read_write, bool u_s, bool pwt, bool cache_disbled, bool pat,
+paging_structure_entry create_page_table_entry(bool present, bool read_write, bool u_s, bool pwt, bool cache_disbled, bool pat,
                                             bool global, uint32_t address)
 {
-    paging_structure entry;
+    paging_structure_entry entry;
 
     entry.present = present;
     entry.read_write = read_write;
@@ -57,7 +57,7 @@ paging_structure create_page_table_entry(bool present, bool read_write, bool u_s
     return entry;
 }
 
-void insert_page_directory_entry(paging_structure entry)
+void insert_page_directory_entry(paging_structure_entry entry)
 {
     page_directory[index] = entry;
     index++;

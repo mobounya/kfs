@@ -6,9 +6,8 @@
 
 void setup_kernel()
 {
-    PDE entry = create_page_directory_entry(true, true, true, false, true, false, 0xfffff000);
+    paging_structure_entry entry = create_page_directory_entry(true, true, true, false, true, false, 0xfffff000);
     insert_page_directory_entry(entry);
-    page_directory_entry *page_directory_temp = page_directory;
 }
 
 extern "C" void kernel_main(void)
