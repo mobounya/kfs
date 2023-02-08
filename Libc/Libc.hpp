@@ -1,7 +1,7 @@
 #pragma once
 
 #include <stddef.h>
-#include "vga_interface.hpp"
+#include <Kernel/VGA/VGA.hpp>
 
 size_t strlen(const char *str);
 

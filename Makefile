@@ -6,25 +6,25 @@ LINKER_SCRIPT = linker.ld
 
 TARGET = i686-elf
 
-COMPILER_FLAGS = -Inot_libc/ -Ikernel/ -ffreestanding -Wall -Wextra -fno-exceptions -fno-rtti -nostdlib -nodefaultlibs -fno-stack-protector
+COMPILER_FLAGS = -I./ -ffreestanding -Wall -Wextra -fno-exceptions -fno-rtti -nostdlib -nodefaultlibs -fno-stack-protector
 
 LINKER_FLAGS = -ffreestanding -nostdlib
 
-NOT_LIBC_FILES = $(addprefix not_libc/, not_libc)
-NOT_LIBC_SRC = $(addsuffix .cpp, $(NOT_LIBC_FILES))
-NOT_LIBC_OBJ = $(addsuffix .o, $(NOT_LIBC_FILES))
+LIBC_FILES = $(addprefix Libc/, Libc)
+LIBC_SRC = $(addsuffix .cpp, $(LIBC_FILES))
+LIBC_OBJ = $(addsuffix .o, $(LIBC_FILES))
 
-KERNEL_FILES = $(addprefix kernel/, kernel vga_interface paging_setup)
+KERNEL_FILES = $(addprefix Kernel/, Kernel VGA/VGA Memory/MemoryManager Memory/PagingStructureEntry)
 KERNEL_SRC = $(addsuffix .cpp, $(KERNEL_FILES))
 KERNEL_OBJ = $(addsuffix .o, $(KERNEL_FILES))
 
-ASM_FILES = $(addprefix kernel/, boot)
+ASM_FILES = $(addprefix Kernel/, Boot)
 ASM_SRC = $(addsuffix .s, $(ASM_FILES))
 ASM_OBJ = $(addsuffix .o, $(ASM_FILES))
 
-CPP_FILES = $(NOT_LIBC_FILES) $(KERNEL_FILES)
-CPP_SRC = $(NOT_LIBC_SRC) $(KERNEL_SRC)
-CPP_OBJ = $(NOT_LIBC_OBJ) $(KERNEL_OBJ)
+CPP_FILES = $(LIBC_FILES) $(KERNEL_FILES)
+CPP_SRC = $(LIBC_SRC) $(KERNEL_SRC)
+CPP_OBJ = $(LIBC_OBJ) $(KERNEL_OBJ)
 
 RED = \033[1;31m
 GREEN = \033[1;32m

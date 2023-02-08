@@ -1,5 +1,5 @@
-#include "vga_interface.hpp"
-#include "not_libc.hpp"
+#include <Libc/Libc.hpp>
+#include <Kernel/VGA/VGA.hpp>
 
 namespace VGA
 {
