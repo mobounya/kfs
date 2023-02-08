@@ -3,12 +3,10 @@
 #include <stdint.h>
 
 
-typedef struct __attribute__((__packed__)) page_directory_entry
+typedef struct __attribute__((__packed__)) paging_structure
 {
     /*
-        P, or 'Present'. If the bit is set, the page is actually in physical memory at the moment. For example, 
-        when a page is swapped out, it is not in physical memory and therefore not 'Present'. If a page is called, but not present, 
-        a page fault will occur, and the OS should handle it.
+        Present; must be 1 to reference a page table
     */
     uint32_t present : 1;
 
@@ -42,30 +40,42 @@ typedef struct __attribute__((__packed__)) page_directory_entry
     uint32_t accessed : 1;
     
     /*
-        1 bit ignored
+        Dirty; indicates whether software has written to the 4-KByte page referenced by this entry.
+        Should be ignored if this entry is a page directory entry.
     */
-    uint32_t ignored_1 : 1;
+    uint32_t dirty : 1;
 
     /*
-        PS, or 'Page Size' stores the page size for that specific entry. If the bit is set, then the PDE maps to a page that is 4 MiB in size.
+        if this entry is a page directory:
+        - PS, or 'Page Size' stores the page size for that specific entry. If the bit is set, then the PDE maps to a page that is 4 MiB in size.
         Otherwise, it maps to a 4 KiB page table. Please note that 4-MiB pages require PSE to be enabled.
+        
+        else of this entry is a page table:
+        - If the PAT is supported, indirectly determines the memory type used to access the 4-KByte page referenced by this
+        entry ; otherwise, reserved (must be 0)
     */
-    uint32_t page_size : 1;
+    uint32_t bit_7 : 1;
+
+    /* 
+        Global; if CR4.PGE = 1, determines whether the translation is global (see Section 4.10); ignored otherwise
+        Should be ignored if this entry is a page directory entry.
+    */
+    uint32_t global : 1;
 
     /*
-        4 bits ignored
+        3 bits ignored.
     */
-    uint32_t ignored_4 : 4;
+    uint32_t ignored : 3;
 
     /*
         Physical address of the page table (4K bytes alligned).
     */
     uint32_t page_table_address : 20;
-} PDE;
+};
 
-extern page_directory_entry page_directory[1024];
+extern paging_structure page_directory[1024];
 
 void enable_paging();
-page_directory_entry create_page_directory_entry(bool present, bool read_write, bool u_s, bool pwt, bool cache_disbled, bool page_size,
+paging_structure create_page_directory_entry(bool present, bool read_write, bool u_s, bool pwt, bool cache_disbled, bool page_size,
                                                    uint32_t address);
-void insert_page_directory_entry(page_directory_entry entry);
+void insert_page_directory_entry(paging_structure entry);
