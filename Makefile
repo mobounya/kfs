@@ -14,7 +14,7 @@ NOT_LIBC_FILES = $(addprefix not_libc/, not_libc)
 NOT_LIBC_SRC = $(addsuffix .cpp, $(NOT_LIBC_FILES))
 NOT_LIBC_OBJ = $(addsuffix .o, $(NOT_LIBC_FILES))
 
-KERNEL_FILES = $(addprefix kernel/, kernel vga_interface)
+KERNEL_FILES = $(addprefix kernel/, kernel vga_interface paging_setup)
 KERNEL_SRC = $(addsuffix .cpp, $(KERNEL_FILES))
 KERNEL_OBJ = $(addsuffix .o, $(KERNEL_FILES))
 
