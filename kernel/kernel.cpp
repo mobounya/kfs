@@ -8,6 +8,7 @@ void setup_kernel()
 {
     paging_structure_entry entry = create_page_directory_entry(true, true, true, false, true, false, 0xfffff000);
     insert_page_directory_entry(entry);
+    load_page_directory((void*)0x1337);
 }
 
 extern "C" void kernel_main(void)

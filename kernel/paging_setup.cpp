@@ -20,6 +20,15 @@ void enable_paging()
     );
 }
 
+void load_page_directory(void *page_directory)
+{
+    asm volatile (
+        "movl %0, %%eax\n"
+        "movl %%eax, %%cr3\n"
+        :: "r" (page_directory) : "%eax"
+    );
+}
+
 paging_structure_entry create_page_directory_entry(bool present, bool read_write, bool u_s, bool pwt, bool cache_disbled, bool page_size,
                                                    uint32_t address)
 {

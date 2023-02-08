@@ -3,7 +3,7 @@
 #include <stdint.h>
 
 
-typedef struct __attribute__((__packed__)) paging_structure_entry
+struct __attribute__((__packed__)) paging_structure_entry
 {
     /*
         Present; must be 1 to reference a page table
@@ -79,3 +79,4 @@ void enable_paging();
 paging_structure_entry create_page_directory_entry(bool present, bool read_write, bool u_s, bool pwt, bool cache_disbled, bool page_size,
                                                    uint32_t address);
 void insert_page_directory_entry(paging_structure_entry entry);
+void load_page_directory(void *page_directory);
