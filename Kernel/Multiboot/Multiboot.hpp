@@ -19,6 +19,9 @@
 #define MULTIBOOT_VBE_TABLE             (1 << 11)
 #define MULTIBOOT_FRAMEBUFFER_TABLE     (1 << 12)
 
+// Boot information format
+// https://www.gnu.org/software/grub/manual/multiboot/multiboot.html
+
 struct multiboot_info
 {
     // (required)
