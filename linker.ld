@@ -26,4 +26,9 @@ SECTIONS
 	{
 		*(.bss)
 	}
+
+	.page_tables :
+	{
+		*(.page_tables)
+	}
 }
