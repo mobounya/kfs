@@ -19,7 +19,7 @@
 #define MULTIBOOT_VBE_TABLE             (1 << 11)
 #define MULTIBOOT_FRAMEBUFFER_TABLE     (1 << 12)
 
-struct multiboot_information
+struct multiboot_info
 {
     // (required)
     uint32_t flags;
@@ -34,7 +34,6 @@ struct multiboot_information
     // (present if flags[2] is set)
     uint32_t cmdline;
 
-
     // (present if flags[3] is set)
     uint32_t mods_count;
     // TODO: make a struct for this field
@@ -42,7 +41,7 @@ struct multiboot_information
 
     // TODO: make a struct for this field
     // (present if flags[4] or flags[5] is set)
-    uint8_t syms[12];
+    uint8_t syms[16];
 
     // (present if flags[6] is set)
     uint32_t mmap_length;

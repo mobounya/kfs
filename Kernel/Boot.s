@@ -26,6 +26,9 @@ page_tables_top:
 .section .text
 .global _start
 
+.extern multiboot_info_ptr
+.type multiboot_info_ptr, @object
+
 _start:
     cli
     lgdt [GDT_descriptor]
@@ -36,6 +39,7 @@ _start:
     ljmp $0x08, $.call_kernel
 
 .call_kernel:
+    movl %ebx, multiboot_info_ptr
     mov $stack_top, %esp # esp now will point to the top of the stack.
     call kernel_main
 1:	hlt
