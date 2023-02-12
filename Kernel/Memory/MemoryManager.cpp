@@ -32,4 +32,9 @@ namespace Memory
             :: "r" (page_directory) : "%eax"
         );
     }
+
+    void MemoryManager::add_physical_memory_region(MemoryRegion &region)
+    {
+        physical_memory.add_memory_region(region);
+    }
 }
