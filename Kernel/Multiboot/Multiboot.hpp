@@ -22,6 +22,14 @@
 // Boot information format
 // https://www.gnu.org/software/grub/manual/multiboot/multiboot.html
 
+struct multiboot_mmap
+{
+    uint32_t size;
+    uint64_t base_addr;
+    uint64_t length;
+    uint32_t  type;
+};
+
 struct multiboot_info
 {
     // (required)
@@ -48,8 +56,7 @@ struct multiboot_info
 
     // (present if flags[6] is set)
     uint32_t mmap_length;
-    // TODO: make a struct for this field
-    uint32_t mmap_addr;
+    multiboot_mmap *mmap_addr;
 
     // (present if flags[7] is set)
     uint32_t drives_length;
