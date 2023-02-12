@@ -1,14 +1,12 @@
+ENTRY(_start)
+
 SECTIONS
 {
 	. = 1M;
 
-	.multiboot_header :
-	{
-		*(.multiboot_header)
-	}
-
 	.text :
 	{
+		*(.multiboot_header)
 		*(.text)
 	}
 

@@ -15,13 +15,8 @@
 .section .bss
 .align 16
 stack_bottom:
-.skip 16384, 0    # skipping 16 KiB and fill it with value 0
+.skip 1024 * 16
 stack_top:
-
-.section .page_tables, "aw", @nobits
-page_tables_base:
-.skip (4096 * 10) # save place for paging structures
-page_tables_top:
 
 .section .text
 .global _start

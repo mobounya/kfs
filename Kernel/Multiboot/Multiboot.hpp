@@ -19,6 +19,12 @@
 #define MULTIBOOT_VBE_TABLE             (1 << 11)
 #define MULTIBOOT_FRAMEBUFFER_TABLE     (1 << 12)
 
+#define MULTIBOOT_MEMORY_AVAILABLE              1
+#define MULTIBOOT_MEMORY_RESERVED               2
+#define MULTIBOOT_MEMORY_ACPI_RECLAIMABLE       3
+#define MULTIBOOT_MEMORY_NVS                    4
+#define MULTIBOOT_MEMORY_BADRAM                 5
+
 // Boot information format
 // https://www.gnu.org/software/grub/manual/multiboot/multiboot.html
 
