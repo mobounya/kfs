@@ -51,8 +51,4 @@ extern "C" void kernel_main(void)
     uint64_t base_addr = multiboot_info_ptr->mmap_addr->base_addr; // 0x0 = 0
     uint64_t length = multiboot_info_ptr->mmap_addr->length; // 0x9fc00 = 654336
     uint32_t  type = multiboot_info_ptr->mmap_addr->type; // 0x1 = RAM
-
-    // uint32_t mmap_length = multiboot_info_ptr->mmap_length; // 0x90
-    // uint32_t mem_lower = multiboot_info_ptr->mem_lower; // 0x27f
-    // uint32_t mem_upper = multiboot_info_ptr->mem_upper; // 0x1fb80
 }
