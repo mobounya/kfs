@@ -10,7 +10,7 @@ COMPILER_FLAGS = -I./ -ffreestanding -Wall -Wextra -fno-exceptions -fno-rtti -no
 
 LINKER_FLAGS = -ffreestanding -nostdlib
 
-LIBC_FILES = $(addprefix Libc/, Libc)
+LIBC_FILES = $(addprefix User/Libc/, Libc)
 LIBC_SRC = $(addsuffix .cpp, $(LIBC_FILES))
 LIBC_OBJ = $(addsuffix .o, $(LIBC_FILES))
 

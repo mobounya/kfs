@@ -7,7 +7,7 @@
 #include <Kernel/VGA/VGA.hpp>
 #include <Kernel/Memory/MemoryRegion.hpp>
 
-#include <Libc/Libc.hpp>
+#include <User/Libc/Libc.hpp>
 
 extern "C" {
     multiboot_info *multiboot_info_ptr;
