@@ -6,7 +6,7 @@ namespace Memory
 {
     class MemoryRegion
     {
-        private:
+        protected:
             uint64_t    base_addr;
             uint64_t    length;
             uint8_t     type;
