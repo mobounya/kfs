@@ -5,6 +5,9 @@ namespace Memory
 {
     MemoryManager::MemoryManager(PageDirectory *page_directory) : page_directory(page_directory)
     {
+        // TODO: improve book keeping of all of paging structures.
+        // Quick and dry way to store my pages.
+        this->page_table = (uint8_t*)(page_directory) + PAGE_DIRECTORY_SIZE;
         this->page_directory_size = 0;
     }
 

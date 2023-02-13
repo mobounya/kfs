@@ -7,6 +7,7 @@
 #include <Kernel/Memory/MemoryRegion.hpp>
 #include <Kernel/Memory/PhysicalMemory.hpp>
 #include <Kernel/Memory/PageDirectory.hpp>
+#include <Kernel/Memory/PageTable.hpp>
 
 namespace Memory
 {
@@ -24,6 +25,7 @@ namespace Memory
         private:
             PhysicalMemory  physical_memory;
             PageDirectory   *page_directory;
+            PageTable       *page_table;
             uint16_t        page_directory_size;
     };
 };

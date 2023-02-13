@@ -14,7 +14,7 @@ LIBC_FILES = $(addprefix User/Libc/, Libc)
 LIBC_SRC = $(addsuffix .cpp, $(LIBC_FILES))
 LIBC_OBJ = $(addsuffix .o, $(LIBC_FILES))
 
-KERNEL_FILES = $(addprefix Kernel/, Kernel VGA/VGA Memory/MemoryManager Memory/PagingStructureEntry Memory/MemoryRegion Memory/PhysicalMemory Memory/PageDirectory)
+KERNEL_FILES = $(addprefix Kernel/, Kernel VGA/VGA Memory/MemoryManager Memory/PagingStructureEntry Memory/MemoryRegion Memory/PhysicalMemory Memory/PageDirectory Memory/PageTable)
 KERNEL_SRC = $(addsuffix .cpp, $(KERNEL_FILES))
 KERNEL_OBJ = $(addsuffix .o, $(KERNEL_FILES))
 
