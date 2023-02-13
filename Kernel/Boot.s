@@ -18,6 +18,12 @@ stack_bottom:
 .skip 1024 * 16
 stack_top:
 
+/* Initalize a 40 kb memory area for 10 paging structures */
+.section .page_tables, "aw", @nobits
+.align 4096
+page_tables_base_ptr:
+.skip (4096 * 10)
+
 .section .text
 .global _start
 
@@ -36,6 +42,7 @@ _start:
 .call_kernel:
     movl %ebx, multiboot_info_ptr
     mov $stack_top, %esp # esp now will point to the top of the stack.
+    push $page_tables_base_ptr
     call kernel_main
 1:	hlt
 	jmp 1b

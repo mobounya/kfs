@@ -46,7 +46,7 @@ void print_multiboot_info()
         vga_interface.write_string("FRAMEBUFFER info available\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
 }
 
-extern "C" void kernel_main(void)
+extern "C" void kernel_main(void *page_tables_base_ptr)
 {
     Memory::MemoryManager memory_manager;
     VGA::TEXT_MODE vga;
