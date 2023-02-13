@@ -2,9 +2,9 @@
 
 namespace Memory
 {
-    MemoryRegion PhysicalMemory::get_memory_region(void)
+    MemoryRegion *PhysicalMemory::get_memory_region(void)
     {
-        MemoryRegion region = memory_regions.front();
+        MemoryRegion *region = memory_regions.front();
         memory_regions.pop();
         return region;
     }

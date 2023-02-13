@@ -10,7 +10,7 @@ namespace Memory
         private:
             std::queue<MemoryRegion> memory_regions;
         public:
-            MemoryRegion  get_memory_region(void);
+            MemoryRegion  *get_memory_region(void);
             void          add_memory_region(const MemoryRegion& region);
     };
 }

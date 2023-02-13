@@ -4,6 +4,10 @@
 
 #define CONTAINER_SIZE 100
 
+#if !defined NULL
+    #define NULL 0x00
+#endif
+
 namespace std
 {
     template <typename T>
@@ -36,7 +40,7 @@ namespace std
             {
                 if (m_size > 0)
                 {
-                    for (int i = 1; i < m_size; i++)
+                    for (size_type i = 1; i < m_size; i++)
                         container[i - 1] = container[i];
                     m_size--;
                 }
@@ -59,7 +63,7 @@ namespace std
                 }
             }
 
-            T*  back(void)
+            T   *back(void)
             {
                 if (m_size > 0)
                     return container + (m_size - 1);
