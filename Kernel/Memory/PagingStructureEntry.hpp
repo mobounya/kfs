@@ -4,7 +4,7 @@
 
 namespace Memory
 {
-    typedef struct __attribute__((__packed__)) paging_structure_entry
+    typedef struct __attribute__((__packed__)) PagingStructureEntry
     {
         /*
             Present; must be 1 to reference a page table
@@ -73,21 +73,21 @@ namespace Memory
         */
         uint32_t page_table_address : 20;
 
-        paging_structure_entry *set_present(void);
-        paging_structure_entry *set_read_write(void);
-        paging_structure_entry *set_u_s(void);
-        paging_structure_entry *set_pwt(void);
-        paging_structure_entry *set_cache_disbled(void);
-        paging_structure_entry *set_page_size(void);
-        paging_structure_entry *set_pat(void);
-        paging_structure_entry *set_global(void);
-        paging_structure_entry *set_physical_address(uint32_t physical_address);
+        PagingStructureEntry *set_present(void);
+        PagingStructureEntry *set_read_write(void);
+        PagingStructureEntry *set_u_s(void);
+        PagingStructureEntry *set_pwt(void);
+        PagingStructureEntry *set_cache_disbled(void);
+        PagingStructureEntry *set_page_size(void);
+        PagingStructureEntry *set_pat(void);
+        PagingStructureEntry *set_global(void);
+        PagingStructureEntry *set_physical_address(uint32_t physical_address);
     } PSE;
 
     /*
         Use the corresponding type when makking a new entry, they're both the same,
         it is just for readability purposes.
     */
-    typedef PSE page_directory_entry;
-    typedef PSE page_table_entry;
+    typedef PSE PageDirectoryEntry;
+    typedef PSE PageTableEntry;
 }

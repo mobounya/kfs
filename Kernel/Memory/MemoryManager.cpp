@@ -8,7 +8,7 @@ namespace Memory
         this->index = 0;
     }
 
-    void MemoryManager::insert_page_directory_entry(page_directory_entry &entry)
+    void MemoryManager::insert_page_directory_entry(PageDirectoryEntry &entry)
     {
         page_directory[index] = entry;
         index++;
