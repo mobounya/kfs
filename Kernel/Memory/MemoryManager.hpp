@@ -6,27 +6,24 @@
 #include <User/c++/queue.hpp>
 #include <Kernel/Memory/MemoryRegion.hpp>
 #include <Kernel/Memory/PhysicalMemory.hpp>
-
-# define N_PAGING_STRUCTURE_ENTRIES 1024
-# define PAGING_STRUCTURE_ENTRY_SIZE 4
-# define PAGING_STRUCTURE_SIZE (N_PAGING_STRUCTURE_ENTRIES * PAGING_STRUCTURE_ENTRY_SIZE)
+#include <Kernel/Memory/PageDirectory.hpp>
 
 namespace Memory
 {
     class MemoryManager
     {
         public:
-            MemoryManager();
+            MemoryManager(PageDirectory *page_directory);
 
         public:
-            void insert_page_directory_entry(PagingStructureEntry &entry);
+            void insert_page_directory_entry(const PagingStructureEntry &entry);
             void enable_paging(void);
             void load_page_directory(void);
-            void add_physical_memory_region(MemoryRegion &region);
+            void add_physical_memory_region(const MemoryRegion &region);
 
         private:
-            PhysicalMemory physical_memory;
-            PagingStructureEntry page_directory[N_PAGING_STRUCTURE_ENTRIES];
-            uint16_t index;
+            PhysicalMemory  physical_memory;
+            PageDirectory   *page_directory;
+            uint16_t        page_directory_size;
     };
 };

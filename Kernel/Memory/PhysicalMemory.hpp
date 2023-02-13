@@ -11,6 +11,6 @@ namespace Memory
             std::queue<MemoryRegion> memory_regions;
         public:
             MemoryRegion  get_memory_region(void);
-            void          add_memory_region(MemoryRegion& region);
+            void          add_memory_region(const MemoryRegion& region);
     };
 }

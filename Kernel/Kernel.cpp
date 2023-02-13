@@ -48,7 +48,7 @@ void print_multiboot_info()
 
 extern "C" void kernel_main(void *page_tables_base_ptr)
 {
-    Memory::MemoryManager memory_manager;
+    Memory::MemoryManager memory_manager((Memory::PageDirectory *)page_tables_base_ptr);
     VGA::TEXT_MODE vga;
     uint32_t mmap_length = multiboot_info_ptr->mmap_length;
     multiboot_mmap *mmap_addr = multiboot_info_ptr->mmap_addr;

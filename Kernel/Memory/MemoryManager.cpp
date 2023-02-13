@@ -3,15 +3,15 @@
 
 namespace Memory
 {
-    MemoryManager::MemoryManager()
+    MemoryManager::MemoryManager(PageDirectory *page_directory) : page_directory(page_directory)
     {
-        this->index = 0;
+        this->page_directory_size = 0;
     }
 
-    void MemoryManager::insert_page_directory_entry(PageDirectoryEntry &entry)
+    void MemoryManager::insert_page_directory_entry(const PageDirectoryEntry &entry)
     {
-        page_directory[index] = entry;
-        index++;
+        page_directory->add_new_entry(entry, page_directory_size);
+        page_directory_size++;
     }
 
     void MemoryManager::enable_paging(void)
@@ -33,7 +33,7 @@ namespace Memory
         );
     }
 
-    void MemoryManager::add_physical_memory_region(MemoryRegion &region)
+    void MemoryManager::add_physical_memory_region(const MemoryRegion &region)
     {
         physical_memory.add_memory_region(region);
     }

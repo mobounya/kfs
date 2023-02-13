@@ -8,7 +8,7 @@ namespace Memory
 {
     struct PageDirectory
     {
-        page_directory_entry page_directory[N_PAGE_DIRECTORY_ENTRIES];
-        void add_new_entry(const PagingStructureEntry &entry, uint16_t index);
+        PageDirectoryEntry page_directory[N_PAGE_DIRECTORY_ENTRIES];
+        void add_new_entry(const PageDirectoryEntry &entry, uint16_t index);
     };
 }

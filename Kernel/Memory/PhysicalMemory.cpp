@@ -9,7 +9,7 @@ namespace Memory
         return region;
     }
 
-    void    PhysicalMemory::add_memory_region(MemoryRegion& region)
+    void    PhysicalMemory::add_memory_region(const MemoryRegion& region)
     {
         memory_regions.push(region);
     }
