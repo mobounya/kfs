@@ -29,6 +29,7 @@ namespace Memory
                 Notes from https://wiki.osdev.org/Detecting_Memory_(x86) :
                     - (in rare/dodgy cases) may return overlapping areas
                     - These are not necessarily 4K page alligned.
+                FIXME: divide overlapping memory regions.
             */
             PhysicalMemory  physical_memory;
             PageDirectory   *page_directory;
