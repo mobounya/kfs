@@ -9,50 +9,62 @@ namespace std
     template <typename T>
     class queue
     {
+        typedef uint32_t    size_type;
+        typedef const T&    const_reference;
+
         private:
             // NOTE: Don't judge me we don't have memory allocation.
             T container[CONTAINER_SIZE];
-            uint16_t index;
+            size_type m_size;
         public:
             queue()
             {
-                index = 0;
+                m_size = 0;
             }
 
             bool empty(void) const
             {
-                return (index == 0);
+                return (m_size == 0);
             }
 
-            uint16_t size(void) const
+            size_type size(void) const
             {
-                return index;
+                return m_size;
             }
 
             void pop(void)
             {
-                if (index > 0)
+                if (m_size > 0)
                 {
-                    for (int i = 1; i < index; i++)
+                    for (int i = 1; i < m_size; i++)
                         container[i - 1] = container[i];
-                    index--;
+                    m_size--;
                 }
             }
 
-            T& front(void)
+            T *front(void)
             {
-                return container[0];
+                if (m_size > 0)
+                    return container;
+                else
+                    return NULL;
             }
 
-            void push(const T& value)
+            void push(const_reference value)
             {
-                container[index] = value;
-                index++;
+                if (m_size < CONTAINER_SIZE)
+                {
+                    container[m_size] = value;
+                    m_size++;
+                }
             }
 
-            T& back(void)
+            T*  back(void)
             {
-                return container[index - 1];
+                if (m_size > 0)
+                    return container + (m_size - 1);
+                else
+                    return NULL; 
             }
     };
 }
