@@ -7,14 +7,21 @@ namespace Memory
     {
         // TODO: improve book keeping of all of paging structures.
         // Quick and dry way to store my pages.
-        this->page_table = (uint8_t*)(page_directory) + PAGE_DIRECTORY_SIZE;
+        this->page_table = (PageTable *)((uint8_t*)(page_directory) + PAGE_DIRECTORY_SIZE);
         this->page_directory_size = 0;
+        this->page_table_size = 0;
     }
 
     void MemoryManager::insert_page_directory_entry(const PageDirectoryEntry &entry)
     {
         page_directory->add_new_entry(entry, page_directory_size);
         page_directory_size++;
+    }
+
+    void MemoryManager::insert_page_table_entry(const PageTableEntry &entry)
+    {
+        page_table->add_new_entry(entry, page_table_size);
+        page_table_size++;
     }
 
     void MemoryManager::enable_paging(void)

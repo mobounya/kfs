@@ -18,6 +18,7 @@ namespace Memory
 
         public:
             void insert_page_directory_entry(const PagingStructureEntry &entry);
+            void insert_page_table_entry(const PageTableEntry &entry);
             void enable_paging(void);
             void load_page_directory(void);
             void add_physical_memory_region(const MemoryRegion &region);
@@ -25,7 +26,8 @@ namespace Memory
         private:
             PhysicalMemory  physical_memory;
             PageDirectory   *page_directory;
-            PageTable       *page_table;
             uint16_t        page_directory_size;
+            PageTable       *page_table;
+            uint16_t        page_table_size;
     };
 };
