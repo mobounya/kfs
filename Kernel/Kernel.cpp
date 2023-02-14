@@ -46,6 +46,7 @@ void print_multiboot_info()
         vga_interface.write_string("FRAMEBUFFER info available\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
 }
 
+
 extern "C" void kernel_main(void *page_tables_base_ptr)
 {
     Memory::MemoryManager   memory_manager((Memory::PageDirectory *)page_tables_base_ptr);
@@ -69,5 +70,7 @@ extern "C" void kernel_main(void *page_tables_base_ptr)
         mmap_structure_size = mmap_addr->size;
         mmap_addr = (multiboot_mmap *)(((uint8_t *)(mmap_addr)) + mmap_structure_size + 4);
     }
-    vga.write_string("Declared avaiable memory to the memory manager !\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
+    const Memory::MemoryPage* page = memory_manager.allocate_memory_page();
+    (void)page;
+    vga.write_string("Allocated one page of physical memory !", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
 }

@@ -9,6 +9,7 @@ namespace Memory
     class MemoryPage : public MemoryRegion
     {
         public:
+            MemoryPage(void);
             // Should be [PAGE_SIZE] aligned.
             MemoryPage(uint64_t base_addr);
     };

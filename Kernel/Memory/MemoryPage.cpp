@@ -3,8 +3,12 @@
 
 namespace Memory
 {
-    MemoryPage::MemoryPage(uint64_t base_addr)
+    MemoryPage::MemoryPage(void)
     {
-        MemoryRegion(base_addr, PAGE_SIZE, MULTIBOOT_MEMORY_AVAILABLE);
+
+    }
+
+    MemoryPage::MemoryPage(uint64_t base_addr) : MemoryRegion(base_addr, PAGE_SIZE, MULTIBOOT_MEMORY_AVAILABLE)
+    {
     }
 }
