@@ -74,6 +74,16 @@ namespace std
                 return (container + index);
             }
 
+            T*          erase(size_type pos)
+            {
+                if (pos < 0 || pos > m_size)
+                    return NULL;
+                for (size_type i = (pos + 1); i < m_size; i++)
+                    container[i - 1] = container[i];
+                m_size--;
+                return (container + pos);
+            }
+
             void        push_back(const T& value)
             {
                 if (m_size < capacity())
@@ -88,5 +98,5 @@ namespace std
                 if (m_size > 0)
                     m_size--;
             }
-    };    
+    };
 }
