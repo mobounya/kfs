@@ -31,10 +31,10 @@ namespace Memory
                     - These are not necessarily 4K page alligned.
                 FIXME: divide overlapping memory regions.
             */
-            PhysicalMemory  physical_memory;
-            PageDirectory   *page_directory;
-            uint16_t        page_directory_size;
-            PageTable       *page_table;
-            uint16_t        page_table_size;
+            PhysicalMemory<MemoryRegion>    physical_memory;
+            PageDirectory                   *page_directory;
+            uint16_t                        page_directory_size;
+            PageTable                       *page_table;
+            uint16_t                        page_table_size;
     };
 };
