@@ -17,11 +17,11 @@ namespace Memory
             MemoryManager(PageDirectory *page_directory);
 
         public:
-            void insert_page_directory_entry(const PagingStructureEntry &entry);
-            void insert_page_table_entry(const PageTableEntry &entry);
-            void enable_paging(void);
-            void load_page_directory(void);
-            void add_physical_memory_region(const MemoryRegion &region);
+            void    insert_page_directory_entry(const PagingStructureEntry &entry);
+            void    insert_page_table_entry(const PageTableEntry &entry);
+            void    enable_paging(void);
+            void    load_page_directory(void);
+            void    declare_memory_region(const MemoryRegion &region);
 
         private:
             /* 

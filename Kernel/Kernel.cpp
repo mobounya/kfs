@@ -62,7 +62,7 @@ extern "C" void kernel_main(void *page_tables_base_ptr)
         if (mmap_addr->type == MULTIBOOT_MEMORY_AVAILABLE)
         {
             Memory::MemoryRegion physical_memory_region = Memory::MemoryRegion(mmap_addr->base_addr, mmap_addr->length, mmap_addr->type);
-            memory_manager.add_physical_memory_region(physical_memory_region);
+            memory_manager.declare_memory_region(physical_memory_region);
         }
 
         // Move to the next map buffer, [mmap_addr->size] is the size of the map buffer without [size] itself so we add 4 bytes at the end.

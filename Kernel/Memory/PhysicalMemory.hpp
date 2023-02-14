@@ -34,5 +34,15 @@ namespace Memory
             {
                 return memory_regions.size();
             }
+
+            size_t  get_available_memory_size(void) const
+            {
+                size_t memory_size = 0;
+
+                for (size_type i = 0; i < memory_regions.size(); i++)
+                    memory_size += memory_regions[i].get_length();
+
+                return memory_size;
+            }
     };
 }

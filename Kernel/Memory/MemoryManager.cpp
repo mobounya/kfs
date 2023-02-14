@@ -43,7 +43,7 @@ namespace Memory
         );
     }
 
-    void MemoryManager::add_physical_memory_region(const MemoryRegion &region)
+    void MemoryManager::declare_memory_region(const MemoryRegion &region)
     {
         physical_memory.push_memory_region(region);
     }
