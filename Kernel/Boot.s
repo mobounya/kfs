@@ -18,11 +18,11 @@ stack_bottom:
 .skip 1024 * 16
 stack_top:
 
-/* Initalize a 40 kb memory area for 10 paging structures */
+/* Initalize a 16384 Kb memory area for 4 paging structures */
 .section .page_tables, "aw", @nobits
 .align 4096
 page_tables_base_ptr:
-.skip (4096 * 10)
+.skip (4096 * 4)
 
 .section .text
 .global _start
