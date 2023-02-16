@@ -6,6 +6,8 @@
 #include <Kernel/Multiboot/Multiboot.hpp>
 #include <Kernel/VGA/VGA.hpp>
 #include <Kernel/Memory/MemoryRegion.hpp>
+#include <Kernel/Memory/PagingStructureEntry.hpp>
+#include <Kernel/Memory/MemoryPage.hpp>
 
 #include <User/Libc/Libc.hpp>
 
@@ -69,7 +71,18 @@ extern "C" void kernel_main(void *page_tables_base_ptr)
         mmap_structure_size = mmap_addr->size;
         mmap_addr = (multiboot_mmap *)(((uint8_t *)(mmap_addr)) + mmap_structure_size + 4);
     }
-    const Memory::MemoryPage* page = memory_manager.allocate_memory_page();
-    (void)page;
-    vga.write_string("Allocated one page of physical memory !", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
+    // Allocate one page of physical memory.
+    const Memory::MemoryPage *page = memory_manager.allocate_memory_page();
+
+    // Make a page table entry that maps to a memory page.
+    Memory::PageTableEntry page_table_entry;
+    page_table_entry.set_present()->set_read_write()->set_u_s()->set_pwt()->set_cache_disbled()->set_pat()->set_global();
+    page_table_entry.set_physical_address(page->get_base_addr());
+    memory_manager.insert_page_table_entry(page_table_entry);
+
+    // Make a page directory entry that referenece a page table.
+    Memory::PageDirectoryEntry page_directory_entry;
+    page_directory_entry.set_present()->set_read_write()->set_u_s()->set_pwt()->set_cache_disbled()->set_page_size()->set_global();
+    page_directory_entry.set_physical_address((uint32_t)memory_manager.get_page_table_ptr());
+    memory_manager.insert_page_directory_entry(page_directory_entry);
 }

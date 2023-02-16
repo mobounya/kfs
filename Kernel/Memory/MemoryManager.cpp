@@ -89,4 +89,9 @@ namespace Memory
         }
         return NULL;
     }
+
+    const PageTable     *MemoryManager::get_page_table_ptr(void) const
+    {
+        return this->page_table;
+    }
 }

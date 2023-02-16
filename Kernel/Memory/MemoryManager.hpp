@@ -26,6 +26,7 @@ namespace Memory
             void                declare_memory_region(const MemoryRegion &region);
             const MemoryPage    *allocate_memory_page(void);
             uint64_t            find_aligned_address(uint64_t address, uint64_t alignment) const;
+            const PageTable     *get_page_table_ptr(void) const;
 
         private:
             /* 
