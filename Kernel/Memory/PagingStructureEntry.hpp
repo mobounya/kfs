@@ -55,7 +55,11 @@ namespace Memory
             - If the PAT is supported, indirectly determines the memory type used to access the 4-KByte page referenced by this
             entry ; otherwise, reserved (must be 0)
         */
-        uint32_t bit_7 : 1;
+        union
+        {
+            uint32_t ps  : 1;
+            uint32_t pat : 1;
+        };
 
         /*
             Global; if CR4.PGE = 1, determines whether the translation is global (see Section 4.10); ignored otherwise

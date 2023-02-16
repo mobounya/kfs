@@ -34,13 +34,13 @@ namespace Memory
 
     PagingStructureEntry *PagingStructureEntry::set_page_size(void)
     {
-        this->bit_7 = 1;
+        this->ps = 1;
         return this;
     }
 
     PagingStructureEntry *PagingStructureEntry::set_pat(void)
     {
-        this->bit_7 = 1;
+        this->pat = 1;
         return this;
     }
 
