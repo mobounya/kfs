@@ -70,6 +70,14 @@ namespace Memory
 
     const MemoryPage  *MemoryManager::allocate_physical_memory_page(void)
     {
+        if (free_memory_pages.size() > 0)
+        {
+            const MemoryPage *page = &(free_memory_pages[free_memory_pages.size() - 1]);
+            allocated_memory_pages.push_memory_region(*page);
+            free_memory_pages.delete_memory_region(free_memory_pages.size() - 1);
+            return page;
+        }
+
         for (uint32_t i = 0; i < physical_memory.size(); i++)
         {
             MemoryRegion region = physical_memory[i];
@@ -92,6 +100,18 @@ namespace Memory
             }
         }
         return NULL;
+    }
+
+    void    MemoryManager::free_physical_memory_page(const MemoryPage &page)
+    {
+        for (uint64_t i = 0; i < allocated_memory_pages.size(); i++)
+        {
+            if (allocated_memory_pages[i].get_base_addr() == page.get_base_addr())
+            {
+                free_memory_pages.push_memory_region(page);
+                allocated_memory_pages.delete_memory_region(i);
+            }
+        }
     }
 
     uint64_t    MemoryManager::find_aligned_address(uint64_t address, uint64_t alignment) const

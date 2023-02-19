@@ -30,6 +30,7 @@ namespace Memory
             void                load_page_directory(void);
             void                declare_memory_region(const MemoryRegion &region);
             const MemoryPage    *allocate_physical_memory_page(void);
+            void                free_physical_memory_page(const MemoryPage &page);
             uint64_t            find_aligned_address(uint64_t address, uint64_t alignment) const;
             const PageTable     *get_page_table_ptr(void) const;
             void                identity_map_memory(uint64_t virtual_address_start, uint64_t virtual_address_end);
