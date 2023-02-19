@@ -1,6 +1,6 @@
 #include <Kernel/Memory/MemoryManager.hpp>
-#include <Kernel/Memory/PagingStructureEntry.hpp>
 #include <User/Libc/Libc.hpp>
+#include <Kernel/Multiboot/Multiboot.hpp>
 
 namespace Memory
 {
@@ -68,16 +68,7 @@ namespace Memory
         physical_memory.push_memory_region(region);
     }
 
-    uint64_t    MemoryManager::find_aligned_address(uint64_t address, uint64_t alignment) const
-    {
-        // Address is already aligned.
-        if (address % alignment == 0)
-            return address;
-        else
-            return address + (alignment - (address % alignment));
-    }
-
-    const MemoryPage  *MemoryManager::allocate_memory_page(void)
+    const MemoryPage  *MemoryManager::allocate_physical_memory_page(void)
     {
         for (uint32_t i = 0; i < physical_memory.size(); i++)
         {
@@ -103,6 +94,48 @@ namespace Memory
         return NULL;
     }
 
+    uint64_t    MemoryManager::find_aligned_address(uint64_t address, uint64_t alignment) const
+    {
+        // Address is already aligned.
+        if (address % alignment == 0)
+            return address;
+        else
+            return address + (alignment - (address % alignment));
+    }
+
+    // MAYBE_FIXME: reserved physical memory are not stored anywhere, maybe store it somewhere.
+    void    MemoryManager::reserve_physical_memory(uint64_t physical_address_start, uint64_t physical_address_end)
+    {
+        for (uint32_t i = 0; i < physical_memory.size(); i++)
+        {
+            const MemoryRegion &region = physical_memory[i];
+
+            uint64_t base_ptr = region.get_base_addr();
+            uint64_t length = region.get_length();
+
+            if (physical_address_start >= base_ptr && physical_address_start < (base_ptr + length))
+            {
+                int64_t first_region_length = physical_address_start - base_ptr;
+                int64_t second_region_length = (base_ptr + length) - physical_address_end;
+                
+                if (first_region_length > 0)
+                {
+                    MemoryRegion region(base_ptr, first_region_length, MULTIBOOT_MEMORY_AVAILABLE);
+                    physical_memory.push_memory_region(region);
+                }
+                if (second_region_length > 0)
+                {
+                    MemoryRegion region(physical_address_end, second_region_length, MULTIBOOT_MEMORY_AVAILABLE);
+                    physical_memory.push_memory_region(region);
+                }
+
+                physical_memory.delete_memory_region(i);
+                if (first_region_length > 0 && second_region_length > 0)
+                    break;
+            }
+        }
+    }
+
     const PageTable     *MemoryManager::get_page_table_ptr(void) const
     {
         return this->page_table;
@@ -110,6 +143,7 @@ namespace Memory
 
     void MemoryManager::identity_map_memory(uint64_t virtual_address_start, uint64_t virtual_address_end)
     {
+        reserve_physical_memory(virtual_address_start, virtual_address_end);
         for (; virtual_address_start < virtual_address_end; virtual_address_start += PAGE_SIZE)
         {
             identity_map_memory_page(virtual_address_start);

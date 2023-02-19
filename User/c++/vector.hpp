@@ -76,7 +76,7 @@ namespace std
 
             T*          erase(size_type pos)
             {
-                if (pos < 0 || pos > m_size)
+                if (pos > m_size)
                     return NULL;
                 for (size_type i = (pos + 1); i < m_size; i++)
                     container[i - 1] = container[i];

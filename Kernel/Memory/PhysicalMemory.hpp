@@ -25,7 +25,7 @@ namespace Memory
                 memory_regions.push_back(region);
             }
 
-            T*      delete_memory_region(size_type index) const
+            T*      delete_memory_region(size_type index)
             {
                 return memory_regions.erase(index);
             }
