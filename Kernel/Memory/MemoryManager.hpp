@@ -9,6 +9,11 @@
 #include <Kernel/Memory/PageDirectory.hpp>
 #include <Kernel/Memory/PageTable.hpp>
 #include <Kernel/Memory/MemoryPage.hpp>
+#include <Kernel/VGA/VGA.hpp>
+
+#define VIRTUAL_ADDRESS_OFFSET_FLAG 0xFFF
+#define VIRTUAL_ADDRESS_TABLE_FLAG 0x3FF000
+#define VIRTUAL_ADDRESS_DIRECTORY_FLAG 0xFFC00000
 
 namespace Memory
 {
@@ -27,8 +32,11 @@ namespace Memory
             const MemoryPage    *allocate_memory_page(void);
             uint64_t            find_aligned_address(uint64_t address, uint64_t alignment) const;
             const PageTable     *get_page_table_ptr(void) const;
+            void                identity_map_memory(uint64_t virtual_address_start, uint64_t virtual_address_end);
 
         private:
+            void                identity_map_memory_page(uint64_t virtual_address);
+
             /* 
                 These are the physical memory regions detected by GRUB, we only store usable [MULTIBOOT_MEMORY_AVAILABLE] for now.
                 Notes from https://wiki.osdev.org/Detecting_Memory_(x86) :

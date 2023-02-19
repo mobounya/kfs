@@ -34,7 +34,7 @@ namespace Memory
 
     PagingStructureEntry *PagingStructureEntry::set_page_size(void)
     {
-        this->ps = 1;
+        this->pat = 1;
         return this;
     }
 

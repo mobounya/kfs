@@ -22,7 +22,7 @@ stack_top:
 .section .page_tables, "aw", @nobits
 .align 4096
 page_tables_base_ptr:
-.skip (4096 * 4)
+.skip (4096 * 5)
 
 .section .text
 .global _start

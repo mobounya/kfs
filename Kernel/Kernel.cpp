@@ -51,7 +51,6 @@ void print_multiboot_info()
 extern "C" void kernel_main(void *page_tables_base_ptr)
 {
     Memory::MemoryManager   memory_manager((Memory::PageDirectory *)page_tables_base_ptr);
-    VGA::TEXT_MODE          vga;
     uint32_t                mmap_length = multiboot_info_ptr->mmap_length;
     multiboot_mmap          *mmap_addr = multiboot_info_ptr->mmap_addr;
     uint32_t                mmap_structure_size;
@@ -71,18 +70,19 @@ extern "C" void kernel_main(void *page_tables_base_ptr)
         mmap_structure_size = mmap_addr->size;
         mmap_addr = (multiboot_mmap *)(((uint8_t *)(mmap_addr)) + mmap_structure_size + 4);
     }
-    // Allocate one page of physical memory.
-    const Memory::MemoryPage *page = memory_manager.allocate_memory_page();
 
-    // Make a page table entry that maps to a memory page.
-    Memory::PageTableEntry page_table_entry;
-    page_table_entry.set_present()->set_read_write()->set_u_s()->set_pwt()->set_cache_disbled()->set_pat()->set_global();
-    page_table_entry.set_physical_address(page->get_base_addr());
-    memory_manager.insert_page_table_entry(page_table_entry);
+    /*
+        Physical Memory Mapping:
+            - 0x0      --> 0x100000 : 1 Mib, reserved for special usage.
+            - 0x100000 --> 0x900000 : 8 Mib, Kernel image (?? I don't know the size of the kernel image).
+    */
 
-    // Make a page directory entry that referenece a page table.
-    Memory::PageDirectoryEntry page_directory_entry;
-    page_directory_entry.set_present()->set_read_write()->set_u_s()->set_pwt()->set_cache_disbled()->set_page_size()->set_global();
-    page_directory_entry.set_physical_address((uint32_t)memory_manager.get_page_table_ptr());
-    memory_manager.insert_page_directory_entry(page_directory_entry);
+    // Identity map the first 1 Mib (Mebibyte), 0x0 --> 0x100000
+    memory_manager.identity_map_memory(0x0, 0x100000);
+
+    // Identity map the Kernel image, 0x100000 --> 0x900000
+    memory_manager.identity_map_memory(0x100000, 0x900000);
+
+    memory_manager.load_page_directory();
+    memory_manager.enable_paging();
 }
