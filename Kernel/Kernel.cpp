@@ -74,14 +74,14 @@ extern "C" void kernel_main(void *page_tables_base_ptr)
     /*
         Physical Memory Mapping:
             - 0x0      --> 0x100000 : 1 Mib, reserved for special usage.
-            - 0x100000 --> 0x900000 : 8 Mib, Kernel image (?? I don't know the size of the kernel image).
+            - 0x100000 --> 0x400000 : 3 Mib, Kernel image (?? I don't know the size of the kernel image).
     */
 
     // Identity map the first 1 Mib (Mebibyte), 0x0 --> 0x100000
     memory_manager.identity_map_memory(0x0, 0x100000);
 
-    // Identity map the Kernel image, 0x100000 --> 0x900000
-    memory_manager.identity_map_memory(0x100000, 0x900000);
+    // Identity map the Kernel image, 0x100000 --> 0x400000
+    memory_manager.identity_map_memory(0x100000, 0x400000);
 
     memory_manager.load_page_directory();
     memory_manager.enable_paging();
