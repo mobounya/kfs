@@ -50,7 +50,8 @@ void print_multiboot_info()
 
 extern "C" void kernel_main(void *page_tables_base_ptr)
 {
-    Memory::MemoryManager   memory_manager((Memory::PageDirectory *)page_tables_base_ptr);
+    VGA::TEXT_MODE          vga;
+    Memory::MemoryManager   &memory_manager = Memory::MemoryManager::instantiate((Memory::PageDirectory *)page_tables_base_ptr);
     uint32_t                mmap_length = multiboot_info_ptr->mmap_length;
     multiboot_mmap          *mmap_addr = multiboot_info_ptr->mmap_addr;
     uint32_t                mmap_structure_size;
@@ -85,4 +86,6 @@ extern "C" void kernel_main(void *page_tables_base_ptr)
 
     memory_manager.load_page_directory();
     memory_manager.enable_paging();
+
+    vga.write_string("Enabled paging !\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
 }

@@ -4,6 +4,19 @@
 
 namespace Memory
 {
+    bool            MemoryManager::instantiated = false;
+    MemoryManager   MemoryManager::memory_manager;
+
+    MemoryManager       &MemoryManager::instantiate(PageDirectory *page_directory)
+    {
+        if (instantiated == false)
+        {
+            memory_manager = MemoryManager(page_directory);
+            instantiated = true;
+        }
+        return memory_manager;
+    }
+
     MemoryManager::MemoryManager()
     {
         this->page_directory_size = 0;
