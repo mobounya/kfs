@@ -2,12 +2,13 @@
 #include <stddef.h>
 
 #include <Kernel/Memory/PagingStructureEntry.hpp>
-#include <Kernel/Memory/MemoryManager.hpp>
+#include <Kernel/Memory/PhysicalMemoryManager.hpp>
 #include <Kernel/Multiboot/Multiboot.hpp>
 #include <Kernel/VGA/VGA.hpp>
 #include <Kernel/Memory/MemoryRegion.hpp>
 #include <Kernel/Memory/PagingStructureEntry.hpp>
 #include <Kernel/Memory/MemoryPage.hpp>
+#include <Kernel/Memory/VirtualMemoryManager.hpp>
 
 #include <User/Libc/Libc.hpp>
 
@@ -50,11 +51,12 @@ void print_multiboot_info()
 
 extern "C" void kernel_main(void *page_tables_base_ptr)
 {
-    VGA::TEXT_MODE          vga;
-    Memory::MemoryManager   &memory_manager = Memory::MemoryManager::instantiate((Memory::PageDirectory *)page_tables_base_ptr);
-    uint32_t                mmap_length = multiboot_info_ptr->mmap_length;
-    multiboot_mmap          *mmap_addr = multiboot_info_ptr->mmap_addr;
-    uint32_t                mmap_structure_size;
+    VGA::TEXT_MODE                  vga;
+    Memory::PhysicalMemoryManager           &memory_manager = Memory::PhysicalMemoryManager::instantiate();
+    Memory::VirtualMemoryManager    kernel_vm((Memory::PageDirectory *)page_tables_base_ptr);
+    uint32_t                        mmap_length = multiboot_info_ptr->mmap_length;
+    multiboot_mmap                  *mmap_addr = multiboot_info_ptr->mmap_addr;
+    uint32_t                        mmap_structure_size;
 
     // Setup physical memory regions in the memory manager.
     for (uint32_t i = 0; i < mmap_length; i += mmap_structure_size + 4)
@@ -79,12 +81,13 @@ extern "C" void kernel_main(void *page_tables_base_ptr)
     */
 
     // Identity map the first 1 Mib (Mebibyte), 0x0 --> 0x100000
-    memory_manager.identity_map_memory(0x0, 0x100000);
+    kernel_vm.identity_map_memory(0x0, 0x100000);
 
     // Identity map the Kernel image, 0x100000 --> 0x400000
-    memory_manager.identity_map_memory(0x100000, 0x400000);
+    kernel_vm.identity_map_memory(0x100000, 0x400000);
 
-    memory_manager.load_page_directory();
+    kernel_vm.load_page_directory();
+
     memory_manager.enable_paging();
 
     vga.write_string("Enabled paging !\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
