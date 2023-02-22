@@ -5,7 +5,6 @@ namespace Memory
     VirtualMemoryManager::VirtualMemoryManager(void)
     {
         this->page_directory_size = 0;
-        this->page_table_size = 0;
     }
 
     VirtualMemoryManager::VirtualMemoryManager(void *page_tables_ptr)
@@ -13,23 +12,18 @@ namespace Memory
         // TODO: improve book keeping of all of paging structures.
         // Quick and dry way to store my pages.
         this->page_directory.page_directory_ptr = page_tables_ptr;
-        this->page_table = (PageTable *)((uint8_t*)(page_tables_ptr) + PAGE_DIRECTORY_SIZE);
         this->page_directory_size = 0;
-        this->page_table_size = 0;
 
         // Setup the first 4 page directory entries to reference a page table.
         PageDirectoryEntry *pde_entry = (PageDirectoryEntry *)(page_tables_ptr);
+        void *page_table_ptr = ((uint8_t *)page_tables_ptr + PAGE_TABLE_SIZE);
         for (uint8_t i = 0; i < 4; i++)
         {
-            uint32_t page_table_ptr = (uint32_t)page_table_ptr;
-            pde_entry->set_present()->set_read_write()->set_u_s()->set_pwt()->set_cache_disbled()->set_physical_address(page_table_ptr);
+            pde_entry->set_present()->set_read_write()->set_u_s()->set_pwt()->set_cache_disbled()->set_physical_address((uint32_t)page_table_ptr);
             insert_page_directory_entry(pde_entry);
-            this->page_table = (PageTable *)((uint8_t*)(this->page_table) + PAGE_TABLE_SIZE);
             pde_entry++;
+            page_table_ptr = ((uint8_t *)page_table_ptr + PAGE_TABLE_SIZE);
         }
-
-        // Reset page_table to point to the first page table.
-        this->page_table = (PageTable *)((uint8_t*)(page_tables_ptr) + PAGE_DIRECTORY_SIZE);
     }
 
     void    *VirtualMemoryManager::allocate_virtual_memory_page(void *addr, uint64_t len, int prot)
@@ -53,8 +47,6 @@ namespace Memory
         for (; virtual_address_start < virtual_address_end; virtual_address_start += PAGE_SIZE)
         {
             identity_map_memory_page(virtual_address_start);
-            if (page_table_size == 1023)
-                page_table_size = 0;
         }
     }
 
@@ -71,12 +63,6 @@ namespace Memory
     {
         page_directory.add_new_entry(entry, page_directory_size);
         page_directory_size++;
-    }
-
-    void VirtualMemoryManager::insert_page_table_entry(const PageTableEntry &entry)
-    {
-        page_table->add_new_entry(entry, page_table_size);
-        page_table_size++;
     }
 
     void VirtualMemoryManager::identity_map_memory_page(uint64_t virtual_address)
@@ -99,7 +85,6 @@ namespace Memory
             uint64_t physical_address = virtual_address;
             PageTable *page_table = (PageTable *)page_table_address;
             page_table->page_table[table_index].set_present()->set_read_write()->set_pwt()->set_cache_disbled()->set_physical_address(physical_address);
-            page_table_size++;
         }
     }
 }
