@@ -52,8 +52,8 @@ void print_multiboot_info()
 extern "C" void kernel_main(void *page_tables_base_ptr)
 {
     VGA::TEXT_MODE                  vga;
-    Memory::PhysicalMemoryManager           &memory_manager = Memory::PhysicalMemoryManager::instantiate();
-    Memory::VirtualMemoryManager    kernel_vm((Memory::PageDirectory *)page_tables_base_ptr);
+    Memory::PhysicalMemoryManager   &memory_manager = Memory::PhysicalMemoryManager::instantiate();
+    Memory::VirtualMemoryManager    kernel_vm(page_tables_base_ptr);
     uint32_t                        mmap_length = multiboot_info_ptr->mmap_length;
     multiboot_mmap                  *mmap_addr = multiboot_info_ptr->mmap_addr;
     uint32_t                        mmap_structure_size;

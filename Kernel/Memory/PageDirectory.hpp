@@ -1,6 +1,11 @@
 #pragma once
 
 #include <Kernel/Memory/PagingStructureEntry.hpp>
+#include <Kernel/Memory/PageTable.hpp>
+
+#if !defined NULL
+    #define NULL 0x00
+#endif
 
 // In 32-bit paging mode all paging structres are 1024 entries, 4 bytes for each entry.
 #define N_PAGE_DIRECTORY_ENTRIES 1024
@@ -11,7 +16,12 @@ namespace Memory
 {
     struct PageDirectory
     {
-        PageDirectoryEntry page_directory[N_PAGE_DIRECTORY_ENTRIES];
-        void add_new_entry(const PageDirectoryEntry &entry, uint16_t index);
+        const void                  *page_directory_ptr;
+        PageDirectoryEntry          *page_directory[N_PAGE_DIRECTORY_ENTRIES];
+        /*
+            Use this to keep information about the page table referenced in [page_directory].
+        */
+        PageTableInfo               page_table_info[N_PAGE_DIRECTORY_ENTRIES];
+        const PagingStructureEntry  *add_new_entry(PagingStructureEntry *entry, uint16_t index);
     };
 }

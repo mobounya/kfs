@@ -2,8 +2,9 @@
 
 namespace Memory
 {
-    void PageTable::add_new_entry(const PageTableEntry &entry, uint16_t index)
+    const PageTableEntry    &PageTable::add_new_entry(const PageTableEntry &entry, uint16_t index)
     {
         page_table[index] = entry;
+        return page_table[index];
     }
 }
