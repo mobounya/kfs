@@ -21,6 +21,7 @@ namespace Memory
         {
             pde_entry->set_present()->set_read_write()->set_u_s()->set_pwt()->set_cache_disbled()->set_physical_address((uint32_t)page_table_ptr);
             insert_page_directory_entry(pde_entry);
+            page_directory.page_table_info[i].size = 0;
             pde_entry++;
             page_table_ptr = ((uint8_t *)page_table_ptr + PAGE_TABLE_SIZE);
         }
@@ -85,6 +86,7 @@ namespace Memory
             uint64_t physical_address = virtual_address;
             PageTable *page_table = (PageTable *)page_table_address;
             page_table->page_table[table_index].set_present()->set_read_write()->set_pwt()->set_cache_disbled()->set_physical_address(physical_address);
+            page_directory.page_table_info[directory_index].size++;
         }
     }
 }

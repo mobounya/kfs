@@ -13,6 +13,11 @@
 
 namespace Memory
 {
+    struct PageTableInfo
+    {
+        uint16_t size;
+    };
+
     struct PageTable
     {
         PageTableEntry          page_table[N_PAGE_TABLE_ENTRIES];
