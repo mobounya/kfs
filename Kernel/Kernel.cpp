@@ -90,5 +90,13 @@ extern "C" void kernel_main(void *page_tables_base_ptr)
 
     memory_manager.enable_paging();
 
-    vga.write_string("Enabled paging !\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
+    char *ptr = (char *)kernel_vm.allocate_virtual_memory(NULL, PAGE_SIZE, 0);
+
+    if (ptr == NULL)
+        vga.write_string("Error in memory allocation!\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
+    else {
+        for (int i = 0; i < PAGE_SIZE; i++)
+            ptr[i] = 0xff;
+        vga.write_string("Successfully allocated memory !\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
+    }
 }
