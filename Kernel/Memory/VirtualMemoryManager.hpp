@@ -17,7 +17,7 @@ namespace Memory
             VirtualMemoryManager(void *page_tables_ptr);
 
         public:
-            void                *allocate_virtual_memory_page(void *addr, uint64_t len, int prot);
+            void                *allocate_virtual_memory(void *addr, uint64_t len, int prot);
             static uint32_t     construct_virtual_address(uint16_t directory_index, uint16_t table_index, uint16_t offset);
             void                load_page_directory(void);
             void                insert_page_directory_entry(PagingStructureEntry *entry);
