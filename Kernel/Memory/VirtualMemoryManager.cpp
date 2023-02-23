@@ -49,7 +49,7 @@ namespace Memory
             uint16_t page_directory_index = page_directory_size - 1;
             uint16_t page_table_index = page_directory.page_table_info[page_directory_index].size;
 
-            const MemoryPage *page = memory_manager.allocate_physical_memory_page();
+            const MemoryPage *page = memory_manager.kallocate_physical_memory_page();
 
             PageTableEntry pt_entry;
             pt_entry.set_present()->set_read_write()->set_u_s()->set_pwt()->set_cache_disbled()->set_physical_address(page->get_base_addr());

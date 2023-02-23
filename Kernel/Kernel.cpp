@@ -76,8 +76,10 @@ extern "C" void kernel_main(void *page_tables_base_ptr)
 
     /*
         Physical Memory Mapping:
-            - 0x0      --> 0x100000 : 1 Mib, reserved for special usage.
-            - 0x100000 --> 0x400000 : 3 Mib, Kernel image (?? I don't know the size of the kernel image).
+            - 0x0      --> 0x100000  : 1 Mib, reserved for special usage.
+            - 0x100000 --> 0x400000  : 3 Mib, Kernel image (?? I don't know the size of the kernel image).
+            - 0x400000 --> 0x800000  : 4 Mib, Available for allocation for the Kernel.
+            - 0x800000 --> 0x1000000 : 8 Mib, Available for allocation for user space programs. 
     */
 
     // Identity map the first 1 Mib (Mebibyte), 0x0 --> 0x100000
@@ -86,17 +88,21 @@ extern "C" void kernel_main(void *page_tables_base_ptr)
     // Identity map the Kernel image, 0x100000 --> 0x400000
     kernel_vm.identity_map_memory(0x100000, 0x400000);
 
-    kernel_vm.load_page_directory();
+    // kernel_vm.load_page_directory();
 
-    memory_manager.enable_paging();
+    // memory_manager.enable_paging();
 
-    char *ptr = (char *)kernel_vm.allocate_virtual_memory(NULL, PAGE_SIZE, 0);
+    memory_manager.print_physical_memory_regions(vga);
 
-    if (ptr == NULL)
+    const Memory::MemoryPage *page = memory_manager.kallocate_physical_memory_page();
+    page = memory_manager.kallocate_physical_memory_page();
+    page = memory_manager.kallocate_physical_memory_page();
+
+    if (page == NULL)
         vga.write_string("Error in memory allocation!\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-    else {
-        for (int i = 0; i < PAGE_SIZE; i++)
-            ptr[i] = 0xff;
-        vga.write_string("Successfully allocated memory !\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
+    else
+    {
+        memory_manager.print_physical_memory_regions(vga);
+        memory_manager.print_kallocated_memory_pages(vga);
     }
 }

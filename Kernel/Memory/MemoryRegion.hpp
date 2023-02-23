@@ -10,6 +10,7 @@ namespace Memory
             uint64_t    base_addr;
             uint64_t    length;
             uint8_t     type;
+
         public:
             MemoryRegion();
             MemoryRegion(uint64_t base_addr, uint64_t length, uint8_t type);
