@@ -1,5 +1,5 @@
-#include <User/Libc/Libc.hpp>
 #include <Kernel/VGA/VGA.hpp>
+#include <string.h>
 
 namespace VGA
 {

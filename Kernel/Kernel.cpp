@@ -10,8 +10,6 @@
 #include <Kernel/Memory/MemoryPage.hpp>
 #include <Kernel/Memory/VirtualMemoryManager.hpp>
 
-#include <User/Libc/Libc.hpp>
-
 extern "C" {
     multiboot_info *multiboot_info_ptr;
 }

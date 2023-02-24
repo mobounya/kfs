@@ -4,3 +4,4 @@ isodir
 *.iso
 .idea
 .vscode
+*.a

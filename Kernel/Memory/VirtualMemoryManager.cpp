@@ -1,5 +1,4 @@
 #include <Kernel/Memory/VirtualMemoryManager.hpp>
-#include <User/Libc/Libc.hpp>
 
 namespace Memory
 {
