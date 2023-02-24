@@ -92,15 +92,19 @@ extern "C" void kernel_main(void *page_tables_base_ptr)
 
     memory_manager.print_physical_memory_regions(vga);
 
-    const Memory::MemoryPage *page = memory_manager.kallocate_physical_memory_page();
-    page = memory_manager.kallocate_physical_memory_page();
-    page = memory_manager.kallocate_physical_memory_page();
+    const Memory::MemoryPage *page = memory_manager.uallocate_physical_memory_page();
 
     if (page == NULL)
         vga.write_string("Error in memory allocation!\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
     else
     {
-        memory_manager.print_physical_memory_regions(vga);
-        memory_manager.print_kallocated_memory_pages(vga);
+        memory_manager.print_uallocated_memory_pages(vga, 0);
+        memory_manager.ufree_physical_memory_page(*page);
+        memory_manager.print_ufree_memory_pages(vga, 0);
+
+        page = memory_manager.kallocate_physical_memory_page();
+        memory_manager.print_kallocated_memory_pages(vga, 0);
+        memory_manager.kfree_physical_memory_page(*page);
+        memory_manager.print_kfree_memory_pages(vga, 0);
     }
 }

@@ -15,7 +15,7 @@
 .section .bss
 .align 16
 stack_bottom:
-.skip 1024 * 16
+.skip 1024 * 26
 stack_top:
 
 /* Initalize a 16384 Kb memory area for 4 paging structures */

@@ -73,6 +73,12 @@ namespace Memory
 
     void VirtualMemoryManager::identity_map_memory(uint64_t virtual_address_start, uint64_t virtual_address_end)
     {
+        /*
+            Ideally you should allocate memory from the physical memory manager from a specific address
+            and then map that address to the same virtual address, but for now we don't have the ability to allocate
+            physical memory at a specified address.
+            TODO: allocate the memory rather than calling (reserve_physical_memory) which just removes the memory of the available memory pool.
+        */
         memory_manager.reserve_physical_memory(virtual_address_start, virtual_address_end);
         for (; virtual_address_start < virtual_address_end; virtual_address_start += PAGE_SIZE)
         {

@@ -37,13 +37,17 @@ namespace Memory
             void                                enable_paging(void);
             void                                declare_memory_region(const MemoryRegion &region);
             const MemoryPage                    *kallocate_physical_memory_page(void);
+            const MemoryPage                    *uallocate_physical_memory_page(void);
             void                                kfree_physical_memory_page(const MemoryPage &page);
+            void                                ufree_physical_memory_page(const MemoryPage &page);
             static uint64_t                     find_aligned_address(uint64_t address, uint64_t alignment);
             void                                reserve_physical_memory(uint64_t physical_address_start, uint64_t physical_address_end);
-            void                                print_physical_memory_regions(VGA::TEXT_MODE &vga);
-            void                                print_kallocated_memory_pages(VGA::TEXT_MODE &vga);
-            void                                print_kfree_memory_pages(VGA::TEXT_MODE &vga);
             static MemoryRegion                 get_overlapping_memory_region(const MemoryRegion &region_1, const MemoryRegion &region_2);
+            void                                print_physical_memory_regions(VGA::TEXT_MODE &vga) const;
+            void                                print_kallocated_memory_pages(VGA::TEXT_MODE &vga, uint8_t max) const;
+            void                                print_uallocated_memory_pages(VGA::TEXT_MODE &vga, uint8_t max) const;
+            void                                print_kfree_memory_pages(VGA::TEXT_MODE &vga, uint8_t max) const;
+            void                                print_ufree_memory_pages(VGA::TEXT_MODE &vga, uint8_t max) const;
 
         private:
             const MemoryPage                    *alloc(const MemoryPool &pool, PhysicalMemory<MemoryPage> &allocated_memory_pages, PhysicalMemory<MemoryPage> &free_memory_pages);
@@ -56,11 +60,14 @@ namespace Memory
                 FIXME: divide overlapping memory regions.
             */
             PhysicalMemory<MemoryRegion>    physical_memory;
+
+            MemoryPool kernel_space;
             PhysicalMemory<MemoryPage>      kernel_allocated_memory_pages;
             PhysicalMemory<MemoryPage>      kernel_free_memory_pages;
 
-            MemoryPool kernel_space;
             MemoryPool user_space;
+            PhysicalMemory<MemoryPage>      user_allocated_memory_pages;
+            PhysicalMemory<MemoryPage>      user_free_memory_pages;
 
             static PhysicalMemoryManager    memory_manager;
             static bool                     instantiated;
