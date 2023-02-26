@@ -2,6 +2,18 @@
 
 namespace Memory
 {
+    TranslatedLinearAddress TranslatedLinearAddress::get_translated_address(const void *virtual_address)
+    {
+        TranslatedLinearAddress translated_address;
+
+        uint32_t page_address = (uint32_t)virtual_address;
+        translated_address.page_directory_index = (VIRTUAL_ADDRESS_DIRECTORY_FLAG & page_address) >> 22;
+        translated_address.page_table_index = (VIRTUAL_ADDRESS_TABLE_FLAG & page_address) >> 12;
+        translated_address.offset = (VIRTUAL_ADDRESS_OFFSET_FLAG & page_address);
+
+        return translated_address;
+    }
+
     VirtualMemoryManager::VirtualMemoryManager(void)
     {
         this->page_directory_size = 0;

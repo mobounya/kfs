@@ -22,7 +22,10 @@ namespace Memory
         void *first_page_ptr = NULL;
 
         // We allocate by multiples of (PAGE_SIZE), so here we will round up (len) to the next multiple of (PAGE_SIZE).
-        len = PhysicalMemoryManager::find_aligned_address(len, PAGE_SIZE);
+        if (len == 0)
+            len = PAGE_SIZE;
+        else
+            len = PhysicalMemoryManager::find_aligned_address(len, PAGE_SIZE);
 
         for (; len > 0; len -= PAGE_SIZE)
         {
@@ -46,5 +49,30 @@ namespace Memory
                 first_page_ptr = (void *)construct_virtual_address(page_directory_index, page_table_index, 0x0);
         }
         return (first_page_ptr);
+    }
+
+    int     KernelVirtualMemoryManager::free_virtual_memory(void *addr, uint64_t len)
+    {
+        if (addr == NULL || PhysicalMemoryManager::find_aligned_address((uint64_t)addr, PAGE_SIZE) != (uint64_t)addr)
+            return -1;
+
+        if (len == 0)
+            len = PAGE_SIZE;
+        else
+            len = PhysicalMemoryManager::find_aligned_address(len, PAGE_SIZE);
+
+        for (uint8_t pages_freed = 0; pages_freed < (len / PAGE_SIZE); pages_freed++)
+        {
+            TranslatedLinearAddress translated_address = TranslatedLinearAddress::get_translated_address(addr);
+            if (page_directory.page_directory[translated_address.page_directory_index] != NULL)
+            {
+                PageTable *page_table = (PageTable *)(page_directory.page_directory[translated_address.page_directory_index]->page_table_address << 12);
+                uint32_t physical_address = (page_table->page_table[translated_address.page_table_index].page_table_address << 12);
+                memory_manager.kfree_physical_memory_page(MemoryPage(physical_address));
+                page_directory.page_table_info[translated_address.page_directory_index].size--;
+            }
+            addr = (void *)(((uint8_t *)addr) + PAGE_SIZE);
+        }
+        return 0;
     }
 }

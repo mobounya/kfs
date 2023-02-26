@@ -86,25 +86,19 @@ extern "C" void kernel_main(void *page_tables_base_ptr)
     // Identity map the Kernel image, 0x100000 --> 0x400000
     kernel_vm.identity_map_memory(0x100000, 0x400000);
 
-    // kernel_vm.load_page_directory();
+    kernel_vm.load_page_directory();
 
-    // memory_manager.enable_paging();
+    memory_manager.enable_paging();
 
-    memory_manager.print_physical_memory_regions(vga);
+    void *ptr = kernel_vm.allocate_virtual_memory(NULL, 0, 0);
 
-    const Memory::MemoryPage *page = memory_manager.uallocate_physical_memory_page();
-
-    if (page == NULL)
-        vga.write_string("Error in memory allocation!\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
+    if (ptr == NULL)
+        vga.write_string("Error allocating virtual memory\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
     else
     {
-        memory_manager.print_uallocated_memory_pages(vga, 0);
-        memory_manager.ufree_physical_memory_page(*page);
-        memory_manager.print_ufree_memory_pages(vga, 0);
-
-        page = memory_manager.kallocate_physical_memory_page();
         memory_manager.print_kallocated_memory_pages(vga, 0);
-        memory_manager.kfree_physical_memory_page(*page);
+        kernel_vm.free_virtual_memory(ptr, 0);
         memory_manager.print_kfree_memory_pages(vga, 0);
+        memory_manager.print_kallocated_memory_pages(vga, 0);
     }
 }
