@@ -16,6 +16,7 @@ namespace Memory
     struct PageTableInfo
     {
         uint16_t size;
+        bool entry_used[N_PAGE_TABLE_ENTRIES];
     };
 
     struct PageTable

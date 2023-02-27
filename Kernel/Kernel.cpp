@@ -99,7 +99,7 @@ extern "C" void kernel_main(void *kernel_page_tables, void *user_page_tables)
     else
     {
         memory_manager.print_uallocated_memory_pages(vga, 0);
-        user_vm.free_virtual_memory(ptr, PAGE_SIZE * 3);
+        user_vm.free_virtual_memory(ptr, PAGE_SIZE * 4);
         memory_manager.print_ufree_memory_pages(vga, 0);
         memory_manager.print_uallocated_memory_pages(vga, 0);
     }
