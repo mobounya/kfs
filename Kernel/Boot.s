@@ -18,10 +18,17 @@ stack_bottom:
 .skip 1024 * 26
 stack_top:
 
-/* Initalize a 16384 Kb memory area for 4 paging structures */
+/*
+    Initalize 1 Page directory and 4 Page tables for the kernel
+    and
+    1 Page directory and 4 Page tables for user space (just for testing)
+*/
+
 .section .page_tables, "aw", @nobits
 .align 4096
-page_tables_base_ptr:
+kernel_page_tables:
+.skip (4096 * 5)
+user_page_tables:
 .skip (4096 * 5)
 
 .section .text
@@ -42,7 +49,8 @@ _start:
 .call_kernel:
     movl %ebx, multiboot_info_ptr
     mov $stack_top, %esp # esp now will point to the top of the stack.
-    push $page_tables_base_ptr
+    push $kernel_page_tables
+    push $user_page_tables
     call kernel_main
 1:	hlt
 	jmp 1b

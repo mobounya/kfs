@@ -12,7 +12,7 @@ COMPILER_FLAGS = -I./ -I./User/Libc -ffreestanding -Wall -Wextra -fno-exceptions
 
 LINKER_FLAGS = -ffreestanding -nostdlib
 
-KERNEL_FILES = $(addprefix Kernel/, Kernel VGA/VGA Memory/PhysicalMemoryManager Memory/PagingStructureEntry Memory/MemoryRegion Memory/PageDirectory Memory/PageTable Memory/MemoryPage Memory/VirtualMemoryManager Memory/KernelVirtualMemoryManager)
+KERNEL_FILES = $(addprefix Kernel/, Kernel VGA/VGA Memory/PhysicalMemoryManager Memory/PagingStructureEntry Memory/MemoryRegion Memory/PageDirectory Memory/PageTable Memory/MemoryPage Memory/VirtualMemoryManager Memory/KernelVirtualMemoryManager Memory/UserVirtualMemoryManager)
 KERNEL_SRC = $(addsuffix .cpp, $(KERNEL_FILES))
 KERNEL_OBJ = $(addsuffix .o, $(KERNEL_FILES))
 

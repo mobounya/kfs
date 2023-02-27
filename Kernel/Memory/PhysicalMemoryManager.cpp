@@ -314,7 +314,7 @@ namespace Memory
     {
         if (user_free_memory_pages.size() == 0)
         {
-             vga.write_string("No kernel free pages available !\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
+             vga.write_string("No User free pages available !\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
         }
         else
         {
@@ -324,7 +324,7 @@ namespace Memory
                 vga.write_string("-------- ", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
                 vga.write_string("Free page #", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
                 vga.write_string(itoa(i), VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-                vga.write_string(" (Kernel) --------\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
+                vga.write_string(" (User) --------\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
                 vga.write_string("Base address: ", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
                 vga.write_string(itoa(user_free_memory_pages[i].get_base_addr()), VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
                 vga.write_string("\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);

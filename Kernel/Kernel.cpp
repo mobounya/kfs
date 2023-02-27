@@ -9,6 +9,7 @@
 #include <Kernel/Memory/PagingStructureEntry.hpp>
 #include <Kernel/Memory/MemoryPage.hpp>
 #include <Kernel/Memory/KernelVirtualMemoryManager.hpp>
+#include <Kernel/Memory/UserVirtualMemoryManager.hpp>
 
 extern "C" {
     multiboot_info *multiboot_info_ptr;
@@ -47,11 +48,12 @@ void print_multiboot_info()
         vga_interface.write_string("FRAMEBUFFER info available\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
 }
 
-extern "C" void kernel_main(void *page_tables_base_ptr)
+extern "C" void kernel_main(void *kernel_page_tables, void *user_page_tables)
 {
     VGA::TEXT_MODE                         vga;
     Memory::PhysicalMemoryManager          &memory_manager = Memory::PhysicalMemoryManager::instantiate();
-    Memory::KernelVirtualMemoryManager     kernel_vm(page_tables_base_ptr);
+    Memory::KernelVirtualMemoryManager     kernel_vm(kernel_page_tables);
+    Memory::UserVirtualMemoryManager       user_vm(user_page_tables);
     uint32_t                               mmap_length = multiboot_info_ptr->mmap_length;
     multiboot_mmap                         *mmap_addr = multiboot_info_ptr->mmap_addr;
     uint32_t                               mmap_structure_size;
@@ -90,15 +92,15 @@ extern "C" void kernel_main(void *page_tables_base_ptr)
 
     memory_manager.enable_paging();
 
-    void *ptr = kernel_vm.allocate_virtual_memory(NULL, 0, 0);
+    void *ptr = user_vm.allocate_virtual_memory(NULL, PAGE_SIZE * 3, 0);
 
     if (ptr == NULL)
         vga.write_string("Error allocating virtual memory\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
     else
     {
-        memory_manager.print_kallocated_memory_pages(vga, 0);
-        kernel_vm.free_virtual_memory(ptr, 0);
-        memory_manager.print_kfree_memory_pages(vga, 0);
-        memory_manager.print_kallocated_memory_pages(vga, 0);
+        memory_manager.print_uallocated_memory_pages(vga, 0);
+        user_vm.free_virtual_memory(ptr, PAGE_SIZE * 3);
+        memory_manager.print_ufree_memory_pages(vga, 0);
+        memory_manager.print_uallocated_memory_pages(vga, 0);
     }
 }
