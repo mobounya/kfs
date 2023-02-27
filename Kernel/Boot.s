@@ -11,11 +11,11 @@
 .long FLAGS
 .long CHECKSUM
 
-/* Initializing a 16 KiB memory area we will use as a stack */
+/* Initializing a 1 MiB memory area we will use as a stack */
 .section .bss
 .align 16
 stack_bottom:
-.skip 1024 * 26
+.skip 1079296
 stack_top:
 
 /*

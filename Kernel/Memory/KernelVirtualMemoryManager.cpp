@@ -45,6 +45,7 @@ namespace Memory
             PageTable          *page_table = (PageTable *)(pde_entry->page_table_address << 12);
             page_table->add_new_entry(pt_entry, page_table_index);
             page_directory.page_table_info[page_directory_index].size++;
+            page_directory.page_table_info[page_directory_index].entry_used[page_table_index] = true;
             if (first_page_ptr == NULL)
                 first_page_ptr = (void *)construct_virtual_address(page_directory_index, page_table_index, 0x0);
         }
@@ -66,10 +67,14 @@ namespace Memory
             TranslatedLinearAddress translated_address = TranslatedLinearAddress::get_translated_address(addr);
             if (page_directory.page_directory[translated_address.page_directory_index] != NULL)
             {
-                PageTable *page_table = (PageTable *)(page_directory.page_directory[translated_address.page_directory_index]->page_table_address << 12);
-                uint32_t physical_address = (page_table->page_table[translated_address.page_table_index].page_table_address << 12);
-                memory_manager.kfree_physical_memory_page(MemoryPage(physical_address));
-                page_directory.page_table_info[translated_address.page_directory_index].size--;
+                if (page_directory.page_table_info[translated_address.page_directory_index].entry_used[translated_address.page_directory_index] == true)
+                {
+                    PageTable *page_table = (PageTable *)(page_directory.page_directory[translated_address.page_directory_index]->page_table_address << 12);
+                    uint32_t physical_address = (page_table->page_table[translated_address.page_table_index].page_table_address << 12);
+                    memory_manager.kfree_physical_memory_page(MemoryPage(physical_address));
+                    page_directory.page_table_info[translated_address.page_directory_index].entry_used[translated_address.page_table_index] = false;
+                    page_directory.page_table_info[translated_address.page_directory_index].size--;
+                }
             }
             addr = (void *)(((uint8_t *)addr) + PAGE_SIZE);
         }
