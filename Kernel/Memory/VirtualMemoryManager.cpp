@@ -1,8 +1,19 @@
 #include <Kernel/Memory/VirtualMemoryManager.hpp>
-#include <User/Libc/Libc.hpp>
 
 namespace Memory
 {
+    TranslatedLinearAddress TranslatedLinearAddress::get_translated_address(const void *virtual_address)
+    {
+        TranslatedLinearAddress translated_address;
+
+        uint32_t page_address = (uint32_t)virtual_address;
+        translated_address.page_directory_index = (VIRTUAL_ADDRESS_DIRECTORY_FLAG & page_address) >> 22;
+        translated_address.page_table_index = (VIRTUAL_ADDRESS_TABLE_FLAG & page_address) >> 12;
+        translated_address.offset = (VIRTUAL_ADDRESS_OFFSET_FLAG & page_address);
+
+        return translated_address;
+    }
+
     VirtualMemoryManager::VirtualMemoryManager(void)
     {
         this->page_directory_size = 0;
@@ -28,42 +39,6 @@ namespace Memory
         }
     }
 
-    void    *VirtualMemoryManager::allocate_virtual_memory(void *addr, uint64_t len, int prot)
-    {
-        // TODO: let user allocate memory at a specified virtual address.
-        // TODO: let user define the protection flags.
-
-        (void)addr;
-        (void)prot;
-        void *first_page_ptr = NULL;
-
-        // We allocate by multiples of (PAGE_SIZE), so here we will round up (len) to the next multiple of (PAGE_SIZE).
-        len = PhysicalMemoryManager::find_aligned_address(len, PAGE_SIZE);
-
-        for (; len > 0; len -= PAGE_SIZE)
-        {
-            // Page table in current page directory entry is full, use the page table in the next page directory entry.
-            if (page_directory.page_table_info[page_directory_size - 1].size >= PAGE_TABLE_SIZE)
-                page_directory_size++;
-
-            uint16_t page_directory_index = page_directory_size - 1;
-            uint16_t page_table_index = page_directory.page_table_info[page_directory_index].size;
-
-            const MemoryPage *page = memory_manager.allocate_physical_memory_page();
-
-            PageTableEntry pt_entry;
-            pt_entry.set_present()->set_read_write()->set_u_s()->set_pwt()->set_cache_disbled()->set_physical_address(page->get_base_addr());
-
-            PageDirectoryEntry *pde_entry = page_directory.page_directory[page_directory_index];
-            PageTable          *page_table = (PageTable *)(pde_entry->page_table_address << 12);
-            page_table->add_new_entry(pt_entry, page_table_index);
-            page_directory.page_table_info[page_directory_index].size++;
-            if (first_page_ptr == NULL)
-                first_page_ptr = (void *)construct_virtual_address(page_directory_index, page_table_index, 0x0);
-        }
-        return (first_page_ptr);
-    }
-
     uint32_t     VirtualMemoryManager::construct_virtual_address(uint16_t directory_index, uint16_t table_index, uint16_t offset)
     {
         uint32_t address = offset;
@@ -74,6 +49,12 @@ namespace Memory
 
     void VirtualMemoryManager::identity_map_memory(uint64_t virtual_address_start, uint64_t virtual_address_end)
     {
+        /*
+            Ideally you should allocate memory from the physical memory manager from a specific address
+            and then map that address to the same virtual address, but for now we don't have the ability to allocate
+            physical memory at a specified address.
+            TODO: allocate the memory rather than calling (reserve_physical_memory) which just removes the memory of the available memory pool.
+        */
         memory_manager.reserve_physical_memory(virtual_address_start, virtual_address_end);
         for (; virtual_address_start < virtual_address_end; virtual_address_start += PAGE_SIZE)
         {

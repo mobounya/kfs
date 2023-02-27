@@ -8,9 +8,8 @@
 #include <Kernel/Memory/MemoryRegion.hpp>
 #include <Kernel/Memory/PagingStructureEntry.hpp>
 #include <Kernel/Memory/MemoryPage.hpp>
-#include <Kernel/Memory/VirtualMemoryManager.hpp>
-
-#include <User/Libc/Libc.hpp>
+#include <Kernel/Memory/KernelVirtualMemoryManager.hpp>
+#include <Kernel/Memory/UserVirtualMemoryManager.hpp>
 
 extern "C" {
     multiboot_info *multiboot_info_ptr;
@@ -49,14 +48,15 @@ void print_multiboot_info()
         vga_interface.write_string("FRAMEBUFFER info available\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
 }
 
-extern "C" void kernel_main(void *page_tables_base_ptr)
+extern "C" void kernel_main(void *kernel_page_tables, void *user_page_tables)
 {
-    VGA::TEXT_MODE                  vga;
-    Memory::PhysicalMemoryManager   &memory_manager = Memory::PhysicalMemoryManager::instantiate();
-    Memory::VirtualMemoryManager    kernel_vm(page_tables_base_ptr);
-    uint32_t                        mmap_length = multiboot_info_ptr->mmap_length;
-    multiboot_mmap                  *mmap_addr = multiboot_info_ptr->mmap_addr;
-    uint32_t                        mmap_structure_size;
+    VGA::TEXT_MODE                         vga;
+    Memory::PhysicalMemoryManager          &memory_manager = Memory::PhysicalMemoryManager::instantiate();
+    Memory::KernelVirtualMemoryManager     kernel_vm(kernel_page_tables);
+    Memory::UserVirtualMemoryManager       user_vm(user_page_tables);
+    uint32_t                               mmap_length = multiboot_info_ptr->mmap_length;
+    multiboot_mmap                         *mmap_addr = multiboot_info_ptr->mmap_addr;
+    uint32_t                               mmap_structure_size;
 
     // Setup physical memory regions in the memory manager.
     for (uint32_t i = 0; i < mmap_length; i += mmap_structure_size + 4)
@@ -76,8 +76,10 @@ extern "C" void kernel_main(void *page_tables_base_ptr)
 
     /*
         Physical Memory Mapping:
-            - 0x0      --> 0x100000 : 1 Mib, reserved for special usage.
-            - 0x100000 --> 0x400000 : 3 Mib, Kernel image (?? I don't know the size of the kernel image).
+            - 0x0      --> 0x100000  : 1 Mib, reserved for special usage.
+            - 0x100000 --> 0x400000  : 3 Mib, Kernel image (?? I don't know the size of the kernel image).
+            - 0x400000 --> 0x800000  : 4 Mib, Available for allocation for the Kernel.
+            - 0x800000 --> 0x1000000 : 8 Mib, Available for allocation for user space programs. 
     */
 
     // Identity map the first 1 Mib (Mebibyte), 0x0 --> 0x100000
@@ -90,13 +92,15 @@ extern "C" void kernel_main(void *page_tables_base_ptr)
 
     memory_manager.enable_paging();
 
-    char *ptr = (char *)kernel_vm.allocate_virtual_memory(NULL, PAGE_SIZE, 0);
+    void *ptr = user_vm.allocate_virtual_memory(NULL, PAGE_SIZE * 3, 0);
 
     if (ptr == NULL)
-        vga.write_string("Error in memory allocation!\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-    else {
-        for (int i = 0; i < PAGE_SIZE; i++)
-            ptr[i] = 0xff;
-        vga.write_string("Successfully allocated memory !\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
+        vga.write_string("Error allocating virtual memory\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
+    else
+    {
+        memory_manager.print_uallocated_memory_pages(vga, 0);
+        user_vm.free_virtual_memory(ptr, PAGE_SIZE * 3);
+        memory_manager.print_ufree_memory_pages(vga, 0);
+        memory_manager.print_uallocated_memory_pages(vga, 0);
     }
 }

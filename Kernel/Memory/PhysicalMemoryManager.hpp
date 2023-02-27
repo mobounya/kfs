@@ -15,6 +15,20 @@ namespace Memory
 {
     class PhysicalMemoryManager
     {
+        class MemoryPool : public MemoryRegion
+        {
+            public:
+                MemoryPool();
+                MemoryPool(uint64_t base_addr, uint64_t end_addr);
+
+            public:
+                void        set_end_addr(uint64_t end_addr);
+                uint64_t    get_end_addr(void) const;
+
+            private:
+                uint64_t end_addr;
+        };
+
         private:
             PhysicalMemoryManager();
 
@@ -22,12 +36,21 @@ namespace Memory
             static PhysicalMemoryManager       &instantiate(void);
             void                                enable_paging(void);
             void                                declare_memory_region(const MemoryRegion &region);
-            const MemoryPage                    *allocate_physical_memory_page(void);
-            void                                free_physical_memory_page(const MemoryPage &page);
+            const MemoryPage                    *kallocate_physical_memory_page(void);
+            const MemoryPage                    *uallocate_physical_memory_page(void);
+            void                                kfree_physical_memory_page(const MemoryPage &page);
+            void                                ufree_physical_memory_page(const MemoryPage &page);
             static uint64_t                     find_aligned_address(uint64_t address, uint64_t alignment);
+            void                                reserve_physical_memory(uint64_t physical_address_start, uint64_t physical_address_end);
+            static MemoryRegion                 get_overlapping_memory_region(const MemoryRegion &region_1, const MemoryRegion &region_2);
+            void                                print_physical_memory_regions(VGA::TEXT_MODE &vga) const;
+            void                                print_kallocated_memory_pages(VGA::TEXT_MODE &vga, uint8_t max) const;
+            void                                print_uallocated_memory_pages(VGA::TEXT_MODE &vga, uint8_t max) const;
+            void                                print_kfree_memory_pages(VGA::TEXT_MODE &vga, uint8_t max) const;
+            void                                print_ufree_memory_pages(VGA::TEXT_MODE &vga, uint8_t max) const;
 
-        public:
-            void                        reserve_physical_memory(uint64_t physical_address_start, uint64_t physical_address_end);
+        private:
+            const MemoryPage                    *alloc(const MemoryPool &pool, PhysicalMemory<MemoryPage> &allocated_memory_pages, PhysicalMemory<MemoryPage> &free_memory_pages);
 
             /*
                 These are the physical memory regions detected by GRUB, we only store usable [MULTIBOOT_MEMORY_AVAILABLE] for now.
@@ -36,10 +59,17 @@ namespace Memory
                     - These are not necessarily 4K page aligned.
                 FIXME: divide overlapping memory regions.
             */
+            PhysicalMemory<MemoryRegion>    physical_memory;
+
+            MemoryPool kernel_space;
+            PhysicalMemory<MemoryPage>      kernel_allocated_memory_pages;
+            PhysicalMemory<MemoryPage>      kernel_free_memory_pages;
+
+            MemoryPool user_space;
+            PhysicalMemory<MemoryPage>      user_allocated_memory_pages;
+            PhysicalMemory<MemoryPage>      user_free_memory_pages;
+
             static PhysicalMemoryManager    memory_manager;
             static bool                     instantiated;
-            PhysicalMemory<MemoryRegion>    physical_memory;
-            PhysicalMemory<MemoryPage>      allocated_memory_pages;
-            PhysicalMemory<MemoryPage>      free_memory_pages;
     };
 };

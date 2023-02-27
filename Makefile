@@ -6,15 +6,13 @@ LINKER_SCRIPT = linker.ld
 
 TARGET = i686-elf
 
-COMPILER_FLAGS = -I./ -ffreestanding -Wall -Wextra -fno-exceptions -fno-rtti -nostdlib -nodefaultlibs -fno-stack-protector
+LIBC = ./User/Libc/ft_libc.a
+
+COMPILER_FLAGS = -I./ -I./User/Libc -ffreestanding -Wall -Wextra -fno-exceptions -fno-rtti -nostdlib -nodefaultlibs -fno-stack-protector
 
 LINKER_FLAGS = -ffreestanding -nostdlib
 
-LIBC_FILES = $(addprefix User/Libc/, Libc)
-LIBC_SRC = $(addsuffix .cpp, $(LIBC_FILES))
-LIBC_OBJ = $(addsuffix .o, $(LIBC_FILES))
-
-KERNEL_FILES = $(addprefix Kernel/, Kernel VGA/VGA Memory/PhysicalMemoryManager Memory/PagingStructureEntry Memory/MemoryRegion Memory/PageDirectory Memory/PageTable Memory/MemoryPage Memory/VirtualMemoryManager)
+KERNEL_FILES = $(addprefix Kernel/, Kernel VGA/VGA Memory/PhysicalMemoryManager Memory/PagingStructureEntry Memory/MemoryRegion Memory/PageDirectory Memory/PageTable Memory/MemoryPage Memory/VirtualMemoryManager Memory/KernelVirtualMemoryManager Memory/UserVirtualMemoryManager)
 KERNEL_SRC = $(addsuffix .cpp, $(KERNEL_FILES))
 KERNEL_OBJ = $(addsuffix .o, $(KERNEL_FILES))
 
@@ -22,9 +20,9 @@ ASM_FILES = $(addprefix Kernel/, Boot)
 ASM_SRC = $(addsuffix .s, $(ASM_FILES))
 ASM_OBJ = $(addsuffix .o, $(ASM_FILES))
 
-CPP_FILES = $(LIBC_FILES) $(KERNEL_FILES)
-CPP_SRC = $(LIBC_SRC) $(KERNEL_SRC)
-CPP_OBJ = $(LIBC_OBJ) $(KERNEL_OBJ)
+CPP_FILES = $(KERNEL_FILES)
+CPP_SRC = $(KERNEL_SRC)
+CPP_OBJ = $(KERNEL_OBJ)
 
 RED = \033[1;31m
 GREEN = \033[1;32m
@@ -34,7 +32,7 @@ all : $(NAME)
 
 $(NAME) : $(ASM_OBJ) $(CPP_OBJ)
 	@echo "$(RED)Linking kernel and boot files...$(NC)"
-	@$(TARGET)-g++ -T $(LINKER_SCRIPT) $(LINKER_FLAGS) -o $@ $(ASM_OBJ) $(CPP_OBJ) -lgcc
+	@$(TARGET)-g++ -T $(LINKER_SCRIPT) $(LINKER_FLAGS) -o $@ $(ASM_OBJ) $(CPP_OBJ) $(LIBC) -lgcc
 	@echo "$(GREEN)Done linking kernel and boot files...$(NC)"
 
 $(ASM_OBJ) : $(ASM_SRC)
@@ -54,6 +52,15 @@ iso: grub.cfg all
 	@cp grub.cfg isodir/boot/grub/grub.cfg
 	@grub-mkrescue --compress=xz -o $(ISO) isodir
 	@echo "$(GREEN)Done creating bootable iso file$(NC)"
+
+libc:
+	make -C ./User/Libc
+
+libc-fclean:
+	make fclean -C ./User/Libc
+
+libc-clean:
+	make clean -C ./User/Libc
 
 iso-clean:
 	rm -rf isodir/
