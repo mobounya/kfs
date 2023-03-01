@@ -4,7 +4,7 @@ TARGET = i686-elf
 
 COMPILER_FLAGS = -I./ -Wall -Wextra -Werror -ffreestanding -nostdlib -nodefaultlibs
 
-C_SOURCES = itoa.c memcpy.c strcmp.c strlen.c
+C_SOURCES = itoa.c memcpy.c strcmp.c strlen.c memset.c
 
 C_OBJ = $(C_SOURCES:.c=.o)
 

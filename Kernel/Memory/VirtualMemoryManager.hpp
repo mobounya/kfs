@@ -26,13 +26,13 @@ namespace Memory
             VirtualMemoryManager(void *page_tables_ptr);
 
         public:
-            virtual void        *allocate_virtual_memory(void *addr, uint64_t len, int prot) = 0;
-            virtual int         free_virtual_memory(void *addr, uint64_t len) = 0;
-            static uint32_t     construct_virtual_address(uint16_t directory_index, uint16_t table_index, uint16_t offset);
-            void                load_page_directory(void);
-            void                insert_page_directory_entry(PagingStructureEntry *entry);
-            void                identity_map_memory(uint64_t virtual_address_start, uint64_t virtual_address_end);
-            int                 disable_page(const void *virtual_address, uint32_t len);
+            virtual void                *allocate_virtual_memory(void *addr, uint64_t len, int prot) = 0;
+            virtual int                 free_virtual_memory(void *addr, uint64_t len) = 0;
+            static uint32_t             construct_virtual_address(uint16_t directory_index, uint16_t table_index, uint16_t offset);
+            void                        load_page_directory(void);
+            const PagingStructureEntry  *insert_page_directory_entry(PagingStructureEntry *entry);
+            void                        identity_map_memory(uint64_t virtual_address_start, uint64_t virtual_address_end);
+            int                         disable_page(const void *virtual_address, uint32_t len);
 
         private:
             void                 identity_map_memory_page(uint64_t virtual_address);
