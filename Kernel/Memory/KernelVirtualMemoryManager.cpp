@@ -39,10 +39,10 @@ namespace Memory
             const MemoryPage *page = memory_manager.kallocate_physical_memory_page();
 
             PageTableEntry pt_entry;
-            pt_entry.set_present()->set_read_write()->set_u_s()->set_pwt()->set_cache_disbled()->set_physical_address(page->get_base_addr());
+            pt_entry.set_present(true)->set_read_write(true)->set_u_s(true)->set_pwt(true)->set_cache_disbled(true)->set_physical_address(page->get_base_addr());
 
             PageDirectoryEntry *pde_entry = page_directory.page_directory[page_directory_index];
-            PageTable          *page_table = (PageTable *)(pde_entry->page_table_address << 12);
+            PageTable          *page_table = (PageTable *)(pde_entry->physical_address << 12);
             page_table->add_new_entry(pt_entry, page_table_index);
             page_directory.page_table_info[page_directory_index].size++;
             page_directory.page_table_info[page_directory_index].entry_used[page_table_index] = true;
@@ -69,8 +69,8 @@ namespace Memory
             {
                 if (page_directory.page_table_info[translated_address.page_directory_index].entry_used[translated_address.page_directory_index] == true)
                 {
-                    PageTable *page_table = (PageTable *)(page_directory.page_directory[translated_address.page_directory_index]->page_table_address << 12);
-                    uint32_t physical_address = (page_table->page_table[translated_address.page_table_index].page_table_address << 12);
+                    PageTable *page_table = (PageTable *)(page_directory.page_directory[translated_address.page_directory_index]->physical_address << 12);
+                    uint32_t physical_address = (page_table->page_table[translated_address.page_table_index].physical_address << 12);
                     memory_manager.kfree_physical_memory_page(MemoryPage(physical_address));
                     page_directory.page_table_info[translated_address.page_directory_index].entry_used[translated_address.page_table_index] = false;
                     page_directory.page_table_info[translated_address.page_directory_index].size--;

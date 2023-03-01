@@ -31,7 +31,7 @@ namespace Memory
         void *page_table_ptr = ((uint8_t *)page_tables_ptr + PAGE_TABLE_SIZE);
         for (uint8_t i = 0; i < 4; i++)
         {
-            pde_entry->set_present()->set_read_write()->set_u_s()->set_pwt()->set_cache_disbled()->set_physical_address((uint32_t)page_table_ptr);
+            pde_entry->set_present(true)->set_read_write(true)->set_u_s(true)->set_pwt(true)->set_cache_disbled(true)->set_physical_address((uint32_t)page_table_ptr);
             insert_page_directory_entry(pde_entry);
             page_directory.page_table_info[i].size = 0;
             pde_entry++;
@@ -90,14 +90,40 @@ namespace Memory
             pde_entry = page_directory.page_directory[directory_index];
 
             // Get the address of the page table.
-            uint32_t page_table_address = pde_entry->page_table_address;
+            uint32_t page_table_address = pde_entry->physical_address;
             page_table_address = (page_table_address << 12); // Page address is 0x1000 (PAGE_SIZE) aligned.
 
             // Go to page_table_address and map the corresponding entry to (physical_address), now (virtual_address) will map to the same (physical_address)
             uint64_t physical_address = virtual_address;
             PageTable *page_table = (PageTable *)page_table_address;
-            page_table->page_table[table_index].set_present()->set_read_write()->set_pwt()->set_cache_disbled()->set_physical_address(physical_address);
+            page_table->page_table[table_index].set_present(true)->set_read_write(true)->set_pwt(true)->set_cache_disbled(true)->set_physical_address(physical_address);
             page_directory.page_table_info[directory_index].size++;
         }
+    }
+
+    int    VirtualMemoryManager::disable_page(const void *virtual_address, uint32_t len)
+    {
+        if (PhysicalMemoryManager::find_aligned_address((uint64_t)virtual_address, PAGE_SIZE) != (uint64_t)virtual_address)
+            return -1;
+
+        if (len == 0)
+            len = PAGE_SIZE;
+        else
+            len = PhysicalMemoryManager::find_aligned_address(len, PAGE_SIZE);
+
+        for (uint32_t n_pages = 0; n_pages < (len / PAGE_SIZE); n_pages++)
+        {
+            TranslatedLinearAddress address = TranslatedLinearAddress::get_translated_address(((uint8_t *)virtual_address) + (n_pages * PAGE_SIZE));
+            if (page_directory.page_directory[address.page_directory_index] == NULL)
+                return -1;
+            PageTable *page_table = (PageTable *)(page_directory.page_directory[address.page_directory_index]->physical_address << 12);
+            PageTableEntry pte;
+            pte.set_present(false)->set_read_write(false);
+            page_table->add_new_entry(pte, address.page_table_index);
+            if (page_directory.page_table_info[address.page_directory_index].entry_used[address.page_table_index] == false)
+                page_directory.page_table_info[address.page_directory_index].size++;
+            page_directory.page_table_info[address.page_directory_index].entry_used[address.page_table_index] = true;
+        }
+        return 0;
     }
 }

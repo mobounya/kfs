@@ -32,6 +32,7 @@ namespace Memory
             void                load_page_directory(void);
             void                insert_page_directory_entry(PagingStructureEntry *entry);
             void                identity_map_memory(uint64_t virtual_address_start, uint64_t virtual_address_end);
+            int                 disable_page(const void *virtual_address, uint32_t len);
 
         private:
             void                 identity_map_memory_page(uint64_t virtual_address);

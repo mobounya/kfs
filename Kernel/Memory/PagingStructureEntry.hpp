@@ -71,16 +71,16 @@ namespace Memory
         /*
             Physical address of the page table (4K bytes alligned).
         */
-        uint32_t page_table_address : 20;
+        uint32_t physical_address : 20;
 
-        PagingStructureEntry *set_present(void);
-        PagingStructureEntry *set_read_write(void);
-        PagingStructureEntry *set_u_s(void);
-        PagingStructureEntry *set_pwt(void);
-        PagingStructureEntry *set_cache_disbled(void);
-        PagingStructureEntry *set_page_size(void);
-        PagingStructureEntry *set_pat(void);
-        PagingStructureEntry *set_global(void);
+        PagingStructureEntry *set_present(bool value);
+        PagingStructureEntry *set_read_write(bool value);
+        PagingStructureEntry *set_u_s(bool value);
+        PagingStructureEntry *set_pwt(bool value);
+        PagingStructureEntry *set_cache_disbled(bool value);
+        PagingStructureEntry *set_page_size(bool value);
+        PagingStructureEntry *set_pat(bool value);
+        PagingStructureEntry *set_global(bool value);
         PagingStructureEntry *set_physical_address(uint32_t physical_address);
     } PSE;
 

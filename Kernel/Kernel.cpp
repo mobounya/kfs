@@ -90,17 +90,13 @@ extern "C" void kernel_main(void *kernel_page_tables, void *user_page_tables)
 
     kernel_vm.load_page_directory();
 
+    // Disable first page so de-refrencing a NULL ptr would not work.
+    int ret = kernel_vm.disable_page(0x0, PAGE_SIZE);
+
     memory_manager.enable_paging();
 
-    void *ptr = user_vm.allocate_virtual_memory(NULL, PAGE_SIZE * 3, 0);
-
-    if (ptr == NULL)
-        vga.write_string("Error allocating virtual memory\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
+    if (ret == -1)
+        vga.write_string("Error in disabling page (0x0)\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
     else
-    {
-        memory_manager.print_uallocated_memory_pages(vga, 0);
-        user_vm.free_virtual_memory(ptr, PAGE_SIZE * 4);
-        memory_manager.print_ufree_memory_pages(vga, 0);
-        memory_manager.print_uallocated_memory_pages(vga, 0);
-    }
+        vga.write_string("Disabling page (0x0) succeeded\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
 }
