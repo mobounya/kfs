@@ -17,7 +17,8 @@ extern "C" {
 
 void print_multiboot_info()
 {
-    VGA::TEXT_MODE vga_interface = VGA::TEXT_MODE();
+    VGA::TEXT_MODE &vga_interface = VGA::TEXT_MODE::instantiate();
+
     if (multiboot_info_ptr->flags & MULTIBOOT_BOOT_LOADER_NAME) {
         vga_interface.write_string("Loaded by:\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::GREEN, VGA::BLINK::FALSE);
         vga_interface.write_string("- ", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::GREEN, VGA::BLINK::FALSE);
@@ -50,7 +51,7 @@ void print_multiboot_info()
 
 extern "C" void kernel_main(void *kernel_page_tables, void *user_page_tables)
 {
-    VGA::TEXT_MODE                         vga;
+    VGA::TEXT_MODE                         &vga = VGA::TEXT_MODE::instantiate();
     Memory::PhysicalMemoryManager          &memory_manager = Memory::PhysicalMemoryManager::instantiate();
     Memory::KernelVirtualMemoryManager     kernel_vm(kernel_page_tables);
     Memory::UserVirtualMemoryManager       user_vm(user_page_tables);
