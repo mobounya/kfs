@@ -1,4 +1,5 @@
 #include <Kernel/Memory/UserVirtualMemoryManager.hpp>
+#include <string.h>
 
 namespace Memory
 {
@@ -86,6 +87,7 @@ namespace Memory
                     memory_manager.ufree_physical_memory_page(MemoryPage(physical_address));
                     page_directory.page_table_info[translated_address.page_directory_index].entry_used[translated_address.page_table_index] = false;
                     page_directory.page_table_info[translated_address.page_directory_index].size--;
+                    memset(&(page_table->page_table[translated_address.page_table_index]), 0x0, sizeof(PageTableEntry));
                 }
             }
             addr = (void *)(((uint8_t *)addr) + PAGE_SIZE);
