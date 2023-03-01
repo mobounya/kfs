@@ -3,11 +3,24 @@
 
 namespace VGA
 {
+    bool            TEXT_MODE::instantiated = false;
+    TEXT_MODE       TEXT_MODE::instance;
+
     TEXT_MODE::TEXT_MODE()
     {
         this->vga_buffer = (uint16_t *)0xB8000;
         this->current_index = 0;
         init_screen_buffer();
+    }
+
+    TEXT_MODE &TEXT_MODE::instantiate(void)
+    {
+        if (instantiated == false)
+        {
+            instance = TEXT_MODE();
+            instantiated = true;
+        }
+        return instance;
     }
 
     void  TEXT_MODE::init_screen_buffer()

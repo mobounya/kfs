@@ -1,4 +1,5 @@
 #include <Kernel/Memory/VirtualMemoryManager.hpp>
+#include <string.h>
 
 namespace Memory
 {
@@ -21,6 +22,10 @@ namespace Memory
 
     VirtualMemoryManager::VirtualMemoryManager(void *page_tables_ptr)
     {
+        memset(&(page_directory.page_directory), 0x0, sizeof(page_directory.page_directory));
+
+        VGA::TEXT_MODE &vga = VGA::TEXT_MODE::instantiate();
+
         // TODO: improve book keeping of all of paging structures.
         // Quick and dry way to store my pages.
         this->page_directory.page_directory_ptr = page_tables_ptr;
@@ -32,7 +37,11 @@ namespace Memory
         for (uint8_t i = 0; i < 4; i++)
         {
             pde_entry->set_present(true)->set_read_write(true)->set_u_s(true)->set_pwt(true)->set_cache_disbled(true)->set_physical_address((uint32_t)page_table_ptr);
-            insert_page_directory_entry(pde_entry);
+            if (insert_page_directory_entry(pde_entry) == NULL)
+            {
+                vga.write_string("VirtualMemoryManager::constructor: cannot insert a new page directory entry.\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
+                return;
+            }
             page_directory.page_table_info[i].size = 0;
             pde_entry++;
             page_table_ptr = ((uint8_t *)page_table_ptr + PAGE_TABLE_SIZE);
@@ -71,10 +80,15 @@ namespace Memory
         );
     }
 
-    void VirtualMemoryManager::insert_page_directory_entry(PageDirectoryEntry *entry)
+    const PagingStructureEntry  *VirtualMemoryManager::insert_page_directory_entry(PageDirectoryEntry *entry)
     {
-        page_directory.add_new_entry(entry, page_directory_size);
-        page_directory_size++;
+        const PagingStructureEntry *ret_entry = page_directory.add_new_entry(entry, page_directory_size);
+        if (ret_entry == NULL)
+            return NULL;
+        else {
+            page_directory_size++;
+            return ret_entry;
+        }
     }
 
     void VirtualMemoryManager::identity_map_memory_page(uint64_t virtual_address)
@@ -98,13 +112,24 @@ namespace Memory
             PageTable *page_table = (PageTable *)page_table_address;
             page_table->page_table[table_index].set_present(true)->set_read_write(true)->set_pwt(true)->set_cache_disbled(true)->set_physical_address(physical_address);
             page_directory.page_table_info[directory_index].size++;
+        } else 
+        {
+            VGA::TEXT_MODE &vga = VGA::TEXT_MODE::instantiate();
+            vga.write_string("VirtualMemoryManager::identity_map_memory_page: cannot access page directory index (", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::GREEN, VGA::BLINK::FALSE);
+            vga.write_string(itoa(directory_index), VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::GREEN, VGA::BLINK::FALSE);
+            vga.write_string(").\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::GREEN, VGA::BLINK::FALSE);
         }
     }
 
     int    VirtualMemoryManager::disable_page(const void *virtual_address, uint32_t len)
     {
+        VGA::TEXT_MODE &vga = VGA::TEXT_MODE::instantiate();
+
         if (PhysicalMemoryManager::find_aligned_address((uint64_t)virtual_address, PAGE_SIZE) != (uint64_t)virtual_address)
+        {
+            vga.write_string("VirtualMemoryManager::disable_page: Virtual address is not page aligned\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::GREEN, VGA::BLINK::FALSE);
             return -1;
+        }
 
         if (len == 0)
             len = PAGE_SIZE;
@@ -115,7 +140,12 @@ namespace Memory
         {
             TranslatedLinearAddress address = TranslatedLinearAddress::get_translated_address(((uint8_t *)virtual_address) + (n_pages * PAGE_SIZE));
             if (page_directory.page_directory[address.page_directory_index] == NULL)
+            {
+                vga.write_string("VirtualMemoryManager::disable_page: cannot access page directory index (", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::GREEN, VGA::BLINK::FALSE);
+                vga.write_string(itoa(address.page_directory_index), VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::GREEN, VGA::BLINK::FALSE);
+                vga.write_string(").\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::GREEN, VGA::BLINK::FALSE);
                 return -1;
+            }
             PageTable *page_table = (PageTable *)(page_directory.page_directory[address.page_directory_index]->physical_address << 12);
             PageTableEntry pte;
             pte.set_present(false)->set_read_write(false);
