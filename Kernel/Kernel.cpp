@@ -102,6 +102,7 @@ extern "C" void kernel_main(void *kernel_page_tables, void *user_page_tables)
     void *ptr = kernel_vm.allocate_virtual_memory(NULL, PAGE_SIZE, 0);
     if (ptr != NULL)
     {
+        kernel_vm.free_virtual_memory(ptr, PAGE_SIZE);
         memcpy(ptr, str, strlen(str) + 1);
         vga.write_string((char *)ptr, VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
     } else

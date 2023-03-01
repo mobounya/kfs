@@ -1,4 +1,5 @@
 #include <Kernel/Memory/KernelVirtualMemoryManager.hpp>
+#include <string.h>
 
 namespace Memory
 {
@@ -79,13 +80,14 @@ namespace Memory
             TranslatedLinearAddress translated_address = TranslatedLinearAddress::get_translated_address(addr);
             if (page_directory.page_directory[translated_address.page_directory_index] != NULL)
             {
-                if (page_directory.page_table_info[translated_address.page_directory_index].entry_used[translated_address.page_directory_index] == true)
+                if (page_directory.page_table_info[translated_address.page_directory_index].entry_used[translated_address.page_table_index] == true)
                 {
                     PageTable *page_table = (PageTable *)(page_directory.page_directory[translated_address.page_directory_index]->physical_address << 12);
                     uint32_t physical_address = (page_table->page_table[translated_address.page_table_index].physical_address << 12);
                     memory_manager.kfree_physical_memory_page(MemoryPage(physical_address));
                     page_directory.page_table_info[translated_address.page_directory_index].entry_used[translated_address.page_table_index] = false;
                     page_directory.page_table_info[translated_address.page_directory_index].size--;
+                    memset(&(page_table->page_table[translated_address.page_table_index]), 0x0, sizeof(PageTableEntry));
                 }
             }
             addr = (void *)(((uint8_t *)addr) + PAGE_SIZE);
