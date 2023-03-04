@@ -35,11 +35,11 @@ namespace Memory
             int                         disable_page(const void *virtual_address, uint32_t len);
 
         private:
-            void                 identity_map_memory_page(uint64_t virtual_address);
+            void                    identity_map_memory_page(uint64_t virtual_address);
+            void                    find_free_page_table_entries(uint16_t number_of_pages, uint16_t &page_directory_index, uint16_t &page_table_index);
 
         protected:
             PhysicalMemoryManager &memory_manager = PhysicalMemoryManager::instantiate();
             PageDirectory         page_directory;
-            uint16_t              page_directory_size;
     };
 }

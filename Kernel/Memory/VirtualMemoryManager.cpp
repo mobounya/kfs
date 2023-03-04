@@ -17,7 +17,7 @@ namespace Memory
 
     VirtualMemoryManager::VirtualMemoryManager(void)
     {
-        this->page_directory_size = 0;
+        this->page_directory.page_directory_size = 0;
     }
 
     VirtualMemoryManager::VirtualMemoryManager(void *page_tables_ptr)
@@ -29,7 +29,7 @@ namespace Memory
         // TODO: improve book keeping of all of paging structures.
         // Quick and dry way to store my pages.
         this->page_directory.page_directory_ptr = page_tables_ptr;
-        this->page_directory_size = 0;
+        this->page_directory.page_directory_size = 0;
 
         // Setup the first 4 page directory entries to reference a page table.
         PageDirectoryEntry *pde_entry = (PageDirectoryEntry *)(page_tables_ptr);
@@ -43,9 +43,11 @@ namespace Memory
                 return;
             }
             page_directory.page_table_info[i].size = 0;
+            memset(&page_directory.page_table_info[i].entry_used, 0x0, 1024);
             pde_entry++;
             page_table_ptr = ((uint8_t *)page_table_ptr + PAGE_TABLE_SIZE);
         }
+        this->page_directory.current_index = 0;
     }
 
     uint32_t     VirtualMemoryManager::construct_virtual_address(uint16_t directory_index, uint16_t table_index, uint16_t offset)
@@ -82,11 +84,11 @@ namespace Memory
 
     const PagingStructureEntry  *VirtualMemoryManager::insert_page_directory_entry(PageDirectoryEntry *entry)
     {
-        const PagingStructureEntry *ret_entry = page_directory.add_new_entry(entry, page_directory_size);
+        const PagingStructureEntry *ret_entry = page_directory.add_new_entry(entry, this->page_directory.page_directory_size);
         if (ret_entry == NULL)
             return NULL;
         else {
-            page_directory_size++;
+            this->page_directory.page_directory_size++;
             return ret_entry;
         }
     }
@@ -98,7 +100,7 @@ namespace Memory
         uint16_t directory_index = (virtual_address & VIRTUAL_ADDRESS_DIRECTORY_FLAG) >> 22;
 
         // This will not work if (directory_index) is larger than 3, since we only have memory for 4 page tables for now.
-        if (directory_index < page_directory_size)
+        if (directory_index < this->page_directory.page_directory_size)
         {
             // Get directory entry that point to the corresponding page table.
             pde_entry = page_directory.page_directory[directory_index];
