@@ -60,7 +60,7 @@ extern "C" void kernel_main(void *kernel_page_tables, void *user_page_tables)
     uint32_t                               mmap_length = multiboot_info_ptr->mmap_length;
     multiboot_mmap                         *mmap_addr = multiboot_info_ptr->mmap_addr;
     uint32_t                               mmap_structure_size;
-    const char                             *str = "Allocated kernel memory successfully !\n";
+    const char                             *str = "Allocated memory successfully !\n";
 
     // Setup physical memory regions in the memory manager.
     for (uint32_t i = 0; i < mmap_length; i += mmap_structure_size + 4)
@@ -94,15 +94,15 @@ extern "C" void kernel_main(void *kernel_page_tables, void *user_page_tables)
 
     kernel_vm.load_page_directory();
 
+    memory_manager.enable_paging();
+
     // Disable first page so de-refrencing a NULL ptr would not work.
     kernel_vm.disable_page(0x0, PAGE_SIZE);
 
-    memory_manager.enable_paging();
-
     void *ptr = kernel_vm.allocate_virtual_memory(NULL, PAGE_SIZE, 0);
+
     if (ptr != NULL)
     {
-        kernel_vm.free_virtual_memory(ptr, PAGE_SIZE);
         memcpy(ptr, str, strlen(str) + 1);
         vga.write_string((char *)ptr, VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
     } else
