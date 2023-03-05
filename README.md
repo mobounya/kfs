@@ -1,3 +1,8 @@
+## General resources for OS development
+
+* [Programming a kernel in c++](https://wiki.osdev.org/C%2B%2B)
+* [Code Tour: Serenity OS startup (from boot to GUI)](https://youtu.be/NpcGMuI7hxk)
+
 # [KFS_1](https://cdn.intra.42.fr/pdf/pdf/60900/en.subject.pdf)
 
 Check this link on how to boot a basic kernel [osdev wiki](https://wiki.osdev.org/Bare_Bones).
@@ -18,11 +23,6 @@ For linking and writing ld scripts, checkout these resources:
 Write to screen using the VGA text mode:
 * https://en.wikipedia.org/wiki/VGA_text_mode
 * https://en.wikipedia.org/wiki/List_of_8-bit_computer_hardware_graphics#IBM_PC/XT_and_compatible_systems
-
-## General resources for OS development
-
-* [Programming a kernel in c++](https://wiki.osdev.org/C%2B%2B)
-* [Code Tour: Serenity OS startup (from boot to GUI)](https://youtu.be/NpcGMuI7hxk)
 
 # [KFS_2](https://cdn.intra.42.fr/pdf/pdf/64575/en.subject.pdf)
 This module is about segmentation, which is obsolete, so we set up a flat-memory model and ignore it.
