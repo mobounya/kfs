@@ -11,7 +11,8 @@ namespace Memory
             KernelVirtualMemoryManager(void *page_tables_ptr);
 
         public:
-            void                                            *allocate_virtual_memory(void *addr, uint64_t len, int prot);
-            int                                             free_virtual_memory(void *addr, uint64_t len);
+            void                                            *kmalloc(size_t len);
+            int                                             kfree(void *addr, size_t len);
+            size_t                                          ksize(const void *addr);
     };
 }

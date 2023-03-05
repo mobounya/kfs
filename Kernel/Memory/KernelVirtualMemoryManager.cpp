@@ -13,14 +13,19 @@ namespace Memory
 
     }
 
-    void        *KernelVirtualMemoryManager::allocate_virtual_memory(void *addr, uint64_t len, int prot)
-    {
-        // TODO: let user allocate memory at a specified virtual address.
-        // TODO: let user define the protection flags.
-        VGA::TEXT_MODE &vga = VGA::TEXT_MODE::instantiate();
+    /*
+        https://www.oreilly.com/library/view/linux-device-drivers/0596000081/ch13.html#linuxdrive2-CHP-13-SECT-1
+        
+        In the Linux kernel, kmalloc will return a logical addresses which is a virtual address that is
+        directly mapped to the same physical address.
 
-        (void)addr;
-        (void)prot;
+        This implementation allocate (len) bytes of virtual memory, but no direct physical mapping.
+    */
+
+    // TODO: make kmalloc behave the same as kmalloc in the linux.
+    void        *KernelVirtualMemoryManager::kmalloc(size_t len)
+    {
+        VGA::TEXT_MODE &vga = VGA::TEXT_MODE::instantiate();
         void *first_page_ptr = NULL;
 
         // We allocate by multiples of (PAGE_SIZE), so here we will round up (len) to the next multiple of (PAGE_SIZE).
@@ -34,7 +39,7 @@ namespace Memory
     
         if (page_directory.find_contiguous_free_pages(len / PAGE_SIZE, page_directory_index, page_table_index) == false)
         {
-            vga.write_string("KernelVirtualMemoryManager::allocate_virtual_memory: failed to allocate virtual memory page.\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
+            vga.write_string("KernelVirtualMemoryManager::kmalloc: failed to allocate virtual memory page.\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
             return NULL;
         }
 
@@ -43,14 +48,14 @@ namespace Memory
             const MemoryPage *page = memory_manager.kallocate_physical_memory_page();
             if (page == NULL)
             {
-                vga.write_string("KernelVirtualMemoryManager::allocate_virtual_memory: failed to allocate physical memory page.\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
+                vga.write_string("KernelVirtualMemoryManager::kmalloc: failed to allocate physical memory page.\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
                 return NULL;
             }
 
             PageDirectoryEntry *pde_entry = page_directory.page_directory[page_directory_index];
             if (pde_entry == NULL)
             {
-                vga.write_string("KernelVirtualMemoryManager::allocate_virtual_memory: such page directory.\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
+                vga.write_string("KernelVirtualMemoryManager::kmalloc: such page directory.\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
                 return NULL;
             }
             PageTable          *page_table = (PageTable *)(pde_entry->physical_address << 12);
@@ -68,13 +73,13 @@ namespace Memory
         return (first_page_ptr);
     }
 
-    int     KernelVirtualMemoryManager::free_virtual_memory(void *addr, uint64_t len)
+    int     KernelVirtualMemoryManager::kfree(void *addr, size_t len)
     {
         VGA::TEXT_MODE &vga = VGA::TEXT_MODE::instantiate();
 
         if (addr == NULL || PhysicalMemoryManager::find_aligned_address((uint64_t)addr, PAGE_SIZE) != (uint64_t)addr)
         {
-            vga.write_string("KernelVirtualMemoryManager::free_virtual_memory: Virtual address is not page aligned\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
+            vga.write_string("KernelVirtualMemoryManager::kfree: Virtual address is not page aligned\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
             return -1;
         }
 
@@ -101,5 +106,30 @@ namespace Memory
             addr = (void *)(((uint8_t *)addr) + PAGE_SIZE);
         }
         return 0;
+    }
+
+    size_t  KernelVirtualMemoryManager::ksize(const void *addr)
+    {
+        if (addr == NULL)
+            return 0;
+        bool contiguous_memory = true;
+        size_t size = 0;
+
+        TranslatedLinearAddress translated_address = TranslatedLinearAddress::get_translated_address(addr);
+        while (contiguous_memory)
+        {
+            if (page_directory.page_directory[translated_address.page_directory_index] == NULL)
+                break ;
+            if (page_directory.page_table_info[translated_address.page_directory_index].entry_used[translated_address.page_table_index] == false)
+                break ;
+            size += PAGE_SIZE;
+            translated_address.page_table_index++;
+            if (translated_address.page_table_index == N_PAGE_TABLE_ENTRIES)
+            {
+                translated_address.page_table_index = 0;
+                translated_address.page_directory_index++;
+            }
+        }
+        return size;
     }
 }

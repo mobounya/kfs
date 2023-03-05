@@ -13,14 +13,12 @@ namespace Memory
         
     }
 
-    void        *UserVirtualMemoryManager::allocate_virtual_memory(void *addr, uint64_t len, int prot)
+    void        *UserVirtualMemoryManager::vmalloc(size_t len)
     {
         // TODO: let user allocate memory at a specified virtual address.
         // TODO: let user define the protection flags.
         VGA::TEXT_MODE &vga = VGA::TEXT_MODE::instantiate();
 
-        (void)addr;
-        (void)prot;
         void *first_page_ptr = NULL;
 
         // We allocate by multiples of (PAGE_SIZE), so here we will round up (len) to the next multiple of (PAGE_SIZE).
@@ -68,7 +66,7 @@ namespace Memory
         return (first_page_ptr);
     }
 
-    int     UserVirtualMemoryManager::free_virtual_memory(void *addr, uint64_t len)
+    int     UserVirtualMemoryManager::vfree(void *addr, size_t len)
     {
         VGA::TEXT_MODE &vga = VGA::TEXT_MODE::instantiate();
 
@@ -102,5 +100,30 @@ namespace Memory
         }
 
         return 0;
+    }
+
+    size_t  UserVirtualMemoryManager::vsize(const void *addr)
+    {
+        if (addr == NULL)
+            return 0;
+        bool contiguous_memory = true;
+        size_t size = 0;
+
+        TranslatedLinearAddress translated_address = TranslatedLinearAddress::get_translated_address(addr);
+        while (contiguous_memory)
+        {
+            if (page_directory.page_directory[translated_address.page_directory_index] == NULL)
+                break ;
+            if (page_directory.page_table_info[translated_address.page_directory_index].entry_used[translated_address.page_table_index] == false)
+                break ;
+            size += PAGE_SIZE;
+            translated_address.page_table_index++;
+            if (translated_address.page_table_index == N_PAGE_TABLE_ENTRIES)
+            {
+                translated_address.page_table_index = 0;
+                translated_address.page_directory_index++;
+            }
+        }
+        return size;
     }
 }

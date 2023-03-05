@@ -11,7 +11,8 @@ namespace Memory
             UserVirtualMemoryManager(void *page_tables_ptr);
 
         public:
-            void                                            *allocate_virtual_memory(void *addr, uint64_t len, int prot);
-            int                                             free_virtual_memory(void *addr, uint64_t len);
+            void                                            *vmalloc(size_t len);
+            int                                             vfree(void *addr, size_t len);
+            size_t                                          vsize(const void *addr);
     };
 }

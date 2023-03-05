@@ -99,12 +99,13 @@ extern "C" void kernel_main(void *kernel_page_tables, void *user_page_tables)
     // Disable first page so de-refrencing a NULL ptr would not work.
     kernel_vm.disable_page(0x0, PAGE_SIZE);
 
-    void *ptr = kernel_vm.allocate_virtual_memory(NULL, PAGE_SIZE, 0);
-
+    void *ptr = kernel_vm.kmalloc(PAGE_SIZE);
+    
     if (ptr != NULL)
     {
-        memcpy(ptr, str, strlen(str) + 1);
-        vga.write_string((char *)ptr, VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
+        size_t size = kernel_vm.ksize(ptr);
+        vga.write_string(itoa(size), VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
+        vga.write_string("\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
     } else
         vga.write_string("Allocation failed\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
 }
