@@ -25,6 +25,7 @@ Write to screen using the VGA text mode:
 * [Code Tour: Serenity OS startup (from boot to GUI)](https://youtu.be/NpcGMuI7hxk)
 
 # [KFS_2](https://cdn.intra.42.fr/pdf/pdf/64575/en.subject.pdf)
+This module is about segmentation, which is obsolete, so we set up a flat-memory model and ignore it.
 
 Too lazy to include resource for segmentation now, will come back later.
 
