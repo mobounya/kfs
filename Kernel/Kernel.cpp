@@ -106,6 +106,10 @@ extern "C" void kernel_main(void *kernel_page_tables, void *user_page_tables)
         size_t size = kernel_vm.ksize(ptr);
         vga.write_string(itoa(size), VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
         vga.write_string("\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
+        memcpy(ptr, str, strlen(str) + 1);
+        vga.write_string((char *)ptr, VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
+        vga.write_string("\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
+
     } else
         vga.write_string("Allocation failed\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
 }
