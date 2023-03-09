@@ -8,11 +8,11 @@ TARGET = i686-elf
 
 LIBC = ./User/Libc/ft_libc.a
 
-COMPILER_FLAGS = -I./ -I./User/Libc -ffreestanding -Wall -Wextra -fno-exceptions -fno-rtti -nostdlib -nodefaultlibs -fno-stack-protector
+COMPILER_FLAGS = -I./ -I./User/Libc -O2 -ffreestanding -Wall -Wextra -fno-exceptions -fno-rtti -nostdlib -nodefaultlibs -fno-stack-protector
 
 LINKER_FLAGS = -ffreestanding -nostdlib
 
-INTERUPTS_FILES = $(addprefix Interrupts/, IDT)
+INTERUPTS_FILES = $(addprefix Interrupts/, IDT PIC)
 MEMORY_FILES = $(addprefix Memory/, PhysicalMemoryManager PagingStructureEntry MemoryRegion PageDirectory PageTable MemoryPage VirtualMemoryManager KernelVirtualMemoryManager UserVirtualMemoryManager)
 VGA_FILES = $(addprefix VGA/, VGA)
 KERNEL_FILES = $(addprefix Kernel/, Kernel $(MEMORY_FILES) $(VGA_FILES) $(INTERUPTS_FILES))
