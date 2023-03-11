@@ -8,7 +8,7 @@ TARGET = i686-elf
 
 LIBC = ./User/Libc/ft_libc.a
 
-COMPILER_FLAGS = -I./ -I./User/Libc -O2 -ffreestanding -Wall -Wextra -fno-exceptions -fno-rtti -nostdlib -nodefaultlibs -fno-stack-protector
+COMPILER_FLAGS = -I./ -I./User/Libc -O2 -ffreestanding -Wall -Wextra -fno-exceptions -fno-rtti -nostdlib -nodefaultlibs -fno-stack-protector -mgeneral-regs-only
 
 LINKER_FLAGS = -ffreestanding -nostdlib
 

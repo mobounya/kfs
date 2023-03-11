@@ -17,9 +17,11 @@ namespace Interrupts
         return offset;
     }
 
+    // https://wiki.osdev.org/Segment_Selector
     void                    GateDescriptor32::set_segment_selector(uint16_t segment_selector)
     {
-        this->segment_selector = segment_selector;
+        this->segment_selector = segment_selector << 3;
+        this->segment_selector = this->segment_selector & 0b000;
     }
 
     uint16_t                GateDescriptor32::get_segment_selector(void) const
@@ -91,12 +93,12 @@ namespace Interrupts
         return this->size;
     }
 
-    void        IDTDescriptor::set_address(uint16_t address)
+    void        IDTDescriptor::set_address(uint32_t address)
     {
         this->address = address;
     }
 
-    uint16_t    IDTDescriptor::get_address(void) const
+    uint32_t    IDTDescriptor::get_address(void) const
     {
         return this->address;
     }

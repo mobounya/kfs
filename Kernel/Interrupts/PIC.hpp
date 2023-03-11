@@ -26,7 +26,7 @@ namespace Interrupts
     class PIC8259
     {
         public:
-            void PIC_remap(int slave_offset, int master_offset);
+            static void PIC_remap(int slave_offset, int master_offset);
     };
 
     typedef PIC8259 PIC;

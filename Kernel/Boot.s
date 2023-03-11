@@ -31,6 +31,13 @@ kernel_page_tables:
 user_page_tables:
 .skip (4096 * 5)
 
+.section .interrupt_descriptor_table, "aw", @nobits
+.align 8
+interrupt_descriptor_table_ptr:
+.skip (8 * 255) # 255 entry 8 bytes each
+idt_descriptor_ptr:
+.skip 6
+
 .section .text
 .global _start
 
@@ -38,7 +45,6 @@ user_page_tables:
 .type multiboot_info_ptr, @object
 
 _start:
-    cli
     lgdt [GDT_descriptor]
     mov $0x10, %esp
     mov %esp, %ds
@@ -51,6 +57,8 @@ _start:
     mov $stack_top, %esp # esp now will point to the top of the stack.
     push $kernel_page_tables
     push $user_page_tables
+    push $interrupt_descriptor_table_ptr
+    push $idt_descriptor_ptr
     call kernel_main
 1:	hlt
 	jmp 1b

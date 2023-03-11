@@ -56,13 +56,13 @@ namespace Interrupts
     {
         private:
             uint16_t size;
-            uint16_t address;
+            uint32_t address;
         public:
             void        set_size(uint16_t size);
             uint16_t    get_size(void) const;
-            void        set_address(uint16_t address);
-            uint16_t    get_address(void) const;
-    };
+            void        set_address(uint32_t address);
+            uint32_t    get_address(void) const;
+    } __attribute__((packed));
 
     typedef InterruptDescriptorTable32  InterruptDescriptorTable;
     typedef GateDescriptor32            GateDescriptor;
