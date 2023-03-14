@@ -12,7 +12,7 @@ COMPILER_FLAGS = -I./ -I./User/Libc -O2 -ffreestanding -Wall -Wextra -fno-except
 
 LINKER_FLAGS = -ffreestanding -nostdlib
 
-GDT_FILES = $(addprefix GDT/, GDT)
+GDT_FILES = $(addprefix GDT/, GDT TSS)
 INTERUPTS_FILES = $(addprefix Interrupts/, IDT PIC)
 MEMORY_FILES = $(addprefix Memory/, PhysicalMemoryManager PagingStructureEntry MemoryRegion PageDirectory PageTable MemoryPage VirtualMemoryManager KernelVirtualMemoryManager UserVirtualMemoryManager)
 VGA_FILES = $(addprefix VGA/, VGA)

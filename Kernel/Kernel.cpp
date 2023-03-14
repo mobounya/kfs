@@ -11,6 +11,7 @@
 #include <Kernel/Memory/KernelVirtualMemoryManager.hpp>
 #include <Kernel/Memory/UserVirtualMemoryManager.hpp>
 #include <Kernel/GDT/GDT.hpp>
+#include <Kernel/GDT/TSS.hpp>
 
 #include <string.h>
 
@@ -52,13 +53,18 @@ void print_multiboot_info()
         vga_interface.write_string("FRAMEBUFFER info available\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
 }
 
-extern "C" void setup_gdt(void)
+extern "C" void setup_gdt(void *stack_ptr)
 {
-    Kernel::GDT_Table *gdt_table_ptr = (Kernel::GDT_Table *)0x00000800;
+    Kernel::GDT_Table   *gdt_table_ptr = (Kernel::GDT_Table *)0x00000800;
+    // Store the tss right after the GDT.
+    Kernel::TSS         *tss_ptr = (Kernel::TSS *)(((Kernel::GDT_Table *)0x00000800) + 1);
     Kernel::GDT_Table gdt_table;
+
     size_t  gdt_size = 0;
     uint8_t access_byte = PRESENT_SEGMENT | CODE_DATA_SEGMENT | EXECUTABLE_SEGMENT | ALLOW_READ_ACCESS;
     uint8_t flags = GRANUALITY_FLAG | SEGMENT_32BIT_FLAG;
+
+    memset(gdt_table_ptr, 0x0, sizeof(Kernel::GDT_Table));
 
     // NULL segment.
     gdt_table.insert_new_entry(Kernel::GDT::create_GDT_Descriptor(0x0, 0x0, 0x0, 0x0), gdt_size++);
@@ -85,6 +91,19 @@ extern "C" void setup_gdt(void)
     // Segment descriptor for user stack.
     access_byte = PRESENT_SEGMENT | DPL_USER | CODE_DATA_SEGMENT | ALLOW_WRITE_ACCESS;
     gdt_table.insert_new_entry(Kernel::GDT::create_GDT_Descriptor(0x0, 0xfffff, access_byte, flags), gdt_size++);
+
+    // Setup the tss.
+    memset(tss_ptr, 0x0, sizeof(Kernel::TSS));
+    tss_ptr->set_SS0(0x10);
+    tss_ptr->set_ESP0((uint32_t)stack_ptr);
+    tss_ptr->set_IOPB(sizeof(Kernel::TSS) - 4);
+
+    // System segment descriptor for TSS.
+    access_byte = 0x89;
+    flags = 0x8;
+    // https://wiki.osdev.org/Task_State_Segment
+    // IOPB may get the value sizeof(TSS) (which is 104) if you don't plan to use this io-bitmap further (according to mystran in http://forum.osdev.org/viewtopic.php?t=13678)
+    gdt_table.insert_new_entry(Kernel::GDT::create_GDT_Descriptor((uint32_t)tss_ptr, sizeof(Kernel::TSS), access_byte, flags), gdt_size++);
 
     *gdt_table_ptr = gdt_table;
 }
@@ -136,5 +155,5 @@ extern "C" void kernel_main(void *kernel_page_tables, void *user_page_tables, vo
     // Disable first page so de-refrencing a NULL ptr would not work.
     // kernel_vm.disable_page(0x0, PAGE_SIZE);
 
-    vga.write_string("Kernel done", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::GREEN, VGA::BLINK::FALSE);
+    vga.write_string("Kernel Done !\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::GREEN, VGA::BLINK::FALSE);
 }

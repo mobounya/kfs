@@ -45,8 +45,10 @@ idt_descriptor_ptr:
 .type multiboot_info_ptr, @object
 
 _start:
+    push $stack_top
     call setup_gdt
     lgdt [GDT_descriptor]
+    # ltr 0x38 # let's not load the tss segment for now.
     mov $0x10, %esp
     mov %esp, %ds
     mov $0x18, %esp
@@ -65,5 +67,5 @@ _start:
 	jmp 1b
 
 GDT_descriptor:
-    .2byte  55
+    .2byte  63
     .4byte  0x00000800
