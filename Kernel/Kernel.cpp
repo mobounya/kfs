@@ -10,8 +10,7 @@
 #include <Kernel/Memory/MemoryPage.hpp>
 #include <Kernel/Memory/KernelVirtualMemoryManager.hpp>
 #include <Kernel/Memory/UserVirtualMemoryManager.hpp>
-#include <Kernel/Interrupts/PIC.hpp>
-#include <Kernel/Interrupts/IDT.hpp>
+#include <Kernel/GDT/GDT.hpp>
 
 #include <string.h>
 
@@ -53,19 +52,41 @@ void print_multiboot_info()
         vga_interface.write_string("FRAMEBUFFER info available\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
 }
 
-struct interrupt_frame {
-    uint32_t ip;
-    uint32_t cs;
-    uint32_t flags;
-    uint32_t sp;
-    uint32_t ss;
-} __attribute__((packed));
- 
-__attribute__((interrupt)) void interrupt_handler(struct interrupt_frame* frame)
+extern "C" void setup_gdt(void)
 {
-    VGA::TEXT_MODE &vga = VGA::TEXT_MODE::instantiate();
-    vga.write_string("Interrupt routine called\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::GREEN, VGA::BLINK::FALSE);
-    return ;
+    Kernel::GDT_Table *gdt_table_ptr = (Kernel::GDT_Table *)0x00000800;
+    Kernel::GDT_Table gdt_table;
+    size_t  gdt_size = 0;
+    uint8_t access_byte = PRESENT_SEGMENT | CODE_DATA_SEGMENT | EXECUTABLE_SEGMENT | ALLOW_READ_ACCESS;
+    uint8_t flags = GRANUALITY_FLAG | SEGMENT_32BIT_FLAG;
+
+    // NULL segment.
+    gdt_table.insert_new_entry(Kernel::GDT::create_GDT_Descriptor(0x0, 0x0, 0x0, 0x0), gdt_size++);
+
+    // Segment descriptor for kernel code.
+    gdt_table.insert_new_entry(Kernel::GDT::create_GDT_Descriptor(0x0, 0xfffff, access_byte, flags), gdt_size++);
+
+    // Segment descriptor for kernel data.
+    access_byte = PRESENT_SEGMENT | CODE_DATA_SEGMENT | ALLOW_WRITE_ACCESS;
+    gdt_table.insert_new_entry(Kernel::GDT::create_GDT_Descriptor(0x0, 0xfffff, access_byte, flags), gdt_size++);
+
+    // Segment descriptor for kernel stack.
+    access_byte = PRESENT_SEGMENT | CODE_DATA_SEGMENT | ALLOW_WRITE_ACCESS;
+    gdt_table.insert_new_entry(Kernel::GDT::create_GDT_Descriptor(0x0, 0xfffff, access_byte, flags), gdt_size++);
+
+    // Segment descriptor for user code.
+    access_byte = PRESENT_SEGMENT | DPL_USER | CODE_DATA_SEGMENT | EXECUTABLE_SEGMENT | ALLOW_READ_ACCESS;
+    gdt_table.insert_new_entry(Kernel::GDT::create_GDT_Descriptor(0x0, 0xfffff, access_byte, flags), gdt_size++);
+
+    // Segment descriptor for user data.
+    access_byte = PRESENT_SEGMENT | DPL_USER | CODE_DATA_SEGMENT | ALLOW_WRITE_ACCESS;
+    gdt_table.insert_new_entry(Kernel::GDT::create_GDT_Descriptor(0x0, 0xfffff, access_byte, flags), gdt_size++);
+
+    // Segment descriptor for user stack.
+    access_byte = PRESENT_SEGMENT | DPL_USER | CODE_DATA_SEGMENT | ALLOW_WRITE_ACCESS;
+    gdt_table.insert_new_entry(Kernel::GDT::create_GDT_Descriptor(0x0, 0xfffff, access_byte, flags), gdt_size++);
+
+    *gdt_table_ptr = gdt_table;
 }
 
 extern "C" void kernel_main(void *kernel_page_tables, void *user_page_tables, void *interrupt_descriptor_table_ptr, void *idt_descriptor_ptr)
@@ -77,8 +98,6 @@ extern "C" void kernel_main(void *kernel_page_tables, void *user_page_tables, vo
     uint32_t                                mmap_length = multiboot_info_ptr->mmap_length;
     multiboot_mmap                          *mmap_addr = multiboot_info_ptr->mmap_addr;
     uint32_t                                mmap_structure_size;
-    Interrupts::InterruptDescriptorTable    *interrupt_descriptor_table = (Interrupts::InterruptDescriptorTable *)interrupt_descriptor_table_ptr;
-    Interrupts::IDTDescriptor               *idt_descriptor = (Interrupts::IDTDescriptor *)idt_descriptor_ptr;
 
     // Setup physical memory regions in the memory manager.
     for (uint32_t i = 0; i < mmap_length; i += mmap_structure_size + 4)
@@ -105,10 +124,10 @@ extern "C" void kernel_main(void *kernel_page_tables, void *user_page_tables, vo
     */
 
     // Identity map the first 1 Mib (Mebibyte), 0x0 --> 0x100000
-    kernel_vm.identity_map_memory(0x0, 0x100000);
+    // kernel_vm.identity_map_memory(0x0, 0x100000);
 
     // Identity map the Kernel image, 0x100000 --> 0x400000
-    kernel_vm.identity_map_memory(0x100000, 0x400000);
+    // kernel_vm.identity_map_memory(0x100000, 0x400000);
 
     // kernel_vm.load_page_directory();
 
@@ -117,25 +136,5 @@ extern "C" void kernel_main(void *kernel_page_tables, void *user_page_tables, vo
     // Disable first page so de-refrencing a NULL ptr would not work.
     // kernel_vm.disable_page(0x0, PAGE_SIZE);
 
-    Interrupts::GateDescriptor descriptor;
-    descriptor.set_offset((uint32_t)&interrupt_handler);
-    descriptor.set_segment_selector(1);
-    descriptor.set_gate_type(Interrupts::GateType::InterruptGate32);
-    descriptor.set_DPL(0);
-    descriptor.set_present(true);
-
-    for (int i = 0; i < IDT_SIZE; i++)
-        interrupt_descriptor_table->insert_new_entry(descriptor, i);
-
-    idt_descriptor->set_address((uint32_t)interrupt_descriptor_table_ptr);
-    idt_descriptor->set_size(sizeof(Interrupts::InterruptDescriptorTable) - 1);
-
-    Interrupts::PIC::PIC_remap(0x28, 0x20);
-
-    asm volatile (
-        "lidt %0"
-        :: "m" (idt_descriptor) :
-    );
-
-    vga.write_string("Kernel done\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::GREEN, VGA::BLINK::FALSE);
+    vga.write_string("Kernel done", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::GREEN, VGA::BLINK::FALSE);
 }

@@ -45,6 +45,7 @@ idt_descriptor_ptr:
 .type multiboot_info_ptr, @object
 
 _start:
+    call setup_gdt
     lgdt [GDT_descriptor]
     mov $0x10, %esp
     mov %esp, %ds
@@ -63,113 +64,6 @@ _start:
 1:	hlt
 	jmp 1b
 
-GDT_start:
-    GDT_null:
-        .8byte 0x0
-
-    kernel_code_descriptor:
-        # first 2 bytes of the limit
-        .2byte 0xffff
-
-        # first 3 bytes of base address
-        .2byte 0x00
-        .byte 0x0
-
-        # access/type byte
-        .byte 0b10011010
-
-        # 4 bit flag and last 4 bits of limit
-        .byte 0b11001111
-
-        # last 1 byte of base address
-        .byte 0x0
-
-    kernel_data_descriptor:
-        # first 2 bytes of the limit
-        .2byte 0xffff
-
-        # first 3 bytes of base address
-        .2byte 0x0
-        .byte 0x0
-
-        # access/type byte
-        .byte 0b10010010
-
-        # 4 bit flag and last 4 bits of limit
-        .byte 0b11001111
-
-        # last 1 byte of base address
-        .byte 0x0
-    
-    kernel_stack_descriptor:
-        # first 2 bytes of the limit
-        .2byte 0xffff
-
-        # first 3 bytes of base address
-        .2byte 0x0
-        .byte 0x0
-
-        # access/type byte
-        .byte 0b10010010
-
-        # 4 bit flag and last 4 bits of limit
-        .byte 0b11001111
-
-        # last 1 byte of base address
-        .byte 0x0
-    
-    user_code_descriptor:
-        # first 2 bytes of the limit
-        .2byte 0xffff
-
-        # first 3 bytes of base address
-        .2byte 0x00
-        .byte 0x0
-
-        # access/type byte
-        .byte 0b11111110
-
-        # 4 bit flag and last 4 bits of limit
-        .byte 0b11001111
-
-        # last 1 byte of base address
-        .byte 0x0
-    
-    user_data_descriptor:
-        # first 2 bytes of the limit
-        .2byte 0xffff
-
-        # first 3 bytes of base address
-        .2byte 0x00
-        .byte 0x0
-
-        # access/type byte
-        .byte 0b11110010
-
-        # 4 bit flag and last 4 bits of limit
-        .byte 0b11001111
-
-        # last 1 byte of base address
-        .byte 0x0
-    
-    user_stack_descriptor:
-        # first 2 bytes of the limit
-        .2byte 0xffff
-
-        # first 3 bytes of base address
-        .2byte 0x0
-        .byte 0x0
-
-        # access/type byte
-        .byte 0b11110010
-
-        # 4 bit flag and last 4 bits of limit
-        .byte 0b11001111
-
-        # last 1 byte of base address
-        .byte 0x0
-GDT_end:
-
 GDT_descriptor:
-    .2byte  GDT_end - GDT_start - 1
-    .4byte  GDT_start
+    .2byte  55
+    .4byte  0x00000800

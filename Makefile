@@ -12,10 +12,11 @@ COMPILER_FLAGS = -I./ -I./User/Libc -O2 -ffreestanding -Wall -Wextra -fno-except
 
 LINKER_FLAGS = -ffreestanding -nostdlib
 
+GDT_FILES = $(addprefix GDT/, GDT)
 INTERUPTS_FILES = $(addprefix Interrupts/, IDT PIC)
 MEMORY_FILES = $(addprefix Memory/, PhysicalMemoryManager PagingStructureEntry MemoryRegion PageDirectory PageTable MemoryPage VirtualMemoryManager KernelVirtualMemoryManager UserVirtualMemoryManager)
 VGA_FILES = $(addprefix VGA/, VGA)
-KERNEL_FILES = $(addprefix Kernel/, Kernel $(MEMORY_FILES) $(VGA_FILES) $(INTERUPTS_FILES))
+KERNEL_FILES = $(addprefix Kernel/, Kernel $(MEMORY_FILES) $(VGA_FILES) $(INTERUPTS_FILES) $(GDT_FILES))
 KERNEL_SRC = $(addsuffix .cpp, $(KERNEL_FILES))
 KERNEL_OBJ = $(addsuffix .o, $(KERNEL_FILES))
 
