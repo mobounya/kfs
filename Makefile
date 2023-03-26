@@ -8,15 +8,16 @@ TARGET = i686-elf
 
 LIBC = ./User/Libc/ft_libc.a
 
-COMPILER_FLAGS = -I./ -I./User/Libc -O2 -ffreestanding -Wall -Wextra -fno-exceptions -fno-rtti -nostdlib -nodefaultlibs -fno-stack-protector -mgeneral-regs-only
+COMPILER_FLAGS = -I./ -I./User/Libc -O2 -ffreestanding -Wall -Wextra -fno-exceptions -fno-rtti -nostdlib -nodefaultlibs -fno-stack-protector
 
 LINKER_FLAGS = -ffreestanding -nostdlib
 
+CPU_FILES = $(addprefix CPU/, CPU)
 GDT_FILES = $(addprefix GDT/, GDT TSS)
-INTERUPTS_FILES = $(addprefix Interrupts/, IDT PIC)
+INTERUPTS_FILES = $(addprefix Interrupts/, IDT PIC InterruptHandlers)
 MEMORY_FILES = $(addprefix Memory/, PhysicalMemoryManager PagingStructureEntry MemoryRegion PageDirectory PageTable MemoryPage VirtualMemoryManager KernelVirtualMemoryManager UserVirtualMemoryManager)
 VGA_FILES = $(addprefix VGA/, VGA)
-KERNEL_FILES = $(addprefix Kernel/, Kernel $(MEMORY_FILES) $(VGA_FILES) $(INTERUPTS_FILES) $(GDT_FILES))
+KERNEL_FILES = $(addprefix Kernel/, Kernel $(MEMORY_FILES) $(VGA_FILES) $(INTERUPTS_FILES) $(GDT_FILES) $(CPU_FILES))
 KERNEL_SRC = $(addsuffix .cpp, $(KERNEL_FILES))
 KERNEL_OBJ = $(addsuffix .o, $(KERNEL_FILES))
 

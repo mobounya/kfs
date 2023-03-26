@@ -20,8 +20,7 @@ namespace Interrupts
     // https://wiki.osdev.org/Segment_Selector
     void                    GateDescriptor32::set_segment_selector(uint16_t segment_selector)
     {
-        this->segment_selector = segment_selector << 3;
-        this->segment_selector = this->segment_selector & 0b000;
+        this->segment_selector = segment_selector;
     }
 
     uint16_t                GateDescriptor32::get_segment_selector(void) const
@@ -47,6 +46,17 @@ namespace Interrupts
         if (this->gate_type == GateType::TrapGate32)
             return GateType::TrapGate32;
         return GateType::Undefined;
+    }
+
+    GateDescriptor32        GateDescriptor32::create_gate_descriptor(uint32_t offset, uint16_t segment_selector, GateType gate_type, uint8_t DPL, bool present)
+    {
+        GateDescriptor32 descriptor;
+        descriptor.set_offset(offset);
+        descriptor.set_segment_selector(segment_selector);
+        descriptor.set_gate_type(gate_type);
+        descriptor.set_DPL(DPL);
+        descriptor.set_present(present);
+        return descriptor;
     }
 
     void                    GateDescriptor32::set_DPL(uint8_t DPL)

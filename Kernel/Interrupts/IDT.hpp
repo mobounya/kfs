@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#define IDT_SIZE 255
+#define IDT_SIZE 256
 
 namespace Interrupts
 {
@@ -14,7 +14,7 @@ namespace Interrupts
         InterruptGate16 = 0x6,
         TrapGate16 = 0x7,
         InterruptGate32 = 0xE,
-        TrapGate32 = 0xF,
+        TrapGate32 = 0xF
     };
 
     struct GateDescriptor32
@@ -30,17 +30,18 @@ namespace Interrupts
             uint32_t    offset_2 : 16;
 
         public:
-            void            set_offset(uint32_t offset);
-            uint32_t        get_offset(void) const;
-            void            set_segment_selector(uint16_t segment_selector);
-            uint16_t        get_segment_selector(void) const;
-            void            set_gate_type(GateType gate_type);
-            GateType        get_gate_type(void) const;
-            void            set_DPL(uint8_t DPL);
-            uint8_t         get_DPL(void) const;
-            void            set_present(bool present);
-            bool            is_present(void) const;
-    };
+            void                        set_offset(uint32_t offset);
+            uint32_t                    get_offset(void) const;
+            void                        set_segment_selector(uint16_t segment_selector);
+            uint16_t                    get_segment_selector(void) const;
+            void                        set_gate_type(GateType gate_type);
+            GateType                    get_gate_type(void) const;
+            void                        set_DPL(uint8_t DPL);
+            uint8_t                     get_DPL(void) const;
+            void                        set_present(bool present);
+            bool                        is_present(void) const;
+            static GateDescriptor32     create_gate_descriptor(uint32_t offset, uint16_t segment_selector, GateType gate_type, uint8_t DPL, bool present);
+    } __attribute__((packed));
 
     struct InterruptDescriptorTable32
     {
@@ -50,7 +51,7 @@ namespace Interrupts
         public:
             void                    insert_new_entry(const GateDescriptor32 &entry, size_t index);
             const GateDescriptor32  *get_entry(size_t index) const;
-    };
+    } __attribute__((packed));
 
     struct IDTDescriptor
     {

@@ -10,13 +10,35 @@
 #include <Kernel/Memory/MemoryPage.hpp>
 #include <Kernel/Memory/KernelVirtualMemoryManager.hpp>
 #include <Kernel/Memory/UserVirtualMemoryManager.hpp>
+#include <Kernel/Interrupts/IDT.hpp>
+#include <Kernel/Interrupts/PIC.hpp>
 #include <Kernel/GDT/GDT.hpp>
 #include <Kernel/GDT/TSS.hpp>
-
+#include <Kernel/CPU/CPU.hpp>
+#include <Kernel/Interrupts/PIC.hpp>
 #include <string.h>
 
 extern "C" {
-    multiboot_info *multiboot_info_ptr;
+    multiboot_info  *multiboot_info_ptr;
+    void            load_idt(void);
+    void            send_signal(void);
+    void            NMI_interrupt_as(void);
+    void            DB_fault_as(void);
+    void            UD_fault_as(void);
+    void            BP_trap_as(void);
+    void            NM_fault_as(void);
+    void            DF_abort_as(void);
+    void            TS_fault_as(void);
+    void            NP_fault_as(void);
+    void            SS_fault_as(void);
+    void            GP_fault_as(void);
+    void            PF_fault_as(void);
+    void            MF_fault_as(void);
+    void            AC_fault_as(void);
+    void            MC_fault_as(void);
+    void            XM_fault_as(void);
+    void            keyboard_handler_as(void);
+    void            default_handler_as(void);
 }
 
 void print_multiboot_info()
@@ -64,7 +86,7 @@ extern "C" void setup_gdt(void *stack_ptr)
     uint8_t access_byte = PRESENT_SEGMENT | CODE_DATA_SEGMENT | EXECUTABLE_SEGMENT | ALLOW_READ_ACCESS;
     uint8_t flags = GRANUALITY_FLAG | SEGMENT_32BIT_FLAG;
 
-    memset(gdt_table_ptr, 0x0, sizeof(Kernel::GDT_Table));
+    memset(gdt_table_ptr, 0xFF, sizeof(Kernel::GDT_Table));
 
     // NULL segment.
     gdt_table.insert_new_entry(Kernel::GDT::create_GDT_Descriptor(0x0, 0x0, 0x0, 0x0), gdt_size++);
@@ -81,58 +103,71 @@ extern "C" void setup_gdt(void *stack_ptr)
     gdt_table.insert_new_entry(Kernel::GDT::create_GDT_Descriptor(0x0, 0xfffff, access_byte, flags), gdt_size++);
 
     // Segment descriptor for user code.
-    access_byte = PRESENT_SEGMENT | DPL_USER | CODE_DATA_SEGMENT | EXECUTABLE_SEGMENT | ALLOW_READ_ACCESS;
-    gdt_table.insert_new_entry(Kernel::GDT::create_GDT_Descriptor(0x0, 0xfffff, access_byte, flags), gdt_size++);
+    // access_byte = PRESENT_SEGMENT | DPL_USER | CODE_DATA_SEGMENT | EXECUTABLE_SEGMENT | ALLOW_READ_ACCESS;
+    // gdt_table.insert_new_entry(Kernel::GDT::create_GDT_Descriptor(0x0, 0xfffff, access_byte, flags), gdt_size++);
 
-    // Segment descriptor for user data.
-    access_byte = PRESENT_SEGMENT | DPL_USER | CODE_DATA_SEGMENT | ALLOW_WRITE_ACCESS;
-    gdt_table.insert_new_entry(Kernel::GDT::create_GDT_Descriptor(0x0, 0xfffff, access_byte, flags), gdt_size++);
+    // // Segment descriptor for user data.
+    // access_byte = PRESENT_SEGMENT | DPL_USER | CODE_DATA_SEGMENT | ALLOW_WRITE_ACCESS;
+    // gdt_table.insert_new_entry(Kernel::GDT::create_GDT_Descriptor(0x0, 0xfffff, access_byte, flags), gdt_size++);
 
-    // Segment descriptor for user stack.
-    access_byte = PRESENT_SEGMENT | DPL_USER | CODE_DATA_SEGMENT | ALLOW_WRITE_ACCESS;
-    gdt_table.insert_new_entry(Kernel::GDT::create_GDT_Descriptor(0x0, 0xfffff, access_byte, flags), gdt_size++);
+    // // Segment descriptor for user stack.
+    // access_byte = PRESENT_SEGMENT | DPL_USER | CODE_DATA_SEGMENT | ALLOW_WRITE_ACCESS;
+    // gdt_table.insert_new_entry(Kernel::GDT::create_GDT_Descriptor(0x0, 0xfffff, access_byte, flags), gdt_size++);
+
 
     // Setup the tss.
-    memset(tss_ptr, 0x0, sizeof(Kernel::TSS));
-    tss_ptr->set_SS0(0x10);
-    tss_ptr->set_ESP0((uint32_t)stack_ptr);
-    tss_ptr->set_IOPB(sizeof(Kernel::TSS) - 4);
+    // memset(tss_ptr, 0x0, sizeof(Kernel::TSS));
+    // tss_ptr->set_SS0(0x10);
+    (void)stack_ptr;
+    // tss_ptr->set_ESP0((uint32_t)stack_ptr);
+    // tss_ptr->set_IOPB(sizeof(Kernel::TSS) - 4);
 
     // System segment descriptor for TSS.
-    access_byte = 0x89;
-    flags = 0x8;
+    // access_byte = 0x89;
+    // flags = 0x8;
     // https://wiki.osdev.org/Task_State_Segment
     // IOPB may get the value sizeof(TSS) (which is 104) if you don't plan to use this io-bitmap further (according to mystran in http://forum.osdev.org/viewtopic.php?t=13678)
-    gdt_table.insert_new_entry(Kernel::GDT::create_GDT_Descriptor((uint32_t)tss_ptr, sizeof(Kernel::TSS), access_byte, flags), gdt_size++);
+    // gdt_table.insert_new_entry(Kernel::GDT::create_GDT_Descriptor((uint32_t)tss_ptr, sizeof(Kernel::TSS), access_byte, flags), gdt_size++);
 
     *gdt_table_ptr = gdt_table;
 }
 
-extern "C" void kernel_main(void *kernel_page_tables, void *user_page_tables, void *interrupt_descriptor_table_ptr, void *idt_descriptor_ptr)
+extern "C" void do_something(uint8_t x)
 {
     VGA::TEXT_MODE                          &vga = VGA::TEXT_MODE::instantiate();
-    Memory::PhysicalMemoryManager           &memory_manager = Memory::PhysicalMemoryManager::instantiate();
-    Memory::KernelVirtualMemoryManager      kernel_vm(kernel_page_tables);
-    Memory::UserVirtualMemoryManager        user_vm(user_page_tables);
-    uint32_t                                mmap_length = multiboot_info_ptr->mmap_length;
-    multiboot_mmap                          *mmap_addr = multiboot_info_ptr->mmap_addr;
-    uint32_t                                mmap_structure_size;
+    vga.write_string("Here ", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::GREEN, VGA::BLINK::FALSE);
+    vga.write_string(itoa(x), VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::GREEN, VGA::BLINK::FALSE);
+    vga.write_string("\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::GREEN, VGA::BLINK::FALSE);
+}
+
+extern "C" void kernel_main(void *kernel_page_tables, void *user_page_tables, void *interrupt_descriptor_table_ptr, void *idt_descriptor_ptr)
+{
+    // Memory::PhysicalMemoryManager           &memory_manager = Memory::PhysicalMemoryManager::instantiate();
+    // Memory::KernelVirtualMemoryManager      kernel_vm(kernel_page_tables);
+    // Memory::UserVirtualMemoryManager        user_vm(user_page_tables);
+    // uint32_t                                mmap_length = multiboot_info_ptr->mmap_length;
+    // multiboot_mmap                          *mmap_addr = multiboot_info_ptr->mmap_addr;
+    // uint32_t                                mmap_structure_size;
+
+    VGA::TEXT_MODE                          &vga = VGA::TEXT_MODE::instantiate();
+    Interrupts::InterruptDescriptorTable    *interrupt_descriptor_table = (Interrupts::InterruptDescriptorTable *)interrupt_descriptor_table_ptr;
+    Interrupts::IDTDescriptor               *idt_descriptor = (Interrupts::IDTDescriptor *)idt_descriptor_ptr;
 
     // Setup physical memory regions in the memory manager.
-    for (uint32_t i = 0; i < mmap_length; i += mmap_structure_size + 4)
-    {
-        // TODO: Deal with the other types of memory, maybe declare them to the memory manager as unusable.
-        // Only declare available memory to the memory manager.
-        if (mmap_addr->type == MULTIBOOT_MEMORY_AVAILABLE)
-        {
-            Memory::MemoryRegion physical_memory_region = Memory::MemoryRegion(mmap_addr->base_addr, mmap_addr->length, mmap_addr->type);
-            memory_manager.declare_memory_region(physical_memory_region);
-        }
+    // for (uint32_t i = 0; i < mmap_length; i += mmap_structure_size + 4)
+    // {
+    //     // TODO: Deal with the other types of memory, maybe declare them to the memory manager as unusable.
+    //     // Only declare available memory to the memory manager.
+    //     if (mmap_addr->type == MULTIBOOT_MEMORY_AVAILABLE)
+    //     {
+    //         Memory::MemoryRegion physical_memory_region = Memory::MemoryRegion(mmap_addr->base_addr, mmap_addr->length, mmap_addr->type);
+    //         memory_manager.declare_memory_region(physical_memory_region);
+    //     }
 
-        // Move to the next map buffer, [mmap_addr->size] is the size of the map buffer without [size] itself so we add 4 bytes at the end.
-        mmap_structure_size = mmap_addr->size;
-        mmap_addr = (multiboot_mmap *)(((uint8_t *)(mmap_addr)) + mmap_structure_size + 4);
-    }
+    //     // Move to the next map buffer, [mmap_addr->size] is the size of the map buffer without [size] itself so we add 4 bytes at the end.
+    //     mmap_structure_size = mmap_addr->size;
+    //     mmap_addr = (multiboot_mmap *)(((uint8_t *)(mmap_addr)) + mmap_structure_size + 4);
+    // }
 
     /*
         Physical Memory Mapping:
@@ -155,5 +190,72 @@ extern "C" void kernel_main(void *kernel_page_tables, void *user_page_tables, vo
     // Disable first page so de-refrencing a NULL ptr would not work.
     // kernel_vm.disable_page(0x0, PAGE_SIZE);
 
-    vga.write_string("Kernel Done !\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::GREEN, VGA::BLINK::FALSE);
+    Interrupts::PIC::PIC_remap(0x20, 0x28);
+
+    Interrupts::PIC::mask_all();
+
+    Interrupts::GateDescriptor descriptor = Interrupts::GateDescriptor::create_gate_descriptor((uint32_t)DB_fault_as, 0x8, Interrupts::GateType::InterruptGate32, 0x0, true);
+    interrupt_descriptor_table->insert_new_entry(descriptor, 1);
+
+    descriptor = Interrupts::GateDescriptor::create_gate_descriptor((uint32_t)NMI_interrupt_as, 0x8, Interrupts::GateType::InterruptGate32, 0x0, true);
+    interrupt_descriptor_table->insert_new_entry(descriptor, 2);
+
+    descriptor = Interrupts::GateDescriptor::create_gate_descriptor((uint32_t)BP_trap_as, 0x8, Interrupts::GateType::InterruptGate32, 0x0, true);
+    interrupt_descriptor_table->insert_new_entry(descriptor, 3);
+
+    descriptor = Interrupts::GateDescriptor::create_gate_descriptor((uint32_t)UD_fault_as, 0x8, Interrupts::GateType::InterruptGate32, 0x0, true);
+    interrupt_descriptor_table->insert_new_entry(descriptor, 6);
+
+    descriptor = Interrupts::GateDescriptor::create_gate_descriptor((uint32_t)NM_fault_as, 0x8, Interrupts::GateType::InterruptGate32, 0x0, true);
+    interrupt_descriptor_table->insert_new_entry(descriptor, 7);
+
+    descriptor = Interrupts::GateDescriptor::create_gate_descriptor((uint32_t)DF_abort_as, 0x8, Interrupts::GateType::InterruptGate32, 0x0, true);
+    interrupt_descriptor_table->insert_new_entry(descriptor, 8);
+
+    descriptor = Interrupts::GateDescriptor::create_gate_descriptor((uint32_t)TS_fault_as, 0x8, Interrupts::GateType::InterruptGate32, 0x0, true);
+    interrupt_descriptor_table->insert_new_entry(descriptor, 10);
+
+    descriptor = Interrupts::GateDescriptor::create_gate_descriptor((uint32_t)NP_fault_as, 0x8, Interrupts::GateType::InterruptGate32, 0x0, true);
+    interrupt_descriptor_table->insert_new_entry(descriptor, 11);
+
+    descriptor = Interrupts::GateDescriptor::create_gate_descriptor((uint32_t)SS_fault_as, 0x8, Interrupts::GateType::InterruptGate32, 0x0, true);
+    interrupt_descriptor_table->insert_new_entry(descriptor, 12);
+
+    descriptor = Interrupts::GateDescriptor::create_gate_descriptor((uint32_t)GP_fault_as, 0x8, Interrupts::GateType::TrapGate32, 0x0, true);
+    interrupt_descriptor_table->insert_new_entry(descriptor, 13);
+
+    descriptor = Interrupts::GateDescriptor::create_gate_descriptor((uint32_t)PF_fault_as, 0x8, Interrupts::GateType::InterruptGate32, 0x0, true);
+    interrupt_descriptor_table->insert_new_entry(descriptor, 14);
+
+    descriptor = Interrupts::GateDescriptor::create_gate_descriptor((uint32_t)MF_fault_as, 0x8, Interrupts::GateType::InterruptGate32, 0x0, true);
+    interrupt_descriptor_table->insert_new_entry(descriptor, 16);
+
+    descriptor = Interrupts::GateDescriptor::create_gate_descriptor((uint32_t)AC_fault_as, 0x8, Interrupts::GateType::InterruptGate32, 0x0, true);
+    interrupt_descriptor_table->insert_new_entry(descriptor, 17);
+
+    descriptor = Interrupts::GateDescriptor::create_gate_descriptor((uint32_t)MC_fault_as, 0x8, Interrupts::GateType::InterruptGate32, 0x0, true);
+    interrupt_descriptor_table->insert_new_entry(descriptor, 18);
+
+    descriptor = Interrupts::GateDescriptor::create_gate_descriptor((uint32_t)XM_fault_as, 0x8, Interrupts::GateType::InterruptGate32, 0x0, true);
+    interrupt_descriptor_table->insert_new_entry(descriptor, 19);
+
+    descriptor = Interrupts::GateDescriptor::create_gate_descriptor((uint32_t)default_handler_as, 0x8, Interrupts::GateType::InterruptGate32, 0x0, true);
+    interrupt_descriptor_table->insert_new_entry(descriptor, 0x35);
+
+    descriptor = Interrupts::GateDescriptor::create_gate_descriptor((uint32_t)keyboard_handler_as, 0x8, Interrupts::GateType::InterruptGate32, 0x0, true);
+    interrupt_descriptor_table->insert_new_entry(descriptor, 0x20 + 1);
+
+    idt_descriptor->set_address((uint32_t)interrupt_descriptor_table_ptr);
+    idt_descriptor->set_size(sizeof(Interrupts::InterruptDescriptorTable) - 1);
+
+    // Keybaord IRQ
+    Interrupts::PIC::IRQ_clear_mask(1);
+    // cascade IRQ
+    // Interrupts::PIC::IRQ_clear_mask(2);
+
+    load_idt();
+
+    Interrupts::PIC::enable();
+
+    vga.write_string("Kernel done !\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::GREEN, VGA::BLINK::FALSE);
 }

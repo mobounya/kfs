@@ -29,4 +29,9 @@ SECTIONS
 	{
 		*(.page_tables)
 	}
+
+	.interrupt_descriptor_table :
+	{
+		*(.interrupt_descriptor_table)
+	}
 }
