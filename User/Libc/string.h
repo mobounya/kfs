@@ -11,7 +11,7 @@ extern "C" {
 size_t          strlen(const char *str);
 int             strcmp(const char *s1, const char *s2);
 void            *memcpy(void *dst, const void *src, size_t n);
-char			*itoa(uint64_t nbr);
+char			*itoa(int n);
 void            *memset(void *s, int c, size_t n);
 
 #ifdef __cplusplus

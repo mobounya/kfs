@@ -34,4 +34,9 @@ SECTIONS
 	{
 		*(.interrupt_descriptor_table)
 	}
+
+	.reserved_kernel_memory :
+	{
+		*(.reserved_kernel_memory)
+	}
 }

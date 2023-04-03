@@ -16,6 +16,7 @@
 #include <Kernel/GDT/TSS.hpp>
 #include <Kernel/CPU/CPU.hpp>
 #include <Kernel/Interrupts/PIC.hpp>
+#include <Kernel/Memory/QuickDirtyMalloc.hpp>
 #include <string.h>
 
 extern "C" {
@@ -256,6 +257,9 @@ extern "C" void kernel_main(void *kernel_page_tables, void *user_page_tables, vo
     load_idt();
 
     Interrupts::PIC::enable();
+
+    void *ptr1 = quick_dirty_kmalloc(LARGE_AREA_SIZE - 1);
+    quick_dirty_kfree(ptr1);
 
     vga.write_string("Kernel done !\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::GREEN, VGA::BLINK::FALSE);
 }

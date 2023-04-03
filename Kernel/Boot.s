@@ -38,6 +38,12 @@ interrupt_descriptor_table_ptr:
 idt_descriptor_ptr:
 .skip 6
 
+.section .reserved_kernel_memory, "aw", @nobits
+reserved_kernel_memory_start:
+.skip 1024 * 10 # 10 KiB
+reserved_kernel_memory_end:
+
+
 .section .text
 .global _start
 .global load_idt
@@ -66,8 +72,13 @@ idt_descriptor_ptr:
 .extern multiboot_info_ptr
 .type multiboot_info_ptr, @object
 
+.extern kernel_memory_ptr
+.type kernel_memory_ptr, @object
+
 _start:
     cli
+    mov $reserved_kernel_memory_start, %esp
+    mov %esp, kernel_memory_ptr
     mov $stack_top, %esp
     push $stack_top
     call setup_gdt
