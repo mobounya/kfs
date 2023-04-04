@@ -19,6 +19,8 @@
 #include <Kernel/Memory/QuickDirtyMalloc.hpp>
 #include <string.h>
 
+#include <Kernel/Klibcpp/array.hpp>
+
 extern "C" {
     multiboot_info  *multiboot_info_ptr;
     void            load_idt(void);
