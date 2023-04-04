@@ -78,16 +78,16 @@ void print_multiboot_info()
 
 extern "C" void setup_gdt(void *stack_ptr)
 {
-    Kernel::GDT_Table   *gdt_table_ptr = (Kernel::GDT_Table *)0x00000800;
+    Kernel::GDT_Table   *gdt_table_ptr = (Kernel::GDT_Table *)0x1000;
     // Store the tss right after the GDT.
-    Kernel::TSS         *tss_ptr = (Kernel::TSS *)(((Kernel::GDT_Table *)0x00000800) + 1);
+    Kernel::TSS         *tss_ptr = (Kernel::TSS *)(((Kernel::GDT_Table *)0x1000) + 1);
     Kernel::GDT_Table gdt_table;
 
     size_t  gdt_size = 0;
     uint8_t access_byte = PRESENT_SEGMENT | CODE_DATA_SEGMENT | EXECUTABLE_SEGMENT | ALLOW_READ_ACCESS;
     uint8_t flags = GRANUALITY_FLAG | SEGMENT_32BIT_FLAG;
 
-    memset(gdt_table_ptr, 0xFF, sizeof(Kernel::GDT_Table));
+    memset(gdt_table_ptr, 0x00, sizeof(Kernel::GDT_Table));
 
     // NULL segment.
     gdt_table.insert_new_entry(Kernel::GDT::create_GDT_Descriptor(0x0, 0x0, 0x0, 0x0), gdt_size++);
@@ -141,34 +141,32 @@ extern "C" void do_something(uint8_t x)
     vga.write_string("\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::GREEN, VGA::BLINK::FALSE);
 }
 
-extern "C" void kernel_main(void *kernel_page_tables, void *user_page_tables, void *interrupt_descriptor_table_ptr, void *idt_descriptor_ptr)
+extern "C" void kernel_main(void *kernel_page_tables, void *interrupt_descriptor_table_ptr, void *idt_descriptor_ptr)
 {
-    // Memory::PhysicalMemoryManager           &memory_manager = Memory::PhysicalMemoryManager::instantiate();
-    // Memory::KernelVirtualMemoryManager      kernel_vm(kernel_page_tables);
-    // Memory::UserVirtualMemoryManager        user_vm(user_page_tables);
-    // uint32_t                                mmap_length = multiboot_info_ptr->mmap_length;
-    // multiboot_mmap                          *mmap_addr = multiboot_info_ptr->mmap_addr;
-    // uint32_t                                mmap_structure_size;
-
-    VGA::TEXT_MODE                          &vga = VGA::TEXT_MODE::instantiate();
+    Memory::PhysicalMemoryManager           &memory_manager = Memory::PhysicalMemoryManager::instantiate();
+    Memory::KernelVirtualMemoryManager      kernel_vm(kernel_page_tables);
+    uint32_t                                mmap_length = multiboot_info_ptr->mmap_length;
+    multiboot_mmap                          *mmap_addr = multiboot_info_ptr->mmap_addr;
+    uint32_t                                mmap_structure_size;
     Interrupts::InterruptDescriptorTable    *interrupt_descriptor_table = (Interrupts::InterruptDescriptorTable *)interrupt_descriptor_table_ptr;
     Interrupts::IDTDescriptor               *idt_descriptor = (Interrupts::IDTDescriptor *)idt_descriptor_ptr;
+    VGA::TEXT_MODE                          &vga = VGA::TEXT_MODE::instantiate();
 
     // Setup physical memory regions in the memory manager.
-    // for (uint32_t i = 0; i < mmap_length; i += mmap_structure_size + 4)
-    // {
-    //     // TODO: Deal with the other types of memory, maybe declare them to the memory manager as unusable.
-    //     // Only declare available memory to the memory manager.
-    //     if (mmap_addr->type == MULTIBOOT_MEMORY_AVAILABLE)
-    //     {
-    //         Memory::MemoryRegion physical_memory_region = Memory::MemoryRegion(mmap_addr->base_addr, mmap_addr->length, mmap_addr->type);
-    //         memory_manager.declare_memory_region(physical_memory_region);
-    //     }
+    for (uint32_t i = 0; i < mmap_length; i += mmap_structure_size + 4)
+    {
+        // TODO: Deal with the other types of memory, maybe declare them to the memory manager as unusable.
+        // Only declare available memory to the memory manager.
+        if (mmap_addr->type == MULTIBOOT_MEMORY_AVAILABLE)
+        {
+            Memory::MemoryRegion physical_memory_region = Memory::MemoryRegion(mmap_addr->base_addr, mmap_addr->length, mmap_addr->type);
+            memory_manager.declare_memory_region(physical_memory_region);
+        }
 
-    //     // Move to the next map buffer, [mmap_addr->size] is the size of the map buffer without [size] itself so we add 4 bytes at the end.
-    //     mmap_structure_size = mmap_addr->size;
-    //     mmap_addr = (multiboot_mmap *)(((uint8_t *)(mmap_addr)) + mmap_structure_size + 4);
-    // }
+        // Move to the next map buffer, [mmap_addr->size] is the size of the map buffer without [size] itself so we add 4 bytes at the end.
+        mmap_structure_size = mmap_addr->size;
+        mmap_addr = (multiboot_mmap *)(((uint8_t *)(mmap_addr)) + mmap_structure_size + 4);
+    }
 
     /*
         Physical Memory Mapping:
@@ -179,14 +177,12 @@ extern "C" void kernel_main(void *kernel_page_tables, void *user_page_tables, vo
     */
 
     // Identity map the first 1 Mib (Mebibyte), 0x0 --> 0x100000
-    // kernel_vm.identity_map_memory(0x0, 0x100000);
+    kernel_vm.identity_map_memory(0x0, 0x100000);
 
     // Identity map the Kernel image, 0x100000 --> 0x400000
-    // kernel_vm.identity_map_memory(0x100000, 0x400000);
+    kernel_vm.identity_map_memory(0x100000, 0x400000);
 
-    // kernel_vm.load_page_directory();
-
-    // memory_manager.enable_paging();
+    kernel_vm.load_page_directory();
 
     // Disable first page so de-refrencing a NULL ptr would not work.
     // kernel_vm.disable_page(0x0, PAGE_SIZE);
@@ -258,8 +254,7 @@ extern "C" void kernel_main(void *kernel_page_tables, void *user_page_tables, vo
 
     Interrupts::PIC::enable();
 
-    void *ptr1 = quick_dirty_kmalloc(LARGE_AREA_SIZE - 1);
-    quick_dirty_kfree(ptr1);
+    memory_manager.enable_paging();
 
     vga.write_string("Kernel done !\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::GREEN, VGA::BLINK::FALSE);
 }

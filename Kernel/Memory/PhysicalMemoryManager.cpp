@@ -19,6 +19,14 @@ namespace Memory
 
     PhysicalMemoryManager::PhysicalMemoryManager()
     {
+        /*
+            Physical Memory Mapping:
+                - 0x0      --> 0x100000  : 1 Mib, reserved for special usage.
+                - 0x100000 --> 0x400000  : 3 Mib, Kernel image (?? I don't know the size of the kernel image).
+                - 0x400000 --> 0x800000  : 4 Mib, Available for allocation for the Kernel.
+                - 0x800000 --> 0x1000000 : 8 Mib, Available for allocation for user space programs. 
+        */
+
         kernel_space = PhysicalMemoryManager::MemoryPool(0x400000, 0x800000);
         user_space = PhysicalMemoryManager::MemoryPool(0x800000, 0x1000000);
     }

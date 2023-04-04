@@ -28,8 +28,6 @@ stack_top:
 .align 4096
 kernel_page_tables:
 .skip (4096 * 5)
-user_page_tables:
-.skip (4096 * 5)
 
 .section .interrupt_descriptor_table, "aw", @nobits
 .align 8
@@ -42,7 +40,6 @@ idt_descriptor_ptr:
 reserved_kernel_memory_start:
 .skip 1024 * 10 # 10 KiB
 reserved_kernel_memory_end:
-
 
 .section .text
 .global _start
@@ -95,7 +92,6 @@ call_kernel:
     mov $stack_top, %esp # esp now will point to the top of the stack.
     push $idt_descriptor_ptr
     push $interrupt_descriptor_table_ptr
-    push $user_page_tables
     push $kernel_page_tables
     call kernel_main
 1:	hlt
@@ -223,6 +219,7 @@ DF_abort_as:
     pop %ecx
     pop %ebx
     pop %eax
+    add $4, %esp
     iret
 
 TS_fault_as:
@@ -243,6 +240,7 @@ TS_fault_as:
     pop %ecx
     pop %ebx
     pop %eax
+    add $4, %esp
     iret
 
 NP_fault_as:
@@ -263,6 +261,7 @@ NP_fault_as:
     pop %ecx
     pop %ebx
     pop %eax
+    add $4, %esp
     iret
 
 SS_fault_as:
@@ -283,6 +282,7 @@ SS_fault_as:
     pop %ecx
     pop %ebx
     pop %eax
+    add $4, %esp
     iret
 
 GP_fault_as:
@@ -324,6 +324,7 @@ PF_fault_as:
     pop %ecx
     pop %ebx
     pop %eax
+    add $4, %esp
     iret
 
 MF_fault_as:
@@ -364,6 +365,7 @@ AC_fault_as:
     pop %ecx
     pop %ebx
     pop %eax
+    add $4, %esp
     iret
 
 MC_fault_as:
@@ -456,4 +458,4 @@ send_signal:
 
 GDT_descriptor:
     .2byte  31
-    .4byte  0x00000800
+    .4byte  0x1000
