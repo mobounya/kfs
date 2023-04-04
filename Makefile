@@ -6,9 +6,9 @@ LINKER_SCRIPT = linker.ld
 
 TARGET = i686-elf
 
-LIBC = ./User/Libc/ft_libc.a
+LIBC = ./Kernel/Klibc/ft_libc.a
 
-COMPILER_FLAGS = -I./ -I./User/Libc -O2 -ffreestanding -Wall -Wextra -fno-exceptions -fno-rtti -nostdlib -nodefaultlibs -fno-stack-protector
+COMPILER_FLAGS = -I./ -I./Kernel/Klibcpp -I./Kernel/Klibc -O2 -ffreestanding -Wall -Wextra -fno-exceptions -fno-rtti -nostdlib -nodefaultlibs -fno-stack-protector
 
 LINKER_FLAGS = -ffreestanding -nostdlib
 
@@ -37,7 +37,7 @@ all : $(NAME)
 
 $(NAME) : $(ASM_OBJ) $(CPP_OBJ)
 	@echo "$(RED)Linking kernel and boot files...$(NC)"
-	@make -C ./User/Libc
+	@make -C ./Kernel/Klibc
 	@$(TARGET)-g++ -T $(LINKER_SCRIPT) $(LINKER_FLAGS) -o $@ $(ASM_OBJ) $(CPP_OBJ) $(LIBC) -lgcc
 	@echo "$(GREEN)Done linking kernel and boot files...$(NC)"
 
@@ -60,13 +60,13 @@ iso: grub.cfg all
 	@echo "$(GREEN)Done creating bootable iso file$(NC)"
 
 libc:
-	make -C ./User/Libc
+	make -C ./Kernel/Klibc
 
 libc-fclean:
-	make fclean -C ./User/Libc
+	make fclean -C ./Kernel/Klibc
 
 libc-clean:
-	make clean -C ./User/Libc
+	make clean -C ./Kernel/Klibc
 
 iso-clean:
 	rm -rf isodir/

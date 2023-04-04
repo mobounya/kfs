@@ -3,7 +3,7 @@
 #include <stdint.h>
 
 #include <Kernel/Memory/PagingStructureEntry.hpp>
-#include <User/c++/queue.hpp>
+#include <Kernel/Klibcpp/queue.hpp>
 #include <Kernel/Memory/MemoryRegion.hpp>
 #include <Kernel/Memory/PhysicalMemory.hpp>
 #include <Kernel/Memory/PageDirectory.hpp>
