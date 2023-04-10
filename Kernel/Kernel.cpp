@@ -251,12 +251,5 @@ extern "C" void kernel_main(void *kernel_page_tables, void *interrupt_descriptor
 
     memory_manager.enable_paging();
 
-    std::unordered_map<std::string, int> map;
-    map["amine"] = 24;
-    map["oussama"] = 16;
-
-    if (map.contains("a") == true)
-        vga.write_string("Contains a\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-    if (map.contains("oussama") == true)
-        vga.write_string("Contains oussama\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
+    vga.write_string("Kernel done\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
 }
