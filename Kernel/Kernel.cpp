@@ -17,11 +17,10 @@
 #include <Kernel/CPU/CPU.hpp>
 #include <Kernel/Interrupts/PIC.hpp>
 #include <Kernel/Memory/QuickDirtyMalloc.hpp>
+
 #include <string.hpp>
-
+#include <unordered_map.hpp>
 #include <cstring.h>
-
-#include <Kernel/Klibcpp/array.hpp>
 
 extern "C" {
     multiboot_info  *multiboot_info_ptr;
@@ -252,6 +251,12 @@ extern "C" void kernel_main(void *kernel_page_tables, void *interrupt_descriptor
 
     memory_manager.enable_paging();
 
-    std::string str1 = "Hello world !\n";
-    vga.write_string(str1, VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
+    std::unordered_map<std::string, int> map;
+    map["amine"] = 24;
+    map["oussama"] = 16;
+
+    if (map.contains("a") == true)
+        vga.write_string("Contains a\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
+    if (map.contains("oussama") == true)
+        vga.write_string("Contains oussama\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
 }

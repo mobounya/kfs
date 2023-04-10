@@ -76,6 +76,11 @@ namespace std
                 return *this;
             }
 
+            bool operator==(const string& str)
+            {
+                return equal(str);
+            }
+
         public:
             reference at(size_type pos)
             {
@@ -293,6 +298,11 @@ namespace std
                 while (i < size() && i < str.size() && m_data[i] == str[i])
                     i++;
                 return m_data[i] - str[i];
+            }
+
+            bool equal(const string& str) const
+            {
+                return (compare(str) == 0);
             }
 
             bool contains(value_type ch) const
