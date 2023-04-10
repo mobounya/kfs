@@ -1,5 +1,5 @@
 #include <Kernel/Memory/VirtualMemoryManager.hpp>
-#include <string.h>
+#include <cstring.h>
 
 namespace Memory
 {

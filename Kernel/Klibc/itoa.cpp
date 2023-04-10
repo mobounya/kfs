@@ -1,4 +1,4 @@
-#include <string.h>
+#include <cstring.h>
 
 static	void	strrev(char *str)
 {

@@ -1,6 +1,6 @@
 #include <Kernel/Memory/PhysicalMemoryManager.hpp>
 #include <Kernel/Multiboot/Multiboot.hpp>
-#include <string.h>
+#include <cstring.h>
 
 namespace Memory
 {

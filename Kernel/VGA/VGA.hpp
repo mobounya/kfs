@@ -3,6 +3,8 @@
 #include <stdint.h>
 #include <stddef.h>
 
+#include <string.hpp>
+
 #define VGA_WIDTH 80
 #define VGA_HEIGHT 25
 
@@ -75,6 +77,7 @@ class TEXT_MODE
     public:
         static TEXT_MODE &instantiate(void);
         void set_start(size_t y, size_t x);
+        void write_string(const std::string &str, BG_COLOR bg_color, FG_COLOR fg_color, bool blink);
         void write_string(const char *string, BG_COLOR bg_color, FG_COLOR fg_color, bool blink);
         vga_char create_char(vga_attribute attr, char ascii_char);
         vga_attribute set_foreground_color(vga_attribute attr, FG_COLOR color);

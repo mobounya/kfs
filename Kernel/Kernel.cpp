@@ -17,7 +17,9 @@
 #include <Kernel/CPU/CPU.hpp>
 #include <Kernel/Interrupts/PIC.hpp>
 #include <Kernel/Memory/QuickDirtyMalloc.hpp>
-#include <string.h>
+#include <string.hpp>
+
+#include <cstring.h>
 
 #include <Kernel/Klibcpp/array.hpp>
 
@@ -135,14 +137,6 @@ extern "C" void setup_gdt(void *stack_ptr)
     *gdt_table_ptr = gdt_table;
 }
 
-extern "C" void do_something(uint8_t x)
-{
-    VGA::TEXT_MODE                          &vga = VGA::TEXT_MODE::instantiate();
-    vga.write_string("Here ", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::GREEN, VGA::BLINK::FALSE);
-    vga.write_string(itoa(x), VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::GREEN, VGA::BLINK::FALSE);
-    vga.write_string("\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::GREEN, VGA::BLINK::FALSE);
-}
-
 extern "C" void kernel_main(void *kernel_page_tables, void *interrupt_descriptor_table_ptr, void *idt_descriptor_ptr)
 {
     Memory::PhysicalMemoryManager           &memory_manager = Memory::PhysicalMemoryManager::instantiate();
@@ -258,5 +252,6 @@ extern "C" void kernel_main(void *kernel_page_tables, void *interrupt_descriptor
 
     memory_manager.enable_paging();
 
-    vga.write_string("Kernel done !\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::GREEN, VGA::BLINK::FALSE);
+    std::string str1 = "Hello world !\n";
+    vga.write_string(str1, VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
 }

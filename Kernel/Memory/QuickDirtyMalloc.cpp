@@ -1,4 +1,5 @@
 #include <Kernel/Memory/QuickDirtyMalloc.hpp>
+#include <cstring.h>
 
 kmemory_area    small;
 kmemory_area    medium;
@@ -40,6 +41,22 @@ static void    init_kmemory(void)
     large.ptr = ((uint8_t *)kernel_memory_ptr) + (SMALL_AREA_SIZE * 100) + (MEDIUM_AREA_SIZE * 100);
 }
 
+/*
+    This will get you the actual allocated memory when you pass n to quick_dirty_kmalloc
+*/
+
+size_t  get_actual_allocated_size(size_t n)
+{
+    if (n < SMALL_AREA_SIZE)
+        return SMALL_AREA_SIZE - 1;
+    else if (n < MEDIUM_AREA_SIZE)
+        return MEDIUM_AREA_SIZE - 1;
+    else if (n < LARGE_AREA_SIZE)
+        return LARGE_AREA_SIZE - 1;
+    else
+        return 0;
+}
+
 void    *quick_dirty_kmalloc(size_t n)
 {
     static bool initialized = false;
@@ -57,6 +74,7 @@ void    *quick_dirty_kmalloc(size_t n)
         ptr = ((uint8_t *)small.ptr) + (unset_bit * SMALL_AREA_SIZE);
         *((uint8_t *)ptr) = SMALL_AREA_FLAG;
         ptr = ((uint8_t *)ptr) + 1;
+        memset(ptr, 0, SMALL_AREA_SIZE - 1);
         small.bitmap |= 1 << unset_bit;
         return ptr;
     }
@@ -66,6 +84,7 @@ void    *quick_dirty_kmalloc(size_t n)
         ptr = ((uint8_t *)medium.ptr) + (unset_bit * MEDIUM_AREA_SIZE);
         *((uint8_t*)ptr) = MEDIUM_AREA_FLAG;
         ptr = ((uint8_t*)ptr) + 1;
+        memset(ptr, 0, SMALL_AREA_SIZE - 1);
         medium.bitmap |= 1 << unset_bit;
         return ptr;
     }
@@ -75,6 +94,7 @@ void    *quick_dirty_kmalloc(size_t n)
         ptr = ((uint8_t *)large.ptr) + (unset_bit * LARGE_AREA_SIZE);
         *((uint8_t*)ptr) = LARGE_AREA_FLAG;
         ptr = ((uint8_t*)ptr) + 1;
+        memset(ptr, 0, SMALL_AREA_SIZE - 1);
         large.bitmap |= 1 << unset_bit;
         return ptr;
     }

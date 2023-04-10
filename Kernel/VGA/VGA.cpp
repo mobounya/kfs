@@ -1,5 +1,5 @@
 #include <Kernel/VGA/VGA.hpp>
-#include <string.h>
+#include <cstring.h>
 
 namespace VGA
 {
@@ -89,6 +89,11 @@ namespace VGA
             }
         }
         flush_buffer_to_screen();
+    }
+
+    void TEXT_MODE::write_string(const std::string &str, BG_COLOR bg_color, FG_COLOR fg_color, bool blink)
+    {
+        write_string(str.c_str(), bg_color, fg_color, blink);
     }
 
     vga_char TEXT_MODE::create_char(vga_attribute attr, char ascii_char)

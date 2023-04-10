@@ -1,6 +1,6 @@
 #include <Kernel/CPU/CPU.hpp>
 #include <Kernel/VGA/VGA.hpp>
-#include <string.h>
+#include <cstring.h>
 
 /*
     - Debug exception

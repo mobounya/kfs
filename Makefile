@@ -6,18 +6,18 @@ LINKER_SCRIPT = linker.ld
 
 TARGET = i686-elf
 
-LIBC = ./Kernel/Klibc/ft_libc.a
-
 COMPILER_FLAGS = -I./ -I./Kernel/Klibcpp -I./Kernel/Klibc -O2 -ffreestanding -Wall -Wextra -fno-exceptions -fno-rtti -nostdlib -nodefaultlibs -fno-stack-protector
 
 LINKER_FLAGS = -ffreestanding -nostdlib
 
+KLIBC = $(addprefix Klibc/, strcpy itoa memcpy strcmp strlen memset strndup strcat strdup)
 CPU_FILES = $(addprefix CPU/, CPU)
 GDT_FILES = $(addprefix GDT/, GDT TSS)
 INTERUPTS_FILES = $(addprefix Interrupts/, IDT PIC InterruptHandlers)
 MEMORY_FILES = $(addprefix Memory/, QuickDirtyMalloc PhysicalMemoryManager PagingStructureEntry MemoryRegion PageDirectory PageTable MemoryPage VirtualMemoryManager KernelVirtualMemoryManager UserVirtualMemoryManager)
 VGA_FILES = $(addprefix VGA/, VGA)
-KERNEL_FILES = $(addprefix Kernel/, Kernel $(MEMORY_FILES) $(VGA_FILES) $(INTERUPTS_FILES) $(GDT_FILES) $(CPU_FILES))
+KERNEL_FILES = $(addprefix Kernel/, Kernel $(MEMORY_FILES) $(VGA_FILES) $(INTERUPTS_FILES) $(GDT_FILES) $(CPU_FILES) $(KLIBC))
+
 KERNEL_SRC = $(addsuffix .cpp, $(KERNEL_FILES))
 KERNEL_OBJ = $(addsuffix .o, $(KERNEL_FILES))
 
@@ -37,8 +37,7 @@ all : $(NAME)
 
 $(NAME) : $(ASM_OBJ) $(CPP_OBJ)
 	@echo "$(RED)Linking kernel and boot files...$(NC)"
-	@make -C ./Kernel/Klibc
-	@$(TARGET)-g++ -T $(LINKER_SCRIPT) $(LINKER_FLAGS) -o $@ $(ASM_OBJ) $(CPP_OBJ) $(LIBC) -lgcc
+	@$(TARGET)-g++ -T $(LINKER_SCRIPT) $(LINKER_FLAGS) -o $@ $(ASM_OBJ) $(CPP_OBJ) -lgcc
 	@echo "$(GREEN)Done linking kernel and boot files...$(NC)"
 
 $(ASM_OBJ) : $(ASM_SRC)
@@ -58,15 +57,6 @@ iso: grub.cfg all
 	@cp grub.cfg isodir/boot/grub/grub.cfg
 	@grub-mkrescue --compress=xz -o $(ISO) isodir
 	@echo "$(GREEN)Done creating bootable iso file$(NC)"
-
-libc:
-	make -C ./Kernel/Klibc
-
-libc-fclean:
-	make fclean -C ./Kernel/Klibc
-
-libc-clean:
-	make clean -C ./Kernel/Klibc
 
 iso-clean:
 	rm -rf isodir/

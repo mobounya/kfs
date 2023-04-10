@@ -17,5 +17,6 @@ struct kmemory_area
     void        *ptr;
 };
 
+size_t  get_actual_allocated_size(size_t n);
 void    quick_dirty_kfree(const void *ptr);
 void    *quick_dirty_kmalloc(size_t n);
