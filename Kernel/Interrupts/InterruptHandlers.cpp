@@ -1,5 +1,7 @@
 #include <Kernel/CPU/CPU.hpp>
 #include <Kernel/VGA/VGA.hpp>
+#include <Kernel/Devices/Keyboard.hpp>
+
 #include <cstring.h>
 
 /*
@@ -184,11 +186,17 @@ extern "C" void XM_fault(void)
 
 extern "C" void keyboard_handler(void)
 {
-    unsigned char scan_code = CPU::inb(0x60);
-    VGA::TEXT_MODE                          &vga = VGA::TEXT_MODE::instantiate();
-    vga.write_string("Keyboard Interrupt: ", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::YELLOW, VGA::BLINK::FALSE);
-    vga.write_string(itoa(scan_code), VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::YELLOW, VGA::BLINK::FALSE);
-    vga.write_string("\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::YELLOW, VGA::BLINK::FALSE);
+    char str[2] = { '\0' };
+    VGA::TEXT_MODE  &vga = VGA::TEXT_MODE::instantiate();
+    Keyboard    &keyboard_driver = Keyboard::instantiate();
+    int scan_code = keyboard_driver.scan_code();
+    if (keyboard_driver.is_special_key(scan_code) == true)
+        keyboard_driver.execute_key(scan_code);
+    else
+    {
+        str[0] = keyboard_driver.get_key_pressed(scan_code);
+        vga.write_string(str, VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::YELLOW, VGA::BLINK::FALSE);
+    }
     CPU::outb(0x20, 0x20);
 }
 
