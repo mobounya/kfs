@@ -1,5 +1,7 @@
 #include <Kernel/Memory/PhysicalMemoryManager.hpp>
 #include <Kernel/Multiboot/Multiboot.hpp>
+#include <Kernel/Display/Screen.hpp>
+
 #include <cstring.h>
 
 namespace Memory
@@ -226,119 +228,86 @@ namespace Memory
         }
     }
 
-    void    PhysicalMemoryManager::print_physical_memory_regions(VGA::TEXT_MODE &vga) const
+    void    PhysicalMemoryManager::print_physical_memory_regions(void) const
     {
+        Screen cout;
+
         for (uint32_t i = 0; i < physical_memory.size(); i++)
         {
-            vga.write_string("-------- ");
-            vga.write_string("Available region #");
-            vga.write_string(itoa(i));
-            vga.write_string(" --------\n");
-            vga.write_string("Base address: ");
-            vga.write_string(itoa(physical_memory[i].get_base_addr()));
-            vga.write_string("\n");
-            vga.write_string("Length: ");
-            vga.write_string(itoa(physical_memory[i].get_length()));
-            vga.write_string("\n\n");
+            cout << "-------- Available region #" << i << " --------\n";
+            cout << "Base address: " << physical_memory[i].get_base_addr() << "\n";
+            cout << "Length: " << physical_memory[i].get_length() << "\n\n";
         }
     }
 
-    void    PhysicalMemoryManager::print_kallocated_memory_pages(VGA::TEXT_MODE &vga, uint8_t max) const
+    void    PhysicalMemoryManager::print_kallocated_memory_pages(uint8_t max) const
     {
+        Screen cout;
+
         if (kernel_allocated_memory_pages.size() == 0)
-        {
-            vga.write_string("No kernel allocated memory !\n");
-        }
+            cout << "No kernel allocated memory !" << "\n";
         else
         {
             max = (max == 0) ? kernel_allocated_memory_pages.size() : max;
             for (uint32_t i = 0; i < max && i < kernel_allocated_memory_pages.size(); i++)
             {
-                vga.write_string("-------- ");
-                vga.write_string("Allocated page #");
-                vga.write_string(itoa(i));
-                vga.write_string(" (Kernel) --------\n");
-                vga.write_string("Base address: ");
-                vga.write_string(itoa(kernel_allocated_memory_pages[i].get_base_addr()));
-                vga.write_string("\n");
-                vga.write_string("Length: ");
-                vga.write_string(itoa(kernel_allocated_memory_pages[i].get_length()));
-                vga.write_string("\n\n");
+                cout << "-------- " << "Allocated page #" << i << " (Kernel) --------" << "\n";
+                cout << "Base address: " << kernel_allocated_memory_pages[i].get_base_addr() << "\n";
+                cout << "Length: " << kernel_allocated_memory_pages[i].get_length() << "\n\n";
             }
         }
     }
 
-    void    PhysicalMemoryManager::print_uallocated_memory_pages(VGA::TEXT_MODE &vga, uint8_t max) const
+    void    PhysicalMemoryManager::print_uallocated_memory_pages(uint8_t max) const
     {
+        Screen cout;
+
         if (user_allocated_memory_pages.size() == 0)
-        {
-            vga.write_string("No user allocated memory !\n");
-        }
+            cout << "No user allocated memory !" << "\n";
         else
         {
             max = (max == 0) ? user_allocated_memory_pages.size() : max;
             for (uint32_t i = 0; i < max && i < user_allocated_memory_pages.size(); i++)
             {
-                vga.write_string("-------- ");
-                vga.write_string("Allocated page #");
-                vga.write_string(itoa(i));
-                vga.write_string(" (User) --------\n");
-                vga.write_string("Base address: ");
-                vga.write_string(itoa(user_allocated_memory_pages[i].get_base_addr()));
-                vga.write_string("\n");
-                vga.write_string("Length: ");
-                vga.write_string(itoa(user_allocated_memory_pages[i].get_length()));
-                vga.write_string("\n\n");
+                cout << "-------- Allocated page #" << i << " (User) --------" << "\n";
+                cout << "Base address: " << user_allocated_memory_pages[i].get_base_addr() << "\n";
+                cout << "Length: " << user_allocated_memory_pages[i].get_length() << "\n\n";
             }
         }
     }
 
-    void    PhysicalMemoryManager::print_kfree_memory_pages(VGA::TEXT_MODE &vga, uint8_t max) const
+    void    PhysicalMemoryManager::print_kfree_memory_pages(uint8_t max) const
     {
+        Screen cout;
+
         if (kernel_free_memory_pages.size() == 0)
-        {
-             vga.write_string("No kernel free pages available !\n");
-        }
+            cout << "No kernel free pages available !" << "\n";
         else
         {
             max = (max == 0) ? kernel_free_memory_pages.size() : max;
             for (uint32_t i = 0; i < max && i < kernel_free_memory_pages.size(); i++)
             {
-                vga.write_string("-------- ");
-                vga.write_string("Free page #");
-                vga.write_string(itoa(i));
-                vga.write_string(" (Kernel) --------\n");
-                vga.write_string("Base address: ");
-                vga.write_string(itoa(kernel_free_memory_pages[i].get_base_addr()));
-                vga.write_string("\n");
-                vga.write_string("Length: ");
-                vga.write_string(itoa(kernel_free_memory_pages[i].get_length()));
-                vga.write_string("\n\n");
+                cout << "-------- " << "Free page #" << i << " (Kernel) --------" << "\n";
+                cout << "Base address: " << kernel_free_memory_pages[i].get_base_addr() << "\n";
+                cout << "Length: " << kernel_free_memory_pages[i].get_length() << "\n\n";
             }
         }
     }
 
-    void    PhysicalMemoryManager::print_ufree_memory_pages(VGA::TEXT_MODE &vga, uint8_t max) const
+    void    PhysicalMemoryManager::print_ufree_memory_pages(uint8_t max) const
     {
+        Screen cout;
+
         if (user_free_memory_pages.size() == 0)
-        {
-             vga.write_string("No User free pages available !\n");
-        }
+            cout << "No User free pages available !" << "\n";
         else
         {
             max = (max == 0) ? user_free_memory_pages.size() : max;
             for (uint32_t i = 0; i < max && i < user_free_memory_pages.size(); i++)
             {
-                vga.write_string("-------- ");
-                vga.write_string("Free page #");
-                vga.write_string(itoa(i));
-                vga.write_string(" (User) --------\n");
-                vga.write_string("Base address: ");
-                vga.write_string(itoa(user_free_memory_pages[i].get_base_addr()));
-                vga.write_string("\n");
-                vga.write_string("Length: ");
-                vga.write_string(itoa(user_free_memory_pages[i].get_length()));
-                vga.write_string("\n\n");
+                cout << "-------- Free page #" << i << " (User) --------" << "\n";
+                cout << "Base address: " << user_free_memory_pages[i].get_base_addr() << "\n";
+                cout << "Length: " << user_free_memory_pages[i].get_length() << "\n\n";
             }
         }
     }

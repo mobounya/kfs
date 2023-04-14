@@ -8,7 +8,6 @@
 #include <Kernel/Memory/PageDirectory.hpp>
 #include <Kernel/Memory/PageTable.hpp>
 #include <Kernel/Memory/MemoryPage.hpp>
-#include <Kernel/VGA/VGA.hpp>
 
 namespace Memory
 {
@@ -42,11 +41,11 @@ namespace Memory
             static uint64_t                     find_aligned_address(uint64_t address, uint64_t alignment);
             void                                reserve_physical_memory(uint64_t physical_address_start, uint64_t physical_address_end);
             static MemoryRegion                 get_overlapping_memory_region(const MemoryRegion &region_1, const MemoryRegion &region_2);
-            void                                print_physical_memory_regions(VGA::TEXT_MODE &vga) const;
-            void                                print_kallocated_memory_pages(VGA::TEXT_MODE &vga, uint8_t max) const;
-            void                                print_uallocated_memory_pages(VGA::TEXT_MODE &vga, uint8_t max) const;
-            void                                print_kfree_memory_pages(VGA::TEXT_MODE &vga, uint8_t max) const;
-            void                                print_ufree_memory_pages(VGA::TEXT_MODE &vga, uint8_t max) const;
+            void                                print_physical_memory_regions(void) const;
+            void                                print_kallocated_memory_pages(uint8_t max) const;
+            void                                print_uallocated_memory_pages(uint8_t max) const;
+            void                                print_kfree_memory_pages(uint8_t max) const;
+            void                                print_ufree_memory_pages(uint8_t max) const;
 
         private:
             const MemoryPage                    *alloc(const MemoryPool &pool, PhysicalMemory<MemoryPage> &allocated_memory_pages, PhysicalMemory<MemoryPage> &free_memory_pages);

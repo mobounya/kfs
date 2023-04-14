@@ -1,4 +1,5 @@
 #include <Kernel/Memory/KernelVirtualMemoryManager.hpp>
+#include <Kernel/Display/Screen.hpp>
 #include <cstring.h>
 
 namespace Memory
@@ -25,7 +26,7 @@ namespace Memory
     // TODO: make kmalloc behave the same as kmalloc in the linux.
     void        *KernelVirtualMemoryManager::kmalloc(size_t len)
     {
-        VGA::TEXT_MODE &vga = VGA::TEXT_MODE::instantiate();
+        Screen cout;
         void *first_page_ptr = NULL;
 
         // We allocate by multiples of (PAGE_SIZE), so here we will round up (len) to the next multiple of (PAGE_SIZE).
@@ -39,7 +40,7 @@ namespace Memory
     
         if (page_directory.find_contiguous_free_pages(len / PAGE_SIZE, page_directory_index, page_table_index) == false)
         {
-            vga.write_string("KernelVirtualMemoryManager::kmalloc: failed to allocate virtual memory page.\n");
+            cout << "KernelVirtualMemoryManager::kmalloc: failed to allocate virtual memory page." << "\n";
             return NULL;
         }
 
@@ -48,14 +49,14 @@ namespace Memory
             const MemoryPage *page = memory_manager.kallocate_physical_memory_page();
             if (page == NULL)
             {
-                vga.write_string("KernelVirtualMemoryManager::kmalloc: failed to allocate physical memory page.\n");
+                cout << "KernelVirtualMemoryManager::kmalloc: failed to allocate physical memory page." << "\n";
                 return NULL;
             }
 
             PageDirectoryEntry *pde_entry = page_directory.page_directory[page_directory_index];
             if (pde_entry == NULL)
             {
-                vga.write_string("KernelVirtualMemoryManager::kmalloc: such page directory.\n");
+                cout << "KernelVirtualMemoryManager::kmalloc: such page directory." << "\n";
                 return NULL;
             }
             PageTable          *page_table = (PageTable *)(pde_entry->physical_address << 12);
@@ -75,11 +76,11 @@ namespace Memory
 
     int     KernelVirtualMemoryManager::kfree(void *addr, size_t len)
     {
-        VGA::TEXT_MODE &vga = VGA::TEXT_MODE::instantiate();
+        Screen cout;
 
         if (addr == NULL || PhysicalMemoryManager::find_aligned_address((uint64_t)addr, PAGE_SIZE) != (uint64_t)addr)
         {
-            vga.write_string("KernelVirtualMemoryManager::kfree: Virtual address is not page aligned\n");
+            cout << "KernelVirtualMemoryManager::kfree: Virtual address is not page aligned." << "\n";
             return -1;
         }
 

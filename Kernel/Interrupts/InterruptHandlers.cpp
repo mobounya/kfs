@@ -1,5 +1,5 @@
 #include <Kernel/CPU/CPU.hpp>
-#include <Kernel/VGA/VGA.hpp>
+#include <Kernel/Display/Screen.hpp>
 #include <Kernel/Devices/Keyboard.hpp>
 
 #include <cstring.h>
@@ -12,8 +12,8 @@
 */
 extern "C" void DB_fault(void)
 {
-    VGA::TEXT_MODE  &vga = VGA::TEXT_MODE::instantiate();
-    vga.write_string("Debug exception\n");
+    Screen cout;
+    cout << "Debug exception" << "\n";
 }
 
 /*
@@ -24,8 +24,8 @@ extern "C" void DB_fault(void)
 */
 extern "C" void NMI_interrupt(void)
 {
-    VGA::TEXT_MODE  &vga = VGA::TEXT_MODE::instantiate();
-    vga.write_string("None maskable interrupt\n");
+    Screen cout;
+    cout << "None maskable interrupt" << "\n";
 }
 
 /*
@@ -36,8 +36,8 @@ extern "C" void NMI_interrupt(void)
 */
 extern "C" void BP_trap(void)
 {
-    VGA::TEXT_MODE  &vga = VGA::TEXT_MODE::instantiate();
-    vga.write_string("Breakpoint trap\n");
+    Screen cout;
+    cout << "Breakpoint trap" << "\n";
 }
 
 /*
@@ -48,8 +48,8 @@ extern "C" void BP_trap(void)
 */
 extern "C" void UD_fault(void)
 {
-    VGA::TEXT_MODE  &vga = VGA::TEXT_MODE::instantiate();
-    vga.write_string("Invalid opcode\n");
+    Screen cout;
+    cout << "Invalid opcode" << "\n";
 }
 
 /*
@@ -60,8 +60,8 @@ extern "C" void UD_fault(void)
 */
 extern "C" void NM_fault(void)
 {
-    VGA::TEXT_MODE  &vga = VGA::TEXT_MODE::instantiate();
-    vga.write_string("Device not available\n");
+    Screen cout;
+    cout << "Device not available" << "\n";
 }
 
 /*
@@ -72,8 +72,8 @@ extern "C" void NM_fault(void)
 */
 extern "C" void DF_abort(void)
 {
-    VGA::TEXT_MODE  &vga = VGA::TEXT_MODE::instantiate();
-    vga.write_string("Double fault\n");
+    Screen cout;
+    cout << "Double fault" << "\n";
 }
 
 /*
@@ -84,8 +84,8 @@ extern "C" void DF_abort(void)
 */
 extern "C" void TS_fault(void)
 {
-    VGA::TEXT_MODE  &vga = VGA::TEXT_MODE::instantiate();
-    vga.write_string("Invalid TSS\n");
+    Screen cout;
+    cout << "Invalid TSS" << "\n";
 }
 
 /*
@@ -96,8 +96,8 @@ extern "C" void TS_fault(void)
 */
 extern "C" void NP_fault(void)
 {
-    VGA::TEXT_MODE                          &vga = VGA::TEXT_MODE::instantiate();
-    vga.write_string("Segment not present\n");
+    Screen cout;
+    cout << "Segment not present" << "\n";
 }
 
 /*
@@ -108,8 +108,8 @@ extern "C" void NP_fault(void)
 */
 extern "C" void SS_fault(void)
 {
-    VGA::TEXT_MODE                          &vga = VGA::TEXT_MODE::instantiate();
-    vga.write_string("Stack segment fault\n");
+    Screen cout;
+    cout << "Stack segment fault" << "\n";
 }
 
 /*
@@ -120,8 +120,8 @@ extern "C" void SS_fault(void)
 */
 extern "C" void GP_fault(void)
 {
-    VGA::TEXT_MODE                          &vga = VGA::TEXT_MODE::instantiate();
-    vga.write_string("General protection fault\n");
+    Screen cout;
+    cout << "General protection fault" << "\n";
 }
 
 /*
@@ -132,8 +132,8 @@ extern "C" void GP_fault(void)
 */
 extern "C" void PF_fault(void)
 {
-    VGA::TEXT_MODE                          &vga = VGA::TEXT_MODE::instantiate();
-    vga.write_string("Page fault\n");
+    Screen cout;
+    cout << "Page fault" << "\n";
 }
 
 /*
@@ -144,8 +144,8 @@ extern "C" void PF_fault(void)
 */
 extern "C" void MF_fault(void)
 {
-    VGA::TEXT_MODE                          &vga = VGA::TEXT_MODE::instantiate();
-    vga.write_string("x87 FPU Floating-point Error (Math fault)\n");
+    Screen cout;
+    cout << "x87 FPU Floating-point Error (Math fault)" << "\n";
 }
 
 /*
@@ -156,8 +156,8 @@ extern "C" void MF_fault(void)
 */
 extern "C" void AC_fault(void)
 {
-    VGA::TEXT_MODE                          &vga = VGA::TEXT_MODE::instantiate();
-    vga.write_string("Alignment check\n");
+    Screen cout;
+    cout << "Alignment check" << "\n";
 }
 
 /*
@@ -168,8 +168,8 @@ extern "C" void AC_fault(void)
 */
 extern "C" void MC_fault(void)
 {
-    VGA::TEXT_MODE                          &vga = VGA::TEXT_MODE::instantiate();
-    vga.write_string("Machine check\n");
+    Screen cout;
+    cout << "Machine check" << "\n";
 }
 
 /*
@@ -180,14 +180,14 @@ extern "C" void MC_fault(void)
 */
 extern "C" void XM_fault(void)
 {
-    VGA::TEXT_MODE                          &vga = VGA::TEXT_MODE::instantiate();
-    vga.write_string("SIMD Floating-point Error (Math fault)\n");
+    Screen cout;
+    cout << "SIMD Floating-point Error (Math fault)" << "\n";
 }
 
 extern "C" void keyboard_handler(void)
 {
+    Screen cout;
     char str[2] = { '\0' };
-    VGA::TEXT_MODE  &vga = VGA::TEXT_MODE::instantiate();
     Keyboard    &keyboard_driver = Keyboard::instantiate();
     int scan_code = keyboard_driver.scan_code();
     if (keyboard_driver.is_special_key(scan_code) == true)
@@ -195,25 +195,13 @@ extern "C" void keyboard_handler(void)
     else
     {
         str[0] = keyboard_driver.get_key_pressed(scan_code);
-        vga.write_string(str);
+        cout << str;
     }
     CPU::outb(0x20, 0x20);
 }
 
 extern "C" void default_handler(void)
 {
-    VGA::TEXT_MODE                          &vga = VGA::TEXT_MODE::instantiate();
-    vga.write_string("Called default handler\n");
-    // vga.write_string("ip: ", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-    // vga.write_string(itoa(frame->ip), VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-    // vga.write_string("\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-    // vga.write_string("cs: ", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-    // vga.write_string(itoa(frame->cs), VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-    // vga.write_string("\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-    // vga.write_string("sp: ", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-    // vga.write_string(itoa(frame->sp), VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-    // vga.write_string("\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-    // vga.write_string("ss: ", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-    // vga.write_string(itoa(frame->ss), VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-    // vga.write_string("\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
+    Screen cout;
+    cout << "Called default handler" << "\n";
 }

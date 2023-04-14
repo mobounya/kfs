@@ -4,7 +4,6 @@
 #include <Kernel/Memory/PagingStructureEntry.hpp>
 #include <Kernel/Memory/PhysicalMemoryManager.hpp>
 #include <Kernel/Multiboot/Multiboot.hpp>
-#include <Kernel/VGA/VGA.hpp>
 #include <Kernel/Memory/MemoryRegion.hpp>
 #include <Kernel/Memory/PagingStructureEntry.hpp>
 #include <Kernel/Memory/MemoryPage.hpp>
@@ -17,6 +16,7 @@
 #include <Kernel/CPU/CPU.hpp>
 #include <Kernel/Interrupts/PIC.hpp>
 #include <Kernel/Memory/QuickDirtyMalloc.hpp>
+#include <Kernel/Display/Screen.hpp>
 
 #include <string.hpp>
 #include <unordered_map.hpp>
@@ -47,36 +47,33 @@ extern "C" {
 
 void print_multiboot_info()
 {
-    VGA::TEXT_MODE &vga_interface = VGA::TEXT_MODE::instantiate();
-
+    Screen cout;
+    
     if (multiboot_info_ptr->flags & MULTIBOOT_BOOT_LOADER_NAME) {
-        vga_interface.write_string("Loaded by:\n");
-        vga_interface.write_string("- ");
-        vga_interface.write_string((char *)(multiboot_info_ptr->boot_loader_name));
-        vga_interface.write_string("\n");
+        cout << "Loaded by:\n -" << (char *)(multiboot_info_ptr->boot_loader_name) << "\n";
     }
     if (multiboot_info_ptr->flags & MULTIBOOT_MEMORY_INFO)
-        vga_interface.write_string("Memory info available\n");
+        cout << "Memory info available" << "\n";
     if (multiboot_info_ptr->flags & MULTIBOOT_BOOT_DEVICE)
-        vga_interface.write_string("Boot device info available\n");
+        cout << "Boot device info available" << "\n";
     if (multiboot_info_ptr->flags & MULTIBOOT_CMDLINE)
-        vga_interface.write_string("Command line info available\n");
+        cout << "Command line info available" << "\n";
     if (multiboot_info_ptr->flags & MULTIBOOT_MODS)
-        vga_interface.write_string("Boot modules info available\n");
+        cout << "Boot modules info available" << "\n";
     if (multiboot_info_ptr->flags & MULTIBOOT_SYMS)
-        vga_interface.write_string("SYMS info available\n");
+        cout << "SYMS info available" << "\n";
     if (multiboot_info_ptr->flags & MULTIBOOT_MEMORY_MAP)
-        vga_interface.write_string("Memory map info available\n");
+        cout << "Memory map info available" << "\n";
     if (multiboot_info_ptr->flags & MULTIBOOT_DRIVE)
-        vga_interface.write_string("Drives info available\n");
+        cout << "Drives info available" << "\n";
     if (multiboot_info_ptr->flags & MULTIBOOT_CONFIG_TABLE)
-        vga_interface.write_string("ROM configuration info available\n");
+        cout << "ROM configuration info available" << "\n";
     if (multiboot_info_ptr->flags & MULTIBOOT_APM_TABLE)
-        vga_interface.write_string("APM info available\n");
+        cout << "APM info available" << "\n";
     if (multiboot_info_ptr->flags & MULTIBOOT_VBE_TABLE)
-        vga_interface.write_string("VBE info available\n");
+        cout << "VBE info available" << "\n";
     if (multiboot_info_ptr->flags & MULTIBOOT_FRAMEBUFFER_TABLE)
-        vga_interface.write_string("FRAMEBUFFER info available\n");
+        cout << "VBE info available" << "\n";
 }
 
 extern "C" void setup_gdt(void *stack_ptr)
@@ -138,6 +135,7 @@ extern "C" void setup_gdt(void *stack_ptr)
 
 extern "C" void kernel_main(void *kernel_page_tables, void *interrupt_descriptor_table_ptr, void *idt_descriptor_ptr)
 {
+    Screen cout;
     Memory::PhysicalMemoryManager           &memory_manager = Memory::PhysicalMemoryManager::instantiate();
     Memory::KernelVirtualMemoryManager      kernel_vm(kernel_page_tables);
     uint32_t                                mmap_length = multiboot_info_ptr->mmap_length;
@@ -145,7 +143,6 @@ extern "C" void kernel_main(void *kernel_page_tables, void *interrupt_descriptor
     uint32_t                                mmap_structure_size;
     Interrupts::InterruptDescriptorTable    *interrupt_descriptor_table = (Interrupts::InterruptDescriptorTable *)interrupt_descriptor_table_ptr;
     Interrupts::IDTDescriptor               *idt_descriptor = (Interrupts::IDTDescriptor *)idt_descriptor_ptr;
-    VGA::TEXT_MODE                          &vga = VGA::TEXT_MODE::instantiate();
 
     // Setup physical memory regions in the memory manager.
     for (uint32_t i = 0; i < mmap_length; i += mmap_structure_size + 4)
@@ -251,5 +248,5 @@ extern "C" void kernel_main(void *kernel_page_tables, void *interrupt_descriptor
 
     memory_manager.enable_paging();
 
-    vga.write_string("Kernel done\n");
+    cout << "Kernel done" << "\n";
 }

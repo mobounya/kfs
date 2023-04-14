@@ -1,4 +1,4 @@
-#include <Kernel/VGA/VGA.hpp>
+#include <Kernel/Display/VGA/VGA.hpp>
 #include <Kernel/CPU/CPU.hpp>
 #include <cstring.h>
 
