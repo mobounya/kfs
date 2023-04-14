@@ -26,6 +26,12 @@ sudo apt-get install texinfo -y
 # You need (GMP, MPC, MPFR) to build gcc.
 sudo apt-get install libgmp3-dev libmpc-dev libmpfr-dev -y
 
+# GRUB will need this package
+sudo apt-get install xorriso
+
+# GRUB will need this package
+sudo apt-get install mtools
+
 # get source code for binutils (version 2.38) and build it.
 wget https://ftp.gnu.org/gnu/binutils/binutils-2.38.tar.gz
 tar -xf binutils-2.38.tar.gz

@@ -32,7 +32,7 @@ namespace Memory
     
         if (page_directory.find_contiguous_free_pages(len / PAGE_SIZE, page_directory_index, page_table_index) == false)
         {
-            vga.write_string("UserVirtualMemoryManager::allocate_virtual_memory: failed to allocate virtual memory page.\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
+            vga.write_string("UserVirtualMemoryManager::allocate_virtual_memory: failed to allocate virtual memory page.\n");
             return NULL;
         }
 
@@ -41,14 +41,14 @@ namespace Memory
             const MemoryPage *page = memory_manager.uallocate_physical_memory_page();
             if (page == NULL)
             {
-                vga.write_string("UserVirtualMemoryManager::allocate_virtual_memory: failed to allocate physical memory page.\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
+                vga.write_string("UserVirtualMemoryManager::allocate_virtual_memory: failed to allocate physical memory page.\n");
                 return NULL;
             }
 
             PageDirectoryEntry *pde_entry = page_directory.page_directory[page_directory_index];
             if (pde_entry == NULL)
             {
-                vga.write_string("UserVirtualMemoryManager::allocate_virtual_memory: such page directory.\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
+                vga.write_string("UserVirtualMemoryManager::allocate_virtual_memory: such page directory.\n");
                 return NULL;
             }
             PageTable          *page_table = (PageTable *)(pde_entry->physical_address << 12);
@@ -72,7 +72,7 @@ namespace Memory
 
         if (addr == NULL || PhysicalMemoryManager::find_aligned_address((uint64_t)addr, PAGE_SIZE) != (uint64_t)addr)
         {
-            vga.write_string("UserVirtualMemoryManager::free_virtual_memory: Virtual address is not page aligned\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
+            vga.write_string("UserVirtualMemoryManager::free_virtual_memory: Virtual address is not page aligned\n");
             return -1;
         }
 

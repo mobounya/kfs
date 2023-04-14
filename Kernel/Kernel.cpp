@@ -50,33 +50,33 @@ void print_multiboot_info()
     VGA::TEXT_MODE &vga_interface = VGA::TEXT_MODE::instantiate();
 
     if (multiboot_info_ptr->flags & MULTIBOOT_BOOT_LOADER_NAME) {
-        vga_interface.write_string("Loaded by:\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::GREEN, VGA::BLINK::FALSE);
-        vga_interface.write_string("- ", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::GREEN, VGA::BLINK::FALSE);
-        vga_interface.write_string((char *)(multiboot_info_ptr->boot_loader_name), VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::GREEN, VGA::BLINK::FALSE);
-        vga_interface.write_string("\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::GREEN, VGA::BLINK::FALSE);
+        vga_interface.write_string("Loaded by:\n");
+        vga_interface.write_string("- ");
+        vga_interface.write_string((char *)(multiboot_info_ptr->boot_loader_name));
+        vga_interface.write_string("\n");
     }
     if (multiboot_info_ptr->flags & MULTIBOOT_MEMORY_INFO)
-        vga_interface.write_string("Memory info available\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
+        vga_interface.write_string("Memory info available\n");
     if (multiboot_info_ptr->flags & MULTIBOOT_BOOT_DEVICE)
-        vga_interface.write_string("Boot device info available\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
+        vga_interface.write_string("Boot device info available\n");
     if (multiboot_info_ptr->flags & MULTIBOOT_CMDLINE)
-        vga_interface.write_string("Command line info available\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
+        vga_interface.write_string("Command line info available\n");
     if (multiboot_info_ptr->flags & MULTIBOOT_MODS)
-        vga_interface.write_string("Boot modules info available\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
+        vga_interface.write_string("Boot modules info available\n");
     if (multiboot_info_ptr->flags & MULTIBOOT_SYMS)
-        vga_interface.write_string("SYMS info available\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
+        vga_interface.write_string("SYMS info available\n");
     if (multiboot_info_ptr->flags & MULTIBOOT_MEMORY_MAP)
-        vga_interface.write_string("Memory map info available\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
+        vga_interface.write_string("Memory map info available\n");
     if (multiboot_info_ptr->flags & MULTIBOOT_DRIVE)
-        vga_interface.write_string("Drives info available\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
+        vga_interface.write_string("Drives info available\n");
     if (multiboot_info_ptr->flags & MULTIBOOT_CONFIG_TABLE)
-        vga_interface.write_string("ROM configuration info available\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
+        vga_interface.write_string("ROM configuration info available\n");
     if (multiboot_info_ptr->flags & MULTIBOOT_APM_TABLE)
-        vga_interface.write_string("APM info available\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
+        vga_interface.write_string("APM info available\n");
     if (multiboot_info_ptr->flags & MULTIBOOT_VBE_TABLE)
-        vga_interface.write_string("VBE info available\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
+        vga_interface.write_string("VBE info available\n");
     if (multiboot_info_ptr->flags & MULTIBOOT_FRAMEBUFFER_TABLE)
-        vga_interface.write_string("FRAMEBUFFER info available\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
+        vga_interface.write_string("FRAMEBUFFER info available\n");
 }
 
 extern "C" void setup_gdt(void *stack_ptr)
@@ -251,5 +251,5 @@ extern "C" void kernel_main(void *kernel_page_tables, void *interrupt_descriptor
 
     memory_manager.enable_paging();
 
-    vga.write_string("Kernel done\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
+    vga.write_string("Kernel done\n");
 }

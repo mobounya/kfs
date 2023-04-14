@@ -39,7 +39,7 @@ namespace Memory
             pde_entry->set_present(true)->set_read_write(true)->set_u_s(true)->set_pwt(true)->set_cache_disbled(true)->set_physical_address((uint32_t)page_table_ptr);
             if (insert_page_directory_entry(pde_entry) == NULL)
             {
-                vga.write_string("VirtualMemoryManager::constructor: cannot insert a new page directory entry.\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
+                vga.write_string("VirtualMemoryManager::constructor: cannot insert a new page directory entry.\n");
                 return;
             }
             page_directory.page_table_info[i].size = 0;
@@ -117,9 +117,9 @@ namespace Memory
         } else 
         {
             VGA::TEXT_MODE &vga = VGA::TEXT_MODE::instantiate();
-            vga.write_string("VirtualMemoryManager::identity_map_memory_page: cannot access page directory index (", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::GREEN, VGA::BLINK::FALSE);
-            vga.write_string(itoa(directory_index), VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::GREEN, VGA::BLINK::FALSE);
-            vga.write_string(").\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::GREEN, VGA::BLINK::FALSE);
+            vga.write_string("VirtualMemoryManager::identity_map_memory_page: cannot access page directory index (");
+            vga.write_string(itoa(directory_index));
+            vga.write_string(").\n");
         }
     }
 
@@ -129,7 +129,7 @@ namespace Memory
 
         if (PhysicalMemoryManager::find_aligned_address((uint64_t)virtual_address, PAGE_SIZE) != (uint64_t)virtual_address)
         {
-            vga.write_string("VirtualMemoryManager::disable_page: Virtual address is not page aligned\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::GREEN, VGA::BLINK::FALSE);
+            vga.write_string("VirtualMemoryManager::disable_page: Virtual address is not page aligned\n");
             return -1;
         }
 
@@ -143,9 +143,9 @@ namespace Memory
             TranslatedLinearAddress address = TranslatedLinearAddress::get_translated_address(((uint8_t *)virtual_address) + (n_pages * PAGE_SIZE));
             if (page_directory.page_directory[address.page_directory_index] == NULL)
             {
-                vga.write_string("VirtualMemoryManager::disable_page: cannot access page directory index (", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::GREEN, VGA::BLINK::FALSE);
-                vga.write_string(itoa(address.page_directory_index), VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::GREEN, VGA::BLINK::FALSE);
-                vga.write_string(").\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::GREEN, VGA::BLINK::FALSE);
+                vga.write_string("VirtualMemoryManager::disable_page: cannot access page directory index (");
+                vga.write_string(itoa(address.page_directory_index));
+                vga.write_string(").\n");
                 return -1;
             }
             PageTable *page_table = (PageTable *)(page_directory.page_directory[address.page_directory_index]->physical_address << 12);

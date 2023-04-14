@@ -230,16 +230,16 @@ namespace Memory
     {
         for (uint32_t i = 0; i < physical_memory.size(); i++)
         {
-            vga.write_string("-------- ", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-            vga.write_string("Available region #", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-            vga.write_string(itoa(i), VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-            vga.write_string(" --------\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-            vga.write_string("Base address: ", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-            vga.write_string(itoa(physical_memory[i].get_base_addr()), VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-            vga.write_string("\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-            vga.write_string("Length: ", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-            vga.write_string(itoa(physical_memory[i].get_length()), VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-            vga.write_string("\n\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
+            vga.write_string("-------- ");
+            vga.write_string("Available region #");
+            vga.write_string(itoa(i));
+            vga.write_string(" --------\n");
+            vga.write_string("Base address: ");
+            vga.write_string(itoa(physical_memory[i].get_base_addr()));
+            vga.write_string("\n");
+            vga.write_string("Length: ");
+            vga.write_string(itoa(physical_memory[i].get_length()));
+            vga.write_string("\n\n");
         }
     }
 
@@ -247,23 +247,23 @@ namespace Memory
     {
         if (kernel_allocated_memory_pages.size() == 0)
         {
-            vga.write_string("No kernel allocated memory !\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
+            vga.write_string("No kernel allocated memory !\n");
         }
         else
         {
             max = (max == 0) ? kernel_allocated_memory_pages.size() : max;
             for (uint32_t i = 0; i < max && i < kernel_allocated_memory_pages.size(); i++)
             {
-                vga.write_string("-------- ", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-                vga.write_string("Allocated page #", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-                vga.write_string(itoa(i), VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-                vga.write_string(" (Kernel) --------\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-                vga.write_string("Base address: ", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-                vga.write_string(itoa(kernel_allocated_memory_pages[i].get_base_addr()), VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-                vga.write_string("\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-                vga.write_string("Length: ", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-                vga.write_string(itoa(kernel_allocated_memory_pages[i].get_length()), VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-                vga.write_string("\n\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
+                vga.write_string("-------- ");
+                vga.write_string("Allocated page #");
+                vga.write_string(itoa(i));
+                vga.write_string(" (Kernel) --------\n");
+                vga.write_string("Base address: ");
+                vga.write_string(itoa(kernel_allocated_memory_pages[i].get_base_addr()));
+                vga.write_string("\n");
+                vga.write_string("Length: ");
+                vga.write_string(itoa(kernel_allocated_memory_pages[i].get_length()));
+                vga.write_string("\n\n");
             }
         }
     }
@@ -272,23 +272,23 @@ namespace Memory
     {
         if (user_allocated_memory_pages.size() == 0)
         {
-            vga.write_string("No user allocated memory !\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
+            vga.write_string("No user allocated memory !\n");
         }
         else
         {
             max = (max == 0) ? user_allocated_memory_pages.size() : max;
             for (uint32_t i = 0; i < max && i < user_allocated_memory_pages.size(); i++)
             {
-                vga.write_string("-------- ", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-                vga.write_string("Allocated page #", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-                vga.write_string(itoa(i), VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-                vga.write_string(" (User) --------\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-                vga.write_string("Base address: ", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-                vga.write_string(itoa(user_allocated_memory_pages[i].get_base_addr()), VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-                vga.write_string("\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-                vga.write_string("Length: ", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-                vga.write_string(itoa(user_allocated_memory_pages[i].get_length()), VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-                vga.write_string("\n\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
+                vga.write_string("-------- ");
+                vga.write_string("Allocated page #");
+                vga.write_string(itoa(i));
+                vga.write_string(" (User) --------\n");
+                vga.write_string("Base address: ");
+                vga.write_string(itoa(user_allocated_memory_pages[i].get_base_addr()));
+                vga.write_string("\n");
+                vga.write_string("Length: ");
+                vga.write_string(itoa(user_allocated_memory_pages[i].get_length()));
+                vga.write_string("\n\n");
             }
         }
     }
@@ -297,23 +297,23 @@ namespace Memory
     {
         if (kernel_free_memory_pages.size() == 0)
         {
-             vga.write_string("No kernel free pages available !\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
+             vga.write_string("No kernel free pages available !\n");
         }
         else
         {
             max = (max == 0) ? kernel_free_memory_pages.size() : max;
             for (uint32_t i = 0; i < max && i < kernel_free_memory_pages.size(); i++)
             {
-                vga.write_string("-------- ", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-                vga.write_string("Free page #", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-                vga.write_string(itoa(i), VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-                vga.write_string(" (Kernel) --------\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-                vga.write_string("Base address: ", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-                vga.write_string(itoa(kernel_free_memory_pages[i].get_base_addr()), VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-                vga.write_string("\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-                vga.write_string("Length: ", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-                vga.write_string(itoa(kernel_free_memory_pages[i].get_length()), VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-                vga.write_string("\n\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
+                vga.write_string("-------- ");
+                vga.write_string("Free page #");
+                vga.write_string(itoa(i));
+                vga.write_string(" (Kernel) --------\n");
+                vga.write_string("Base address: ");
+                vga.write_string(itoa(kernel_free_memory_pages[i].get_base_addr()));
+                vga.write_string("\n");
+                vga.write_string("Length: ");
+                vga.write_string(itoa(kernel_free_memory_pages[i].get_length()));
+                vga.write_string("\n\n");
             }
         }
     }
@@ -322,23 +322,23 @@ namespace Memory
     {
         if (user_free_memory_pages.size() == 0)
         {
-             vga.write_string("No User free pages available !\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
+             vga.write_string("No User free pages available !\n");
         }
         else
         {
             max = (max == 0) ? user_free_memory_pages.size() : max;
             for (uint32_t i = 0; i < max && i < user_free_memory_pages.size(); i++)
             {
-                vga.write_string("-------- ", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-                vga.write_string("Free page #", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-                vga.write_string(itoa(i), VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-                vga.write_string(" (User) --------\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-                vga.write_string("Base address: ", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-                vga.write_string(itoa(user_free_memory_pages[i].get_base_addr()), VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-                vga.write_string("\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-                vga.write_string("Length: ", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-                vga.write_string(itoa(user_free_memory_pages[i].get_length()), VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-                vga.write_string("\n\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
+                vga.write_string("-------- ");
+                vga.write_string("Free page #");
+                vga.write_string(itoa(i));
+                vga.write_string(" (User) --------\n");
+                vga.write_string("Base address: ");
+                vga.write_string(itoa(user_free_memory_pages[i].get_base_addr()));
+                vga.write_string("\n");
+                vga.write_string("Length: ");
+                vga.write_string(itoa(user_free_memory_pages[i].get_length()));
+                vga.write_string("\n\n");
             }
         }
     }
