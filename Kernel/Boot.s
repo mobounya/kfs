@@ -41,6 +41,11 @@ reserved_kernel_memory_start:
 .skip 1024 * 10 # 10 KiB
 reserved_kernel_memory_end:
 
+.section .multiboot_info, "aw", @nobits
+multiboot_info_start:
+.skip 150
+multiboot_info_end:
+
 .section .text
 .global _start
 .global load_idt
@@ -74,9 +79,13 @@ reserved_kernel_memory_end:
 
 _start:
     cli
-    mov $reserved_kernel_memory_start, %esp
-    mov %esp, kernel_memory_ptr
-    mov $stack_top, %esp
+    mov $stack_top, %esp # esp now will point to the top of the stack.
+    push $multiboot_info_start
+    push %ebx
+    call copy_multiboot_info_structure
+    movl $multiboot_info_start, multiboot_info_ptr
+    mov $reserved_kernel_memory_start, %ebx
+    mov %ebx, kernel_memory_ptr
     push $stack_top
     call setup_gdt
     lgdt [GDT_descriptor]
@@ -84,12 +93,10 @@ _start:
     ljmp $0x08, $call_kernel
 
 call_kernel:
-    mov $0x10, %esp
-    mov %esp, %ds
-    mov $0x18, %esp
-    mov %esp, %ss
-    movl %ebx, multiboot_info_ptr
-    mov $stack_top, %esp # esp now will point to the top of the stack.
+    mov $0x10, %ebx
+    mov %ebx, %ds
+    mov $0x18, %ebx
+    mov %ebx, %ss
     push $idt_descriptor_ptr
     push $interrupt_descriptor_table_ptr
     push $kernel_page_tables

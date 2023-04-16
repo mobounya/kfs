@@ -48,7 +48,7 @@ extern "C" {
 void print_multiboot_info()
 {
     Screen cout;
-    
+
     if (multiboot_info_ptr->flags & MULTIBOOT_BOOT_LOADER_NAME) {
         cout << "Loaded by:\n -" << (char *)(multiboot_info_ptr->boot_loader_name) << "\n";
     }
@@ -74,6 +74,32 @@ void print_multiboot_info()
         cout << "VBE info available" << "\n";
     if (multiboot_info_ptr->flags & MULTIBOOT_FRAMEBUFFER_TABLE)
         cout << "VBE info available" << "\n";
+}
+
+/*
+    grub_multiboot_info_ptr is the pointer given to us by grub in the ebx register.
+    multiboot_info_section_ptr is a pointer to a location in memory enough to fit the structure.
+*/
+extern "C" void copy_multiboot_info_structure(void *grub_multiboot_info_ptr, void *multiboot_info_section_ptr)
+{
+    // TODO: you need to save the content of any pointer in the multiboot info structure in order to use it.
+    // for now we will save the content of mmap_addr and boot_loader_name since that's the only two we using currently.
+
+    size_t section_offset = sizeof(multiboot_info);
+    multiboot_info  *multi_info_ptr = (multiboot_info *)grub_multiboot_info_ptr;
+
+    // save the data of mmap_addr address.
+    void *mmap_addr = memcpy(((uint8_t *)multiboot_info_section_ptr) + section_offset, multi_info_ptr->mmap_addr, multi_info_ptr->mmap_length);
+    multi_info_ptr->mmap_addr = (multiboot_mmap *)mmap_addr;
+    section_offset += multi_info_ptr->mmap_length;
+
+    // save the data of boot_loader_name address.
+    void *boot_loader_name_addr = memcpy(((uint8_t *)multiboot_info_section_ptr) + section_offset, (void *)(multi_info_ptr->boot_loader_name), strlen((char *)multi_info_ptr->boot_loader_name));
+    multi_info_ptr->boot_loader_name = (uint32_t)boot_loader_name_addr;
+    section_offset += strlen((char *)multi_info_ptr->boot_loader_name) + 1;
+
+    // save the entire structure.
+    memcpy(multiboot_info_section_ptr, multi_info_ptr, sizeof(multiboot_info));
 }
 
 extern "C" void setup_gdt(void *stack_ptr)
