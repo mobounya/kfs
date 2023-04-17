@@ -67,6 +67,8 @@ namespace Memory
             physical memory at a specified address.
             TODO: allocate the memory rather than calling (reserve_physical_memory) which just removes the memory of the available memory pool.
         */
+        Screen cout;
+
         memory_manager.reserve_physical_memory(virtual_address_start, virtual_address_end);
         for (; virtual_address_start < virtual_address_end; virtual_address_start += PAGE_SIZE)
         {
@@ -98,8 +100,9 @@ namespace Memory
     {
         Screen cout;
         PageDirectoryEntry *pde_entry;
-        uint16_t table_index = (virtual_address & VIRTUAL_ADDRESS_TABLE_FLAG) >> 12;
-        uint16_t directory_index = (virtual_address & VIRTUAL_ADDRESS_DIRECTORY_FLAG) >> 22;
+        TranslatedLinearAddress linear_address = TranslatedLinearAddress::get_translated_address((const void *)virtual_address);
+        uint32_t table_index = linear_address.page_table_index;
+        uint32_t directory_index = linear_address.page_directory_index;
 
         // This will not work if (directory_index) is larger than 3, since we only have memory for 4 page tables for now.
         if (directory_index < this->page_directory.page_directory_size)
@@ -116,6 +119,7 @@ namespace Memory
             PageTable *page_table = (PageTable *)page_table_address;
             page_table->page_table[table_index].set_present(true)->set_read_write(true)->set_pwt(true)->set_cache_disbled(true)->set_physical_address(physical_address);
             page_directory.page_table_info[directory_index].size++;
+            page_directory.page_table_info[directory_index].entry_used[table_index] = true;
         } else
             cout << "VirtualMemoryManager::identity_map_memory_page: cannot access page directory index (" << directory_index << ")." << "\n";
     }

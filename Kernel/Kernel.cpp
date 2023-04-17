@@ -1,6 +1,6 @@
 #include <stdint.h>
 #include <stddef.h>
-
+#include <Kernel/Memory/KernelVirtualMemoryManager.hpp>
 #include <Kernel/Memory/PagingStructureEntry.hpp>
 #include <Kernel/Memory/PhysicalMemoryManager.hpp>
 #include <Kernel/Multiboot/Multiboot.hpp>
@@ -189,8 +189,8 @@ extern "C" void kernel_main(void *kernel_page_tables, void *interrupt_descriptor
     /*
         Physical Memory Mapping:
             - 0x0      --> 0x100000  : 1 Mib, reserved for special usage.
-            - 0x100000 --> 0x400000  : 3 Mib, Kernel image (?? I don't know the size of the kernel image).
-            - 0x400000 --> 0x800000  : 4 Mib, Available for allocation for the Kernel.
+            - 0x100000 --> 0x300000  : 3 Mib, Kernel image (?? I don't know the size of the kernel image).
+            - 0x300000 --> 0x800000  : 4 Mib, Available for allocation for the Kernel.
             - 0x800000 --> 0x1000000 : 8 Mib, Available for allocation for user space programs. 
     */
 
@@ -198,12 +198,12 @@ extern "C" void kernel_main(void *kernel_page_tables, void *interrupt_descriptor
     kernel_vm.identity_map_memory(0x0, 0x100000);
 
     // Identity map the Kernel image, 0x100000 --> 0x400000
-    kernel_vm.identity_map_memory(0x100000, 0x400000);
+    kernel_vm.identity_map_memory(0x100000, 0x300000);
 
     kernel_vm.load_page_directory();
 
     // Disable first page so de-refrencing a NULL ptr would not work.
-    // kernel_vm.disable_page(0x0, PAGE_SIZE);
+    kernel_vm.disable_page(0x0, PAGE_SIZE);
 
     Interrupts::PIC::PIC_remap(0x20, 0x28);
 
@@ -274,5 +274,11 @@ extern "C" void kernel_main(void *kernel_page_tables, void *interrupt_descriptor
 
     memory_manager.enable_paging();
 
-    cout << "Kernel done" << "\n";
+    char *ptr = (char *)kernel_vm.kmalloc(1);
+    // kernel_vm.kfree(ptr, 1);
+    ptr[0] = 'A';
+    ptr[1] = 'B';
+    ptr[2] = 'C';
+    ptr[3] = '\0';
+    cout << ptr << "\n";
 }

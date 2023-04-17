@@ -1,6 +1,7 @@
 #include <Kernel/Memory/PhysicalMemoryManager.hpp>
 #include <Kernel/Multiboot/Multiboot.hpp>
 #include <Kernel/Display/Screen.hpp>
+#include <Kernel/Memory/VirtualMemoryManager.hpp>
 
 #include <cstring.h>
 
@@ -25,11 +26,11 @@ namespace Memory
             Physical Memory Mapping:
                 - 0x0      --> 0x100000  : 1 Mib, reserved for special usage.
                 - 0x100000 --> 0x400000  : 3 Mib, Kernel image (?? I don't know the size of the kernel image).
-                - 0x400000 --> 0x800000  : 4 Mib, Available for allocation for the Kernel.
+                - 0x300000 --> 0x800000  : 4 Mib, Available for allocation for the Kernel.
                 - 0x800000 --> 0x1000000 : 8 Mib, Available for allocation for user space programs. 
         */
 
-        kernel_space = PhysicalMemoryManager::MemoryPool(0x400000, 0x800000);
+        kernel_space = PhysicalMemoryManager::MemoryPool(0x300000, 0x800000);
         user_space = PhysicalMemoryManager::MemoryPool(0x800000, 0x1000000);
     }
 
@@ -198,6 +199,7 @@ namespace Memory
     // MAYBE_FIXME: reserved physical memory are not stored anywhere, maybe store it somewhere.
     void    PhysicalMemoryManager::reserve_physical_memory(uint64_t physical_address_start, uint64_t physical_address_end)
     {
+        Screen cout;
         for (uint32_t i = 0; i < physical_memory.size(); i++)
         {
             const MemoryRegion &region = physical_memory[i];
@@ -209,7 +211,7 @@ namespace Memory
             {
                 int64_t first_region_length = physical_address_start - base_ptr;
                 int64_t second_region_length = (base_ptr + length) - physical_address_end;
-                
+
                 if (first_region_length > 0)
                 {
                     MemoryRegion region(base_ptr, first_region_length, MULTIBOOT_MEMORY_AVAILABLE);
