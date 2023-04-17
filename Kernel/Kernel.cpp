@@ -169,6 +169,7 @@ extern "C" void kernel_main(void *kernel_page_tables, void *interrupt_descriptor
     uint32_t                                mmap_structure_size;
     Interrupts::InterruptDescriptorTable    *interrupt_descriptor_table = (Interrupts::InterruptDescriptorTable *)interrupt_descriptor_table_ptr;
     Interrupts::IDTDescriptor               *idt_descriptor = (Interrupts::IDTDescriptor *)idt_descriptor_ptr;
+    char                                    *str = "Hello world !";
 
     // Setup physical memory regions in the memory manager.
     for (uint32_t i = 0; i < mmap_length; i += mmap_structure_size + 4)
@@ -274,11 +275,8 @@ extern "C" void kernel_main(void *kernel_page_tables, void *interrupt_descriptor
 
     memory_manager.enable_paging();
 
-    char *ptr = (char *)kernel_vm.kmalloc(1);
-    // kernel_vm.kfree(ptr, 1);
-    ptr[0] = 'A';
-    ptr[1] = 'B';
-    ptr[2] = 'C';
-    ptr[3] = '\0';
+    char *ptr = (char *)kernel_vm.kmalloc(PAGE_SIZE);
+    kernel_vm.kfree(ptr, PAGE_SIZE);
+    strcpy(ptr, str);
     cout << ptr << "\n";
 }

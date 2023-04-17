@@ -4,6 +4,16 @@
 
 #include <cstring.h>
 
+void    panic(void)
+{
+    Screen cout;
+
+    cout << "KERNEL PANIC, PLEASE REBOOT !!" << "\n";
+    asm("cli");
+    for (;;)
+        asm("hlt");
+}
+
 /*
     - Debug exception
     Vector:      1
@@ -132,8 +142,10 @@ extern "C" void GP_fault(void)
 */
 extern "C" void PF_fault(void)
 {
+    // TODO: recover from a page fault instead of panicking.
     Screen cout;
     cout << "Page fault" << "\n";
+    panic();
 }
 
 /*
