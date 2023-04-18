@@ -192,7 +192,10 @@ extern "C" void keyboard_handler(void)
     char str[2] = { '\0' };
     Keyboard    &keyboard_driver = Keyboard::instantiate();
     int scan_code = keyboard_driver.scan_code();
-    if (keyboard_driver.is_special_key(scan_code) == true)
+    // F12 panics the kernel, used for debugging.
+    if (scan_code == 0x58)
+        CPU::panic();
+    else if (keyboard_driver.is_special_key(scan_code) == true)
         keyboard_driver.execute_key(scan_code);
     else
     {

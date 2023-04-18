@@ -67,8 +67,7 @@ Keyboard::Keyboard()
     scan_code_set[0x38] = '\0'; // left alt
     scan_code_set[0x39] = ' ';
     scan_code_set[0x3A] = '\0'; // CapsLock pressed
-
-    scan_code_set[0x3A] = '\0'; // CapsLock pressed
+    scan_code_set[0x58] = '\0'; // F12 pressed
 }
 
 Keyboard       &Keyboard::instantiate(void)
