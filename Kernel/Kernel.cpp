@@ -17,6 +17,7 @@
 #include <Kernel/Interrupts/PIC.hpp>
 #include <Kernel/Memory/QuickDirtyMalloc.hpp>
 #include <Kernel/Display/Screen.hpp>
+#include <Kernel/Debug/Debug.hpp>
 
 #include <string.hpp>
 #include <unordered_map.hpp>
@@ -275,8 +276,5 @@ extern "C" void kernel_main(void *kernel_page_tables, void *interrupt_descriptor
 
     memory_manager.enable_paging();
 
-    char *ptr = (char *)kernel_vm.kmalloc(PAGE_SIZE);
-    kernel_vm.kfree(ptr, PAGE_SIZE);
-    strcpy(ptr, str);
-    cout << ptr << "\n";
+    Debug::dump_registers();
 }
