@@ -276,5 +276,7 @@ extern "C" void kernel_main(void *kernel_page_tables, void *interrupt_descriptor
 
     memory_manager.enable_paging();
 
-    Debug::dump_registers();
+    char *ptr = (char *)kernel_vm.kmalloc(1);
+    kernel_vm.kfree(ptr, 1);
+    ptr[0] = 'A';
 }

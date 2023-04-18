@@ -1,10 +1,24 @@
 #include <Kernel/CPU/CPU.hpp>
+#include <Kernel/Display/Screen.hpp>
+#include <Kernel/Debug/Debug.hpp>
 
 CPU      CPU::m_cpu;
 bool     CPU::instantiated = false;
 
 CPU::CPU()
 {
+}
+
+void    CPU::panic(void)
+{
+    Screen cout;
+
+    cout << "KERNEL PANIC, PLEASE REBOOT !!" << "\n\n";
+    Debug::dump_registers();
+
+    asm("cli");
+    for (;;)
+        asm("hlt");
 }
 
 CPU     &CPU::instantiate(void)

@@ -20,6 +20,7 @@ class CPU
         static void         outb(uint16_t port, uint8_t val);
         static uint8_t      inb(uint16_t port);
         static void         io_wait(void);
+        static void         panic(void);
 
     public:
         Registers           save_state(void);
