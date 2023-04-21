@@ -33,6 +33,7 @@ kernel_page_tables:
 .align 8
 interrupt_descriptor_table_ptr:
 .skip (8 * 256) # 256 entry 8 bytes each
+.skip (8 * 3) # Just to be safe
 idt_descriptor_ptr:
 .skip 6
 
@@ -49,7 +50,6 @@ multiboot_info_end:
 .section .text
 .global _start
 .global load_idt
-.global send_signal
 .global call_kernel
 
 .global DB_fault_as
@@ -67,9 +67,10 @@ multiboot_info_end:
 .global AC_fault_as
 .global MC_fault_as
 .global XM_fault_as
+.global signal_handler_1_as
+.global signal_handler_2_as
 
 .global keyboard_handler_as
-.global default_handler_as
 
 .extern multiboot_info_ptr
 .type multiboot_info_ptr, @object
@@ -107,6 +108,46 @@ call_kernel:
 # Other registers: %eip %eflags %cs %ss %ds %es %fs %gs %cr0 %cr2 %cr3 %cr4 %cr8
 # Pushed by the compiler : %ebp %ecx %edx %eax
 # General registers: %eax %ebx %ecx %edx %esp %ebp %esi %edi
+
+signal_handler_1_as:
+    push %eax
+    push %ebx
+    push %ecx
+    push %edx
+    push %esp
+    push %ebp
+    push %esi
+    push %edi
+    call signal_handler_1
+    pop %edi
+    pop %esi
+    pop %ebp
+    pop %esp
+    pop %edx
+    pop %ecx
+    pop %ebx
+    pop %eax
+    iret
+
+signal_handler_2_as:
+    push %eax
+    push %ebx
+    push %ecx
+    push %edx
+    push %esp
+    push %ebp
+    push %esi
+    push %edi
+    call signal_handler_2
+    pop %edi
+    pop %esi
+    pop %ebp
+    pop %esp
+    pop %edx
+    pop %ecx
+    pop %ebx
+    pop %eax
+    iret
 
 BP_trap_as:
     push %eax
@@ -435,32 +476,8 @@ keyboard_handler_as:
     pop %eax 
     iret
 
-default_handler_as:
-    push %eax
-    push %ebx
-    push %ecx
-    push %edx
-    push %esp
-    push %ebp
-    push %esi
-    push %edi
-    call default_handler
-    pop %edi
-    pop %esi
-    pop %ebp
-    pop %esp
-    pop %edx
-    pop %ecx
-    pop %ebx
-    pop %eax
-    iret
-
 load_idt:
     lidt [idt_descriptor_ptr]
-    ret
-
-send_signal:
-    int $0x35
     ret
 
 GDT_descriptor:

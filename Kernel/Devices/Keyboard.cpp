@@ -1,15 +1,17 @@
 #include <Kernel/Devices/Keyboard.hpp>
 #include <Kernel/CPU/CPU.hpp>
 
-bool                                Keyboard::instantiated = false;
-Keyboard                            Keyboard::keyboard_driver;
-std::unordered_map<int, char>       Keyboard::scan_code_set;
-bool                                Keyboard::caps_on = false;
+bool                                    Keyboard::instantiated = false;
+Keyboard                                Keyboard::keyboard_driver;
+std::unordered_map<int, char>           Keyboard::scan_code_set;
+std::unordered_map<int, key_handler>    Keyboard::key_handlers;
+bool                                    Keyboard::caps_on = false;
 
 Keyboard::Keyboard()
 {
     scan_code_set = std::unordered_map<int, char>();
-    scan_code_set[0x02] = '?'; // escape
+    key_handlers = std::unordered_map<int, key_handler>();
+    scan_code_set[0x01] = '?'; // escape
     scan_code_set[0x02] = '1';
     scan_code_set[0x03] = '2';
     scan_code_set[0x04] = '3';
@@ -116,4 +118,17 @@ char        Keyboard::get_key_pressed(int scan_code) const
 int         Keyboard::scan_code(void)
 {
     return CPU::inb(0x60);
+}
+
+void        Keyboard::map_key(int key_code, key_handler fn)
+{
+    key_handlers[key_code] = fn;
+}
+
+key_handler Keyboard::get_key_handler(int key_code)
+{
+    if (key_handlers.contains(key_code))
+        return key_handlers[key_code];
+    else
+        return NULL;
 }

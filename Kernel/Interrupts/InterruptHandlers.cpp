@@ -190,11 +190,14 @@ extern "C" void keyboard_handler(void)
 {
     Screen cout;
     char str[2] = { '\0' };
-    Keyboard    &keyboard_driver = Keyboard::instantiate();
-    int scan_code = keyboard_driver.scan_code();
-    // F12 panics the kernel, used for debugging.
-    if (scan_code == 0x58)
-        CPU::panic();
+    Keyboard &keyboard_driver = Keyboard::instantiate();
+    int scan_code             = keyboard_driver.scan_code();
+    key_handler fn = keyboard_driver.get_key_handler(scan_code);
+
+    if (fn != NULL)
+        fn();
+    else if (scan_code == 0x58)
+        CPU::panic(); // F12 panics the kernel, used for debugging.
     else if (keyboard_driver.is_special_key(scan_code) == true)
         keyboard_driver.execute_key(scan_code);
     else
@@ -205,8 +208,14 @@ extern "C" void keyboard_handler(void)
     CPU::outb(0x20, 0x20);
 }
 
-extern "C" void default_handler(void)
+extern "C" void signal_handler_2(void)
 {
     Screen cout;
-    cout << "Called default handler" << "\n";
+    cout << "Called signal handler 2" << "\n";
+}
+
+extern "C" void signal_handler_1(void)
+{
+    Screen cout;
+    cout << "Called signal handler 1" << "\n";    
 }

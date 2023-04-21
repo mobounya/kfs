@@ -18,5 +18,6 @@ extern "C"
     void MC_fault(void);
     void XM_fault(void);
     void keyboard_handler(void);
-    void default_handler(void);
+    void signal_handler_1(void);
+    void signal_handler_2(void);
 }

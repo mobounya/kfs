@@ -79,10 +79,26 @@ namespace Interrupts
         return this->present;
     }
 
-    void                    InterruptDescriptorTable32::insert_new_entry(const GateDescriptor32 &entry, size_t index)
+    InterruptDescriptorTable32::InterruptDescriptorTable32()
     {
-        if (index < IDT_SIZE)
+    }
+
+    void                    InterruptDescriptorTable32::insert_intel_interrupt_handler(const GateDescriptor32 &entry, size_t index)
+    {
+        if (index <= 20)
             this->entries[index] = entry;
+    }
+
+    void                    InterruptDescriptorTable32::insert_irq_handler(const GateDescriptor32 &entry, size_t offset)
+    {
+        if (offset < IRQ_SIZE)
+            this->entries[IRQ_START + offset] = entry;
+    }
+
+    void                    InterruptDescriptorTable32::insert_software_interrupt_handler(const GateDescriptor32 &entry, size_t offset)
+    {
+        if (offset < SOFTWARE_INTERRUPTS_SIZE)
+            this->entries[SOFTWARE_INTERRUPTS_START + offset] = entry;
     }
 
     const GateDescriptor32  *InterruptDescriptorTable32::get_entry(size_t index) const

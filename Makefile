@@ -10,6 +10,7 @@ COMPILER_FLAGS = -I./ -I./Kernel/Klibcpp -I./Kernel/Klibc -O2 -ffreestanding -Wa
 
 LINKER_FLAGS = -ffreestanding -nostdlib
 
+SIGNALS_FILES = $(addprefix Signals/, Signals)
 KLIBCPP = $(addprefix Klibcpp/, tohex)
 DEBUG_FILES = $(addprefix Debug/, Debug)
 DEVICES_FILES = $(addprefix Devices/, Keyboard) 
@@ -20,7 +21,7 @@ INTERUPTS_FILES = $(addprefix Interrupts/, IDT PIC InterruptHandlers)
 MEMORY_FILES = $(addprefix Memory/, QuickDirtyMalloc PhysicalMemoryManager PagingStructureEntry MemoryRegion PageDirectory PageTable MemoryPage VirtualMemoryManager KernelVirtualMemoryManager UserVirtualMemoryManager)
 VGA_FILES = $(addprefix Display/VGA/, VGA)
 SCREEN_FILES = $(addprefix Display/, Screen)
-KERNEL_FILES = $(addprefix Kernel/, Kernel $(MEMORY_FILES) $(VGA_FILES) $(INTERUPTS_FILES) $(GDT_FILES) $(CPU_FILES) $(KLIBC) $(DEVICES_FILES) $(SCREEN_FILES) $(DEBUG_FILES) $(KLIBCPP))
+KERNEL_FILES = $(addprefix Kernel/, Kernel $(MEMORY_FILES) $(VGA_FILES) $(INTERUPTS_FILES) $(GDT_FILES) $(CPU_FILES) $(KLIBC) $(DEVICES_FILES) $(SCREEN_FILES) $(DEBUG_FILES) $(KLIBCPP) $(SIGNALS_FILES))
 
 KERNEL_SRC = $(addsuffix .cpp, $(KERNEL_FILES))
 KERNEL_OBJ = $(addsuffix .o, $(KERNEL_FILES))

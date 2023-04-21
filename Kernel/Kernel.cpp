@@ -18,6 +18,8 @@
 #include <Kernel/Memory/QuickDirtyMalloc.hpp>
 #include <Kernel/Display/Screen.hpp>
 #include <Kernel/Debug/Debug.hpp>
+#include <Kernel/Signals/Signals.hpp>
+#include <Kernel/Devices/Keyboard.hpp>
 
 #include <string.hpp>
 #include <unordered_map.hpp>
@@ -26,7 +28,6 @@
 extern "C" {
     multiboot_info  *multiboot_info_ptr;
     void            load_idt(void);
-    void            send_signal(void);
     void            NMI_interrupt_as(void);
     void            DB_fault_as(void);
     void            UD_fault_as(void);
@@ -44,6 +45,8 @@ extern "C" {
     void            XM_fault_as(void);
     void            keyboard_handler_as(void);
     void            default_handler_as(void);
+    void            signal_handler_1_as(void);
+    void            signal_handler_2_as(void);
 }
 
 void print_multiboot_info()
@@ -170,7 +173,7 @@ extern "C" void kernel_main(void *kernel_page_tables, void *interrupt_descriptor
     uint32_t                                mmap_structure_size;
     Interrupts::InterruptDescriptorTable    *interrupt_descriptor_table = (Interrupts::InterruptDescriptorTable *)interrupt_descriptor_table_ptr;
     Interrupts::IDTDescriptor               *idt_descriptor = (Interrupts::IDTDescriptor *)idt_descriptor_ptr;
-    char                                    *str = "Hello world !";
+    Signals                                 signals(interrupt_descriptor_table);
 
     // Setup physical memory regions in the memory manager.
     for (uint32_t i = 0; i < mmap_length; i += mmap_structure_size + 4)
@@ -212,55 +215,52 @@ extern "C" void kernel_main(void *kernel_page_tables, void *interrupt_descriptor
     Interrupts::PIC::mask_all();
 
     Interrupts::GateDescriptor descriptor = Interrupts::GateDescriptor::create_gate_descriptor((uint32_t)DB_fault_as, 0x8, Interrupts::GateType::InterruptGate32, 0x0, true);
-    interrupt_descriptor_table->insert_new_entry(descriptor, 1);
+    interrupt_descriptor_table->insert_intel_interrupt_handler(descriptor, 1);
 
     descriptor = Interrupts::GateDescriptor::create_gate_descriptor((uint32_t)NMI_interrupt_as, 0x8, Interrupts::GateType::InterruptGate32, 0x0, true);
-    interrupt_descriptor_table->insert_new_entry(descriptor, 2);
+    interrupt_descriptor_table->insert_intel_interrupt_handler(descriptor, 2);
 
     descriptor = Interrupts::GateDescriptor::create_gate_descriptor((uint32_t)BP_trap_as, 0x8, Interrupts::GateType::InterruptGate32, 0x0, true);
-    interrupt_descriptor_table->insert_new_entry(descriptor, 3);
+    interrupt_descriptor_table->insert_intel_interrupt_handler(descriptor, 3);
 
     descriptor = Interrupts::GateDescriptor::create_gate_descriptor((uint32_t)UD_fault_as, 0x8, Interrupts::GateType::InterruptGate32, 0x0, true);
-    interrupt_descriptor_table->insert_new_entry(descriptor, 6);
+    interrupt_descriptor_table->insert_intel_interrupt_handler(descriptor, 6);
 
     descriptor = Interrupts::GateDescriptor::create_gate_descriptor((uint32_t)NM_fault_as, 0x8, Interrupts::GateType::InterruptGate32, 0x0, true);
-    interrupt_descriptor_table->insert_new_entry(descriptor, 7);
+    interrupt_descriptor_table->insert_intel_interrupt_handler(descriptor, 7);
 
     descriptor = Interrupts::GateDescriptor::create_gate_descriptor((uint32_t)DF_abort_as, 0x8, Interrupts::GateType::InterruptGate32, 0x0, true);
-    interrupt_descriptor_table->insert_new_entry(descriptor, 8);
+    interrupt_descriptor_table->insert_intel_interrupt_handler(descriptor, 8);
 
     descriptor = Interrupts::GateDescriptor::create_gate_descriptor((uint32_t)TS_fault_as, 0x8, Interrupts::GateType::InterruptGate32, 0x0, true);
-    interrupt_descriptor_table->insert_new_entry(descriptor, 10);
+    interrupt_descriptor_table->insert_intel_interrupt_handler(descriptor, 10);
 
     descriptor = Interrupts::GateDescriptor::create_gate_descriptor((uint32_t)NP_fault_as, 0x8, Interrupts::GateType::InterruptGate32, 0x0, true);
-    interrupt_descriptor_table->insert_new_entry(descriptor, 11);
+    interrupt_descriptor_table->insert_intel_interrupt_handler(descriptor, 11);
 
     descriptor = Interrupts::GateDescriptor::create_gate_descriptor((uint32_t)SS_fault_as, 0x8, Interrupts::GateType::InterruptGate32, 0x0, true);
-    interrupt_descriptor_table->insert_new_entry(descriptor, 12);
+    interrupt_descriptor_table->insert_intel_interrupt_handler(descriptor, 12);
 
     descriptor = Interrupts::GateDescriptor::create_gate_descriptor((uint32_t)GP_fault_as, 0x8, Interrupts::GateType::TrapGate32, 0x0, true);
-    interrupt_descriptor_table->insert_new_entry(descriptor, 13);
+    interrupt_descriptor_table->insert_intel_interrupt_handler(descriptor, 13);
 
     descriptor = Interrupts::GateDescriptor::create_gate_descriptor((uint32_t)PF_fault_as, 0x8, Interrupts::GateType::InterruptGate32, 0x0, true);
-    interrupt_descriptor_table->insert_new_entry(descriptor, 14);
+    interrupt_descriptor_table->insert_intel_interrupt_handler(descriptor, 14);
 
     descriptor = Interrupts::GateDescriptor::create_gate_descriptor((uint32_t)MF_fault_as, 0x8, Interrupts::GateType::InterruptGate32, 0x0, true);
-    interrupt_descriptor_table->insert_new_entry(descriptor, 16);
+    interrupt_descriptor_table->insert_intel_interrupt_handler(descriptor, 16);
 
     descriptor = Interrupts::GateDescriptor::create_gate_descriptor((uint32_t)AC_fault_as, 0x8, Interrupts::GateType::InterruptGate32, 0x0, true);
-    interrupt_descriptor_table->insert_new_entry(descriptor, 17);
+    interrupt_descriptor_table->insert_intel_interrupt_handler(descriptor, 17);
 
     descriptor = Interrupts::GateDescriptor::create_gate_descriptor((uint32_t)MC_fault_as, 0x8, Interrupts::GateType::InterruptGate32, 0x0, true);
-    interrupt_descriptor_table->insert_new_entry(descriptor, 18);
+    interrupt_descriptor_table->insert_intel_interrupt_handler(descriptor, 18);
 
     descriptor = Interrupts::GateDescriptor::create_gate_descriptor((uint32_t)XM_fault_as, 0x8, Interrupts::GateType::InterruptGate32, 0x0, true);
-    interrupt_descriptor_table->insert_new_entry(descriptor, 19);
-
-    descriptor = Interrupts::GateDescriptor::create_gate_descriptor((uint32_t)default_handler_as, 0x8, Interrupts::GateType::InterruptGate32, 0x0, true);
-    interrupt_descriptor_table->insert_new_entry(descriptor, 0x35);
+    interrupt_descriptor_table->insert_intel_interrupt_handler(descriptor, 19);
 
     descriptor = Interrupts::GateDescriptor::create_gate_descriptor((uint32_t)keyboard_handler_as, 0x8, Interrupts::GateType::InterruptGate32, 0x0, true);
-    interrupt_descriptor_table->insert_new_entry(descriptor, 0x20 + 1);
+    interrupt_descriptor_table->insert_irq_handler(descriptor, 1);
 
     idt_descriptor->set_address((uint32_t)interrupt_descriptor_table_ptr);
     idt_descriptor->set_size(sizeof(Interrupts::InterruptDescriptorTable) - 1);
@@ -275,4 +275,19 @@ extern "C" void kernel_main(void *kernel_page_tables, void *interrupt_descriptor
     Interrupts::PIC::enable();
 
     memory_manager.enable_paging();
+
+    signals.register_signal(SIGNAL_1, signal_handler_1_as);
+    signals.register_signal(SIGNAL_2, signal_handler_2_as); // There's an error here. WHY !!!!
+
+    Keyboard &keybrd = Keyboard::instantiate();
+
+    // F1
+    keybrd.map_key(0x3B, [](){
+        Signals::send_signal(SIGNAL_1);
+    });
+
+    // F2
+    keybrd.map_key(0x3C, [](){
+        Signals::send_signal(SIGNAL_2);
+    });
 }

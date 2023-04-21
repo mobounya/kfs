@@ -5,6 +5,12 @@
 
 #define IDT_SIZE 256
 
+#define IRQ_START 0x20
+#define IRQ_SIZE 16
+
+#define SOFTWARE_INTERRUPTS_START (IRQ_START + IRQ_SIZE)
+#define SOFTWARE_INTERRUPTS_SIZE (224 - IRQ_SIZE)
+
 namespace Interrupts
 {
     enum GateType
@@ -46,10 +52,15 @@ namespace Interrupts
     struct InterruptDescriptorTable32
     {
         private:
-            GateDescriptor32 entries[IDT_SIZE];
+            GateDescriptor32    entries[IDT_SIZE];
 
         public:
-            void                    insert_new_entry(const GateDescriptor32 &entry, size_t index);
+            InterruptDescriptorTable32(void);
+
+        public:
+            void                    insert_intel_interrupt_handler(const GateDescriptor32 &entry, size_t index);
+            void                    insert_irq_handler(const GateDescriptor32 &entry, size_t offset);
+            void                    insert_software_interrupt_handler(const GateDescriptor32 &entry, size_t offset);
             const GateDescriptor32  *get_entry(size_t index) const;
     } __attribute__((packed));
 

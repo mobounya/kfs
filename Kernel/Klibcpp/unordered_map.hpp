@@ -47,6 +47,8 @@ namespace std
                 if (key_index == -1)
                 {
                     m_first[m_size] = key;
+                    // I don't know what i am doing.
+                    memset(m_second + m_size, 0x0, sizeof(T));
                     m_size++;
                     return m_second[m_size - 1];
                 }
