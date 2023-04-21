@@ -75,12 +75,16 @@ multiboot_info_end:
 .extern multiboot_info_ptr
 .type multiboot_info_ptr, @object
 
+.extern stack_top_ptr
+.type stack_top_ptr, @object
+
 .extern kernel_memory_ptr
 .type kernel_memory_ptr, @object
 
 _start:
     cli
     mov $stack_top, %esp # esp now will point to the top of the stack.
+    mov %esp, stack_top_ptr
     push $multiboot_info_start
     push %ebx
     call copy_multiboot_info_structure

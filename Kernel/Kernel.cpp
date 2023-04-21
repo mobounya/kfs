@@ -277,7 +277,7 @@ extern "C" void kernel_main(void *kernel_page_tables, void *interrupt_descriptor
     memory_manager.enable_paging();
 
     signals.register_signal(SIGNAL_1, signal_handler_1_as);
-    signals.register_signal(SIGNAL_2, signal_handler_2_as); // There's an error here. WHY !!!!
+    signals.register_signal(SIGNAL_2, signal_handler_2_as);
 
     Keyboard &keybrd = Keyboard::instantiate();
 

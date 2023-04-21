@@ -15,6 +15,7 @@ void    CPU::panic(void)
 
     cout << "KERNEL PANIC, PLEASE REBOOT !!" << "\n\n";
     Debug::dump_registers();
+    Debug::dump_stack();
 
     asm("cli");
     for (;;)
