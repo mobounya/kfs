@@ -75,3 +75,27 @@ void    Debug::dump_stack(void)
     }
     return ;
 }
+
+void Debug::print_mem(void *ptr, size_t size)
+{
+    Screen  cout;
+    uint8_t max_bytes = size;
+    size_t printed_bytes = 0;
+    cout.set_base(BASE::HEX);
+
+    uint8_t *stack_start = (uint8_t *)ptr;
+
+    while (printed_bytes < max_bytes)
+    {
+        size_t bytes_left = (max_bytes - printed_bytes);
+        size_t bytes_to_print = 0;
+        if (bytes_left < 16)
+            bytes_to_print = bytes_left;
+        else if (bytes_left >= 16)
+            bytes_to_print = 16;
+        Debug::print_mem_line(stack_start, bytes_to_print);
+        stack_start += bytes_to_print;
+        printed_bytes += bytes_to_print;
+    }
+    return ;
+}
