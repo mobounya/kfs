@@ -11,6 +11,6 @@ namespace Memory
         public:
             MemoryPage(void);
             // Should be [PAGE_SIZE] aligned.
-            MemoryPage(uint64_t base_addr);
+            MemoryPage(uint32_t base_addr);
     };
 }

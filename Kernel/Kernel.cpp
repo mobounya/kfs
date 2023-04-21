@@ -9,6 +9,7 @@
 #include <Kernel/Memory/MemoryPage.hpp>
 #include <Kernel/Memory/KernelVirtualMemoryManager.hpp>
 #include <Kernel/Memory/UserVirtualMemoryManager.hpp>
+#include <Kernel/Memory/VirtualAddress.hpp>
 #include <Kernel/Interrupts/IDT.hpp>
 #include <Kernel/Interrupts/PIC.hpp>
 #include <Kernel/GDT/GDT.hpp>
@@ -200,15 +201,15 @@ extern "C" void kernel_main(void *kernel_page_tables, void *interrupt_descriptor
     */
 
     // Identity map the first 1 Mib (Mebibyte), 0x0 --> 0x100000
-    kernel_vm.identity_map_memory(0x0, 0x100000);
+    kernel_vm.identity_map_memory(VirtualAddress((void *)0x0), VirtualAddress((void *)0x100000));
 
     // Identity map the Kernel image, 0x100000 --> 0x400000
-    kernel_vm.identity_map_memory(0x100000, 0x300000);
+    kernel_vm.identity_map_memory(VirtualAddress((void *)0x100000), VirtualAddress((void *)0x300000));
 
     kernel_vm.load_page_directory();
 
     // Disable first page so de-refrencing a NULL ptr would not work.
-    kernel_vm.disable_page(0x0, PAGE_SIZE);
+    kernel_vm.disable_page(VirtualAddress((void *)0x0), PAGE_SIZE);
 
     Interrupts::PIC::PIC_remap(0x20, 0x28);
 

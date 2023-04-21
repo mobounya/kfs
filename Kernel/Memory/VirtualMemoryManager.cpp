@@ -4,11 +4,11 @@
 
 namespace Memory
 {
-    TranslatedLinearAddress TranslatedLinearAddress::get_translated_address(const void *virtual_address)
+    TranslatedLinearAddress TranslatedLinearAddress::get_translated_address(const VirtualAddress &addr)
     {
         TranslatedLinearAddress translated_address;
 
-        uint32_t page_address = (uint32_t)virtual_address;
+        uint32_t page_address = (uint32_t)addr.ptr();
         translated_address.page_directory_index = (VIRTUAL_ADDRESS_DIRECTORY_FLAG & page_address) >> 22;
         translated_address.page_table_index = (VIRTUAL_ADDRESS_TABLE_FLAG & page_address) >> 12;
         translated_address.offset = (VIRTUAL_ADDRESS_OFFSET_FLAG & page_address);
@@ -51,15 +51,15 @@ namespace Memory
         this->page_directory.current_index = 0;
     }
 
-    uint32_t     VirtualMemoryManager::construct_virtual_address(uint16_t directory_index, uint16_t table_index, uint16_t offset)
+    VirtualAddress     VirtualMemoryManager::construct_virtual_address(uint16_t directory_index, uint16_t table_index, uint16_t offset)
     {
         uint32_t address = offset;
         address |= (uint32_t)table_index << 12;
         address |= (uint32_t)directory_index << 22;
-        return address;
+        return VirtualAddress(address);
     }
 
-    void VirtualMemoryManager::identity_map_memory(uint64_t virtual_address_start, uint64_t virtual_address_end)
+    void VirtualMemoryManager::identity_map_memory(VirtualAddress start, const VirtualAddress &end)
     {
         /*
             Ideally you should allocate memory from the physical memory manager from a specific address
@@ -69,10 +69,10 @@ namespace Memory
         */
         Screen cout;
 
-        memory_manager.reserve_physical_memory(virtual_address_start, virtual_address_end);
-        for (; virtual_address_start < virtual_address_end; virtual_address_start += PAGE_SIZE)
+        memory_manager.reserve_physical_memory((uint32_t)start.ptr(), (uint32_t)end.ptr());
+        for (; start < end; start += PAGE_SIZE)
         {
-            identity_map_memory_page(virtual_address_start);
+            identity_map_memory_page(start);
         }
     }
 
@@ -96,11 +96,11 @@ namespace Memory
         }
     }
 
-    void VirtualMemoryManager::identity_map_memory_page(uint64_t virtual_address)
+    void VirtualMemoryManager::identity_map_memory_page(const VirtualAddress &page)
     {
         Screen cout;
         PageDirectoryEntry *pde_entry;
-        TranslatedLinearAddress linear_address = TranslatedLinearAddress::get_translated_address((const void *)virtual_address);
+        TranslatedLinearAddress linear_address = TranslatedLinearAddress::get_translated_address(page);
         uint32_t table_index = linear_address.page_table_index;
         uint32_t directory_index = linear_address.page_directory_index;
 
@@ -115,7 +115,7 @@ namespace Memory
             page_table_address = (page_table_address << 12); // Page address is 0x1000 (PAGE_SIZE) aligned.
 
             // Go to page_table_address and map the corresponding entry to (physical_address), now (virtual_address) will map to the same (physical_address)
-            uint64_t physical_address = virtual_address;
+            uint32_t physical_address = (uint32_t)page.ptr();
             PageTable *page_table = (PageTable *)page_table_address;
             page_table->page_table[table_index].set_present(true)->set_read_write(true)->set_pwt(true)->set_cache_disbled(true)->set_physical_address(physical_address);
             page_directory.page_table_info[directory_index].size++;
@@ -124,11 +124,11 @@ namespace Memory
             cout << "VirtualMemoryManager::identity_map_memory_page: cannot access page directory index (" << directory_index << ")." << "\n";
     }
 
-    int    VirtualMemoryManager::disable_page(const void *virtual_address, uint32_t len)
+    int    VirtualMemoryManager::disable_page(const VirtualAddress &addr, uint32_t len)
     {
         Screen cout;
 
-        if (PhysicalMemoryManager::find_aligned_address((uint64_t)virtual_address, PAGE_SIZE) != (uint64_t)virtual_address)
+        if (PhysicalMemoryManager::find_aligned_address((uint32_t)addr.ptr(), PAGE_SIZE) != (uint32_t)addr.ptr())
         {
             cout << "VirtualMemoryManager::disable_page: Virtual address is not page aligned" << "\n";
             return -1;
@@ -141,7 +141,8 @@ namespace Memory
 
         for (uint32_t n_pages = 0; n_pages < (len / PAGE_SIZE); n_pages++)
         {
-            TranslatedLinearAddress address = TranslatedLinearAddress::get_translated_address(((uint8_t *)virtual_address) + (n_pages * PAGE_SIZE));
+            VirtualAddress temp = (uint8_t *)(addr.ptr()) + (n_pages * PAGE_SIZE);
+            TranslatedLinearAddress address = TranslatedLinearAddress::get_translated_address(temp);
             if (page_directory.page_directory[address.page_directory_index] == NULL)
             {
                 cout << "VirtualMemoryManager::disable_page: cannot access page directory index (" << address.page_directory_index << ")." << "\n";

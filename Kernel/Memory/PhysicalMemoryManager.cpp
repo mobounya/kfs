@@ -15,7 +15,7 @@ namespace Memory
 
     }
 
-    PhysicalMemoryManager::MemoryPool::MemoryPool(uint64_t base_addr, uint64_t end_addr) : MemoryRegion(base_addr, end_addr - base_addr, MULTIBOOT_MEMORY_AVAILABLE)
+    PhysicalMemoryManager::MemoryPool::MemoryPool(uint32_t base_addr, uint32_t end_addr) : MemoryRegion(base_addr, end_addr - base_addr, MULTIBOOT_MEMORY_AVAILABLE)
     {
         this->end_addr = end_addr;
     }
@@ -92,8 +92,8 @@ namespace Memory
             MemoryRegion region = physical_memory[i];
 
             // Memory region base pointer and length will change if we have to page align the region.
-            uint64_t aligned_address = find_aligned_address(region.get_base_addr(), PAGE_SIZE);
-            uint64_t new_length = region.get_length() - (aligned_address - region.get_base_addr());
+            uint32_t aligned_address = find_aligned_address(region.get_base_addr(), PAGE_SIZE);
+            uint32_t new_length = region.get_length() - (aligned_address - region.get_base_addr());
             region.set_base_addr(aligned_address);
             region.set_length(new_length);
 
@@ -111,10 +111,10 @@ namespace Memory
                 */
 
                 // This the size of the memory before the page that we will cut away.
-                uint64_t first_hole_size = available_memory.get_base_addr() - region.get_base_addr();
+                uint32_t first_hole_size = available_memory.get_base_addr() - region.get_base_addr();
 
                 // This the size of the memory after the page that we will cut away.
-                uint64_t second_hole_size = (region.get_base_addr() + region.get_length()) - (available_memory.get_base_addr() + PAGE_SIZE);
+                uint32_t second_hole_size = (region.get_base_addr() + region.get_length()) - (available_memory.get_base_addr() + PAGE_SIZE);
 
                 // Give back the first memory hole.
                 if (first_hole_size > 0)
@@ -145,8 +145,8 @@ namespace Memory
 
     MemoryRegion    PhysicalMemoryManager::get_overlapping_memory_region(const MemoryRegion &region_1, const MemoryRegion &region_2)
     {
-        uint64_t region_1_end_ptr = region_1.get_base_addr() + region_1.get_length();
-        uint64_t region_2_end_ptr = region_2.get_base_addr() + region_2.get_length();
+        uint32_t region_1_end_ptr = region_1.get_base_addr() + region_1.get_length();
+        uint32_t region_2_end_ptr = region_2.get_base_addr() + region_2.get_length();
         uint32_t overlapping_start = 0;
         uint32_t overlapping_end = 0;
 
@@ -165,7 +165,7 @@ namespace Memory
 
     void    PhysicalMemoryManager::kfree_physical_memory_page(const MemoryPage &page)
     {
-        for (uint64_t i = 0; i < kernel_allocated_memory_pages.size(); i++)
+        for (uint32_t i = 0; i < kernel_allocated_memory_pages.size(); i++)
         {
             if (kernel_allocated_memory_pages[i].get_base_addr() == page.get_base_addr())
             {
@@ -187,7 +187,7 @@ namespace Memory
         }
     }
 
-    uint64_t    PhysicalMemoryManager::find_aligned_address(uint64_t address, uint64_t alignment)
+    uint32_t    PhysicalMemoryManager::find_aligned_address(uint32_t address, uint32_t alignment)
     {
         // Address is already aligned.
         if (address % alignment == 0)
@@ -197,15 +197,15 @@ namespace Memory
     }
 
     // MAYBE_FIXME: reserved physical memory are not stored anywhere, maybe store it somewhere.
-    void    PhysicalMemoryManager::reserve_physical_memory(uint64_t physical_address_start, uint64_t physical_address_end)
+    void    PhysicalMemoryManager::reserve_physical_memory(uint32_t physical_address_start, uint32_t physical_address_end)
     {
         Screen cout;
         for (uint32_t i = 0; i < physical_memory.size(); i++)
         {
             const MemoryRegion &region = physical_memory[i];
 
-            uint64_t base_ptr = region.get_base_addr();
-            uint64_t length = region.get_length();
+            uint32_t base_ptr = region.get_base_addr();
+            uint32_t length = region.get_length();
 
             if (physical_address_start >= base_ptr && physical_address_start < (base_ptr + length))
             {

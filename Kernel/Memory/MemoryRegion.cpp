@@ -7,28 +7,28 @@ namespace Memory
 
     }
 
-    MemoryRegion::MemoryRegion(uint64_t base_addr, uint64_t length, uint8_t type) : base_addr(base_addr), length(length),
+    MemoryRegion::MemoryRegion(uint32_t base_addr, uint32_t length, uint8_t type) : base_addr(base_addr), length(length),
                                 type(type)
     {
 
     }
 
-    void MemoryRegion::set_base_addr(uint64_t base_addr)
+    void MemoryRegion::set_base_addr(uint32_t base_addr)
     {
         this->base_addr = base_addr;
     }
 
-    uint64_t MemoryRegion::get_base_addr(void) const
+    uint32_t MemoryRegion::get_base_addr(void) const
     {
         return this->base_addr;
     }
 
-    void MemoryRegion::set_length(uint64_t length)
+    void MemoryRegion::set_length(uint32_t length)
     {
         this->length = length;
     }
 
-    uint64_t MemoryRegion::get_length(void) const
+    uint32_t MemoryRegion::get_length(void) const
     {
         return this->length;
     }

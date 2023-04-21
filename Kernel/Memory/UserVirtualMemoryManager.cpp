@@ -58,7 +58,7 @@ namespace Memory
 
             page_table->add_new_entry(pt_entry, page_table_index);
             if (first_page_ptr == NULL)
-                first_page_ptr = (void *)construct_virtual_address(page_directory_index, page_table_index, 0x0);
+                first_page_ptr = construct_virtual_address(page_directory_index, page_table_index, 0x0).ptr();
             page_directory.page_table_info[page_directory_index].entry_used[page_table_index] = true;
             page_directory.page_table_info[page_directory_index].size++;
             page_table_index++;
@@ -70,7 +70,7 @@ namespace Memory
     {
         Screen cout;
 
-        if (addr == NULL || PhysicalMemoryManager::find_aligned_address((uint64_t)addr, PAGE_SIZE) != (uint64_t)addr)
+        if (addr == NULL || PhysicalMemoryManager::find_aligned_address((uint32_t)addr, PAGE_SIZE) != (uint32_t)addr)
         {
             cout << "UserVirtualMemoryManager::free_virtual_memory: Virtual address is not page aligned." << "\n";
             return -1;
