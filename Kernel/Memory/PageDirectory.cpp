@@ -1,8 +1,7 @@
 #include <Kernel/Memory/PageDirectory.hpp>
 
 #include <stdint.h>
-#include <Kernel/VGA/VGA.hpp>
-#include <string.h>
+#include <cstring.h>
 
 namespace Memory
 {

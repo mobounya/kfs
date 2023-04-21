@@ -6,13 +6,23 @@ LINKER_SCRIPT = linker.ld
 
 TARGET = i686-elf
 
-LIBC = ./User/Libc/ft_libc.a
-
-COMPILER_FLAGS = -I./ -I./User/Libc -ffreestanding -Wall -Wextra -fno-exceptions -fno-rtti -nostdlib -nodefaultlibs -fno-stack-protector
+COMPILER_FLAGS = -I./ -I./Kernel/Klibcpp -I./Kernel/Klibc -O2 -ffreestanding -Wall -Wextra -fno-exceptions -fno-rtti -nostdlib -nodefaultlibs -fno-stack-protector
 
 LINKER_FLAGS = -ffreestanding -nostdlib
 
-KERNEL_FILES = $(addprefix Kernel/, Kernel VGA/VGA Memory/PhysicalMemoryManager Memory/PagingStructureEntry Memory/MemoryRegion Memory/PageDirectory Memory/PageTable Memory/MemoryPage Memory/VirtualMemoryManager Memory/KernelVirtualMemoryManager Memory/UserVirtualMemoryManager)
+SIGNALS_FILES = $(addprefix Signals/, Signals)
+KLIBCPP = $(addprefix Klibcpp/, tohex)
+DEBUG_FILES = $(addprefix Debug/, Debug)
+DEVICES_FILES = $(addprefix Devices/, Keyboard) 
+KLIBC = $(addprefix Klibc/, isalpha islower isupper tolower toupper strcpy itoa memcpy strcmp strlen memset strndup strcat strdup)
+CPU_FILES = $(addprefix CPU/, CPU)
+GDT_FILES = $(addprefix GDT/, GDT TSS)
+INTERUPTS_FILES = $(addprefix Interrupts/, IDT PIC InterruptHandlers)
+MEMORY_FILES = $(addprefix Memory/, QuickDirtyMalloc PhysicalMemoryManager PagingStructureEntry MemoryRegion PageDirectory PageTable MemoryPage VirtualMemoryManager KernelVirtualMemoryManager UserVirtualMemoryManager)
+VGA_FILES = $(addprefix Display/VGA/, VGA)
+SCREEN_FILES = $(addprefix Display/, Screen)
+KERNEL_FILES = $(addprefix Kernel/, Kernel $(MEMORY_FILES) $(VGA_FILES) $(INTERUPTS_FILES) $(GDT_FILES) $(CPU_FILES) $(KLIBC) $(DEVICES_FILES) $(SCREEN_FILES) $(DEBUG_FILES) $(KLIBCPP) $(SIGNALS_FILES))
+
 KERNEL_SRC = $(addsuffix .cpp, $(KERNEL_FILES))
 KERNEL_OBJ = $(addsuffix .o, $(KERNEL_FILES))
 
@@ -32,8 +42,7 @@ all : $(NAME)
 
 $(NAME) : $(ASM_OBJ) $(CPP_OBJ)
 	@echo "$(RED)Linking kernel and boot files...$(NC)"
-	@make -C ./User/Libc
-	@$(TARGET)-g++ -T $(LINKER_SCRIPT) $(LINKER_FLAGS) -o $@ $(ASM_OBJ) $(CPP_OBJ) $(LIBC) -lgcc
+	@$(TARGET)-g++ -T $(LINKER_SCRIPT) $(LINKER_FLAGS) -o $@ $(ASM_OBJ) $(CPP_OBJ) -lgcc
 	@echo "$(GREEN)Done linking kernel and boot files...$(NC)"
 
 $(ASM_OBJ) : $(ASM_SRC)
@@ -53,15 +62,6 @@ iso: grub.cfg all
 	@cp grub.cfg isodir/boot/grub/grub.cfg
 	@grub-mkrescue --compress=xz -o $(ISO) isodir
 	@echo "$(GREEN)Done creating bootable iso file$(NC)"
-
-libc:
-	make -C ./User/Libc
-
-libc-fclean:
-	make fclean -C ./User/Libc
-
-libc-clean:
-	make clean -C ./User/Libc
 
 iso-clean:
 	rm -rf isodir/

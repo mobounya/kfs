@@ -3,6 +3,8 @@
 #include <stdint.h>
 #include <stddef.h>
 
+#include <string.hpp>
+
 #define VGA_WIDTH 80
 #define VGA_HEIGHT 25
 
@@ -63,7 +65,6 @@ class TEXT_MODE
         static TEXT_MODE       instance;
         static bool            instantiated;
 
-        vga_char        screen_buffer[VGA_BUFFER_SIZE];
         vga_char        *vga_buffer;
         size_t          current_index = 0;
 
@@ -71,14 +72,17 @@ class TEXT_MODE
         void write_char(vga_char c);
         void flush_buffer_to_screen();
         void shift_screen_buffer(size_t size);
-
-    public:
-        static TEXT_MODE &instantiate(void);
-        void set_start(size_t y, size_t x);
+        void write_string(const std::string &str, BG_COLOR bg_color, FG_COLOR fg_color, bool blink);
         void write_string(const char *string, BG_COLOR bg_color, FG_COLOR fg_color, bool blink);
-        vga_char create_char(vga_attribute attr, char ascii_char);
         vga_attribute set_foreground_color(vga_attribute attr, FG_COLOR color);
         vga_attribute set_background_color(vga_attribute attr, BG_COLOR color);
         vga_attribute set_blink(vga_attribute attr);
+        void set_start(size_t y, size_t x);
+        vga_char create_char(vga_attribute attr, char ascii_char);
+
+    public:
+        static TEXT_MODE &instantiate(void);
+        void write_string(const char *string);
+        void write_string(const std::string &str);
 };
 }

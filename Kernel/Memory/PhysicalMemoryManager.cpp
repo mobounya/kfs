@@ -1,6 +1,9 @@
 #include <Kernel/Memory/PhysicalMemoryManager.hpp>
 #include <Kernel/Multiboot/Multiboot.hpp>
-#include <string.h>
+#include <Kernel/Display/Screen.hpp>
+#include <Kernel/Memory/VirtualMemoryManager.hpp>
+
+#include <cstring.h>
 
 namespace Memory
 {
@@ -19,7 +22,15 @@ namespace Memory
 
     PhysicalMemoryManager::PhysicalMemoryManager()
     {
-        kernel_space = PhysicalMemoryManager::MemoryPool(0x400000, 0x800000);
+        /*
+            Physical Memory Mapping:
+                - 0x0      --> 0x100000  : 1 Mib, reserved for special usage.
+                - 0x100000 --> 0x400000  : 3 Mib, Kernel image (?? I don't know the size of the kernel image).
+                - 0x300000 --> 0x800000  : 4 Mib, Available for allocation for the Kernel.
+                - 0x800000 --> 0x1000000 : 8 Mib, Available for allocation for user space programs. 
+        */
+
+        kernel_space = PhysicalMemoryManager::MemoryPool(0x300000, 0x800000);
         user_space = PhysicalMemoryManager::MemoryPool(0x800000, 0x1000000);
     }
 
@@ -188,6 +199,7 @@ namespace Memory
     // MAYBE_FIXME: reserved physical memory are not stored anywhere, maybe store it somewhere.
     void    PhysicalMemoryManager::reserve_physical_memory(uint64_t physical_address_start, uint64_t physical_address_end)
     {
+        Screen cout;
         for (uint32_t i = 0; i < physical_memory.size(); i++)
         {
             const MemoryRegion &region = physical_memory[i];
@@ -199,7 +211,7 @@ namespace Memory
             {
                 int64_t first_region_length = physical_address_start - base_ptr;
                 int64_t second_region_length = (base_ptr + length) - physical_address_end;
-                
+
                 if (first_region_length > 0)
                 {
                     MemoryRegion region(base_ptr, first_region_length, MULTIBOOT_MEMORY_AVAILABLE);
@@ -218,119 +230,86 @@ namespace Memory
         }
     }
 
-    void    PhysicalMemoryManager::print_physical_memory_regions(VGA::TEXT_MODE &vga) const
+    void    PhysicalMemoryManager::print_physical_memory_regions(void) const
     {
+        Screen cout;
+
         for (uint32_t i = 0; i < physical_memory.size(); i++)
         {
-            vga.write_string("-------- ", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-            vga.write_string("Available region #", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-            vga.write_string(itoa(i), VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-            vga.write_string(" --------\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-            vga.write_string("Base address: ", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-            vga.write_string(itoa(physical_memory[i].get_base_addr()), VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-            vga.write_string("\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-            vga.write_string("Length: ", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-            vga.write_string(itoa(physical_memory[i].get_length()), VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-            vga.write_string("\n\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
+            cout << "-------- Available region #" << i << " --------\n";
+            cout << "Base address: " << physical_memory[i].get_base_addr() << "\n";
+            cout << "Length: " << physical_memory[i].get_length() << "\n\n";
         }
     }
 
-    void    PhysicalMemoryManager::print_kallocated_memory_pages(VGA::TEXT_MODE &vga, uint8_t max) const
+    void    PhysicalMemoryManager::print_kallocated_memory_pages(uint8_t max) const
     {
+        Screen cout;
+
         if (kernel_allocated_memory_pages.size() == 0)
-        {
-            vga.write_string("No kernel allocated memory !\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-        }
+            cout << "No kernel allocated memory !" << "\n";
         else
         {
             max = (max == 0) ? kernel_allocated_memory_pages.size() : max;
             for (uint32_t i = 0; i < max && i < kernel_allocated_memory_pages.size(); i++)
             {
-                vga.write_string("-------- ", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-                vga.write_string("Allocated page #", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-                vga.write_string(itoa(i), VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-                vga.write_string(" (Kernel) --------\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-                vga.write_string("Base address: ", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-                vga.write_string(itoa(kernel_allocated_memory_pages[i].get_base_addr()), VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-                vga.write_string("\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-                vga.write_string("Length: ", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-                vga.write_string(itoa(kernel_allocated_memory_pages[i].get_length()), VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-                vga.write_string("\n\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
+                cout << "-------- " << "Allocated page #" << i << " (Kernel) --------" << "\n";
+                cout << "Base address: " << kernel_allocated_memory_pages[i].get_base_addr() << "\n";
+                cout << "Length: " << kernel_allocated_memory_pages[i].get_length() << "\n\n";
             }
         }
     }
 
-    void    PhysicalMemoryManager::print_uallocated_memory_pages(VGA::TEXT_MODE &vga, uint8_t max) const
+    void    PhysicalMemoryManager::print_uallocated_memory_pages(uint8_t max) const
     {
+        Screen cout;
+
         if (user_allocated_memory_pages.size() == 0)
-        {
-            vga.write_string("No user allocated memory !\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-        }
+            cout << "No user allocated memory !" << "\n";
         else
         {
             max = (max == 0) ? user_allocated_memory_pages.size() : max;
             for (uint32_t i = 0; i < max && i < user_allocated_memory_pages.size(); i++)
             {
-                vga.write_string("-------- ", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-                vga.write_string("Allocated page #", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-                vga.write_string(itoa(i), VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-                vga.write_string(" (User) --------\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-                vga.write_string("Base address: ", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-                vga.write_string(itoa(user_allocated_memory_pages[i].get_base_addr()), VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-                vga.write_string("\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-                vga.write_string("Length: ", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-                vga.write_string(itoa(user_allocated_memory_pages[i].get_length()), VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-                vga.write_string("\n\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
+                cout << "-------- Allocated page #" << i << " (User) --------" << "\n";
+                cout << "Base address: " << user_allocated_memory_pages[i].get_base_addr() << "\n";
+                cout << "Length: " << user_allocated_memory_pages[i].get_length() << "\n\n";
             }
         }
     }
 
-    void    PhysicalMemoryManager::print_kfree_memory_pages(VGA::TEXT_MODE &vga, uint8_t max) const
+    void    PhysicalMemoryManager::print_kfree_memory_pages(uint8_t max) const
     {
+        Screen cout;
+
         if (kernel_free_memory_pages.size() == 0)
-        {
-             vga.write_string("No kernel free pages available !\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-        }
+            cout << "No kernel free pages available !" << "\n";
         else
         {
             max = (max == 0) ? kernel_free_memory_pages.size() : max;
             for (uint32_t i = 0; i < max && i < kernel_free_memory_pages.size(); i++)
             {
-                vga.write_string("-------- ", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-                vga.write_string("Free page #", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-                vga.write_string(itoa(i), VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-                vga.write_string(" (Kernel) --------\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-                vga.write_string("Base address: ", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-                vga.write_string(itoa(kernel_free_memory_pages[i].get_base_addr()), VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-                vga.write_string("\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-                vga.write_string("Length: ", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-                vga.write_string(itoa(kernel_free_memory_pages[i].get_length()), VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-                vga.write_string("\n\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
+                cout << "-------- " << "Free page #" << i << " (Kernel) --------" << "\n";
+                cout << "Base address: " << kernel_free_memory_pages[i].get_base_addr() << "\n";
+                cout << "Length: " << kernel_free_memory_pages[i].get_length() << "\n\n";
             }
         }
     }
 
-    void    PhysicalMemoryManager::print_ufree_memory_pages(VGA::TEXT_MODE &vga, uint8_t max) const
+    void    PhysicalMemoryManager::print_ufree_memory_pages(uint8_t max) const
     {
+        Screen cout;
+
         if (user_free_memory_pages.size() == 0)
-        {
-             vga.write_string("No User free pages available !\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-        }
+            cout << "No User free pages available !" << "\n";
         else
         {
             max = (max == 0) ? user_free_memory_pages.size() : max;
             for (uint32_t i = 0; i < max && i < user_free_memory_pages.size(); i++)
             {
-                vga.write_string("-------- ", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-                vga.write_string("Free page #", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-                vga.write_string(itoa(i), VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-                vga.write_string(" (User) --------\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-                vga.write_string("Base address: ", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-                vga.write_string(itoa(user_free_memory_pages[i].get_base_addr()), VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-                vga.write_string("\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-                vga.write_string("Length: ", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-                vga.write_string(itoa(user_free_memory_pages[i].get_length()), VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
-                vga.write_string("\n\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
+                cout << "-------- Free page #" << i << " (User) --------" << "\n";
+                cout << "Base address: " << user_free_memory_pages[i].get_base_addr() << "\n";
+                cout << "Length: " << user_free_memory_pages[i].get_length() << "\n\n";
             }
         }
     }

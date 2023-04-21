@@ -29,4 +29,14 @@ SECTIONS
 	{
 		*(.page_tables)
 	}
+
+	.interrupt_descriptor_table :
+	{
+		*(.interrupt_descriptor_table)
+	}
+
+	.reserved_kernel_memory :
+	{
+		*(.reserved_kernel_memory)
+	}
 }

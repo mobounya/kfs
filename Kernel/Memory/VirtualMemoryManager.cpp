@@ -1,5 +1,6 @@
 #include <Kernel/Memory/VirtualMemoryManager.hpp>
-#include <string.h>
+#include <Kernel/Display/Screen.hpp>
+#include <cstring.h>
 
 namespace Memory
 {
@@ -22,9 +23,9 @@ namespace Memory
 
     VirtualMemoryManager::VirtualMemoryManager(void *page_tables_ptr)
     {
-        memset(&(page_directory.page_directory), 0x0, sizeof(page_directory.page_directory));
+        Screen cout;
 
-        VGA::TEXT_MODE &vga = VGA::TEXT_MODE::instantiate();
+        memset(&(page_directory.page_directory), 0x0, sizeof(page_directory.page_directory));
 
         // TODO: improve book keeping of all of paging structures.
         // Quick and dry way to store my pages.
@@ -39,7 +40,7 @@ namespace Memory
             pde_entry->set_present(true)->set_read_write(true)->set_u_s(true)->set_pwt(true)->set_cache_disbled(true)->set_physical_address((uint32_t)page_table_ptr);
             if (insert_page_directory_entry(pde_entry) == NULL)
             {
-                vga.write_string("VirtualMemoryManager::constructor: cannot insert a new page directory entry.\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::RED, VGA::BLINK::FALSE);
+                cout << "VirtualMemoryManager::constructor: cannot insert a new page directory entry." << "\n";
                 return;
             }
             page_directory.page_table_info[i].size = 0;
@@ -66,6 +67,8 @@ namespace Memory
             physical memory at a specified address.
             TODO: allocate the memory rather than calling (reserve_physical_memory) which just removes the memory of the available memory pool.
         */
+        Screen cout;
+
         memory_manager.reserve_physical_memory(virtual_address_start, virtual_address_end);
         for (; virtual_address_start < virtual_address_end; virtual_address_start += PAGE_SIZE)
         {
@@ -95,9 +98,11 @@ namespace Memory
 
     void VirtualMemoryManager::identity_map_memory_page(uint64_t virtual_address)
     {
+        Screen cout;
         PageDirectoryEntry *pde_entry;
-        uint16_t table_index = (virtual_address & VIRTUAL_ADDRESS_TABLE_FLAG) >> 12;
-        uint16_t directory_index = (virtual_address & VIRTUAL_ADDRESS_DIRECTORY_FLAG) >> 22;
+        TranslatedLinearAddress linear_address = TranslatedLinearAddress::get_translated_address((const void *)virtual_address);
+        uint32_t table_index = linear_address.page_table_index;
+        uint32_t directory_index = linear_address.page_directory_index;
 
         // This will not work if (directory_index) is larger than 3, since we only have memory for 4 page tables for now.
         if (directory_index < this->page_directory.page_directory_size)
@@ -114,22 +119,18 @@ namespace Memory
             PageTable *page_table = (PageTable *)page_table_address;
             page_table->page_table[table_index].set_present(true)->set_read_write(true)->set_pwt(true)->set_cache_disbled(true)->set_physical_address(physical_address);
             page_directory.page_table_info[directory_index].size++;
-        } else 
-        {
-            VGA::TEXT_MODE &vga = VGA::TEXT_MODE::instantiate();
-            vga.write_string("VirtualMemoryManager::identity_map_memory_page: cannot access page directory index (", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::GREEN, VGA::BLINK::FALSE);
-            vga.write_string(itoa(directory_index), VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::GREEN, VGA::BLINK::FALSE);
-            vga.write_string(").\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::GREEN, VGA::BLINK::FALSE);
-        }
+            page_directory.page_table_info[directory_index].entry_used[table_index] = true;
+        } else
+            cout << "VirtualMemoryManager::identity_map_memory_page: cannot access page directory index (" << directory_index << ")." << "\n";
     }
 
     int    VirtualMemoryManager::disable_page(const void *virtual_address, uint32_t len)
     {
-        VGA::TEXT_MODE &vga = VGA::TEXT_MODE::instantiate();
+        Screen cout;
 
         if (PhysicalMemoryManager::find_aligned_address((uint64_t)virtual_address, PAGE_SIZE) != (uint64_t)virtual_address)
         {
-            vga.write_string("VirtualMemoryManager::disable_page: Virtual address is not page aligned\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::GREEN, VGA::BLINK::FALSE);
+            cout << "VirtualMemoryManager::disable_page: Virtual address is not page aligned" << "\n";
             return -1;
         }
 
@@ -143,9 +144,7 @@ namespace Memory
             TranslatedLinearAddress address = TranslatedLinearAddress::get_translated_address(((uint8_t *)virtual_address) + (n_pages * PAGE_SIZE));
             if (page_directory.page_directory[address.page_directory_index] == NULL)
             {
-                vga.write_string("VirtualMemoryManager::disable_page: cannot access page directory index (", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::GREEN, VGA::BLINK::FALSE);
-                vga.write_string(itoa(address.page_directory_index), VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::GREEN, VGA::BLINK::FALSE);
-                vga.write_string(").\n", VGA::BG_COLOR::BG_BLACK, VGA::FG_COLOR::GREEN, VGA::BLINK::FALSE);
+                cout << "VirtualMemoryManager::disable_page: cannot access page directory index (" << address.page_directory_index << ")." << "\n";
                 return -1;
             }
             PageTable *page_table = (PageTable *)(page_directory.page_directory[address.page_directory_index]->physical_address << 12);

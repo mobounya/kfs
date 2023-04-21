@@ -28,140 +28,462 @@ stack_top:
 .align 4096
 kernel_page_tables:
 .skip (4096 * 5)
-user_page_tables:
-.skip (4096 * 5)
+
+.section .interrupt_descriptor_table, "aw", @nobits
+.align 8
+interrupt_descriptor_table_ptr:
+.skip (8 * 256) # 256 entry 8 bytes each
+.skip (8 * 3) # Just to be safe
+idt_descriptor_ptr:
+.skip 6
+
+.section .reserved_kernel_memory, "aw", @nobits
+reserved_kernel_memory_start:
+.skip 1024 * 10 # 10 KiB
+reserved_kernel_memory_end:
+
+.section .multiboot_info, "aw", @nobits
+multiboot_info_start:
+.skip 150
+multiboot_info_end:
 
 .section .text
 .global _start
+.global load_idt
+.global call_kernel
+
+.global DB_fault_as
+.global NMI_interrupt_as
+.global UD_fault_as
+.global BP_trap_as
+.global NM_fault_as
+.global DF_abort_as
+.global TS_fault_as
+.global NP_fault_as
+.global SS_fault_as
+.global GP_fault_as
+.global PF_fault_as
+.global MF_fault_as
+.global AC_fault_as
+.global MC_fault_as
+.global XM_fault_as
+.global signal_handler_1_as
+.global signal_handler_2_as
+
+.global keyboard_handler_as
 
 .extern multiboot_info_ptr
 .type multiboot_info_ptr, @object
 
+.extern stack_top_ptr
+.type stack_top_ptr, @object
+
+.extern kernel_memory_ptr
+.type kernel_memory_ptr, @object
+
 _start:
     cli
-    lgdt [GDT_descriptor]
-    mov $0x10, %esp
-    mov %esp, %ds
-    mov $0x18, %esp
-    mov %esp, %ss
-    ljmp $0x08, $.call_kernel
-
-.call_kernel:
-    movl %ebx, multiboot_info_ptr
     mov $stack_top, %esp # esp now will point to the top of the stack.
+    mov %esp, stack_top_ptr
+    push $multiboot_info_start
+    push %ebx
+    call copy_multiboot_info_structure
+    movl $multiboot_info_start, multiboot_info_ptr
+    mov $reserved_kernel_memory_start, %ebx
+    mov %ebx, kernel_memory_ptr
+    push $stack_top
+    call setup_gdt
+    lgdt [GDT_descriptor]
+    # ltr 0x38 # let's not load the tss segment for now.
+    ljmp $0x08, $call_kernel
+
+call_kernel:
+    mov $0x10, %ebx
+    mov %ebx, %ds
+    mov $0x18, %ebx
+    mov %ebx, %ss
+    push $idt_descriptor_ptr
+    push $interrupt_descriptor_table_ptr
     push $kernel_page_tables
-    push $user_page_tables
     call kernel_main
 1:	hlt
 	jmp 1b
 
-GDT_start:
-    GDT_null:
-        .8byte 0x0
+# Other registers: %eip %eflags %cs %ss %ds %es %fs %gs %cr0 %cr2 %cr3 %cr4 %cr8
+# Pushed by the compiler : %ebp %ecx %edx %eax
+# General registers: %eax %ebx %ecx %edx %esp %ebp %esi %edi
 
-    kernel_code_descriptor:
-        # first 2 bytes of the limit
-        .2byte 0xffff
+signal_handler_1_as:
+    push %eax
+    push %ebx
+    push %ecx
+    push %edx
+    push %esp
+    push %ebp
+    push %esi
+    push %edi
+    call signal_handler_1
+    pop %edi
+    pop %esi
+    pop %ebp
+    pop %esp
+    pop %edx
+    pop %ecx
+    pop %ebx
+    pop %eax
+    iret
 
-        # first 3 bytes of base address
-        .2byte 0x00
-        .byte 0x0
+signal_handler_2_as:
+    push %eax
+    push %ebx
+    push %ecx
+    push %edx
+    push %esp
+    push %ebp
+    push %esi
+    push %edi
+    call signal_handler_2
+    pop %edi
+    pop %esi
+    pop %ebp
+    pop %esp
+    pop %edx
+    pop %ecx
+    pop %ebx
+    pop %eax
+    iret
 
-        # access/type byte
-        .byte 0b10011010
+BP_trap_as:
+    push %eax
+    push %ebx
+    push %ecx
+    push %edx
+    push %esp
+    push %ebp
+    push %esi
+    push %edi
+    call BP_trap
+    pop %edi
+    pop %esi
+    pop %ebp
+    pop %esp
+    pop %edx
+    pop %ecx
+    pop %ebx
+    pop %eax
+    iret
 
-        # 4 bit flag and last 4 bits of limit
-        .byte 0b11001111
+DB_fault_as:
+    push %eax
+    push %ebx
+    push %ecx
+    push %edx
+    push %esp
+    push %ebp
+    push %esi
+    push %edi
+    call DB_fault
+    pop %edi
+    pop %esi
+    pop %ebp
+    pop %esp
+    pop %edx
+    pop %ecx
+    pop %ebx
+    pop %eax
+    iret
 
-        # last 1 byte of base address
-        .byte 0x0
+NMI_interrupt_as:
+    push %eax
+    push %ebx
+    push %ecx
+    push %edx
+    push %esp
+    push %ebp
+    push %esi
+    push %edi
+    call NMI_interrupt
+    pop %edi
+    pop %esi
+    pop %ebp
+    pop %esp
+    pop %edx
+    pop %ecx
+    pop %ebx
+    pop %eax
+    iret
 
-    kernel_data_descriptor:
-        # first 2 bytes of the limit
-        .2byte 0xffff
+UD_fault_as:
+    push %eax
+    push %ebx
+    push %ecx
+    push %edx
+    push %esp
+    push %ebp
+    push %esi
+    push %edi
+    call UD_fault
+    pop %edi
+    pop %esi
+    pop %ebp
+    pop %esp
+    pop %edx
+    pop %ecx
+    pop %ebx
+    pop %eax
+    iret
 
-        # first 3 bytes of base address
-        .2byte 0x0
-        .byte 0x0
+NM_fault_as:
+    push %eax
+    push %ebx
+    push %ecx
+    push %edx
+    push %esp
+    push %ebp
+    push %esi
+    push %edi
+    call NM_fault
+    pop %edi
+    pop %esi
+    pop %ebp
+    pop %esp
+    pop %edx
+    pop %ecx
+    pop %ebx
+    pop %eax
+    iret
 
-        # access/type byte
-        .byte 0b10010010
+DF_abort_as:
+    push %eax
+    push %ebx
+    push %ecx
+    push %edx
+    push %esp
+    push %ebp
+    push %esi
+    push %edi
+    call DF_abort
+    pop %edi
+    pop %esi
+    pop %ebp
+    pop %esp
+    pop %edx
+    pop %ecx
+    pop %ebx
+    pop %eax
+    add $4, %esp
+    iret
 
-        # 4 bit flag and last 4 bits of limit
-        .byte 0b11001111
+TS_fault_as:
+    push %eax
+    push %ebx
+    push %ecx
+    push %edx
+    push %esp
+    push %ebp
+    push %esi
+    push %edi
+    call TS_fault
+    pop %edi
+    pop %esi
+    pop %ebp
+    pop %esp
+    pop %edx
+    pop %ecx
+    pop %ebx
+    pop %eax
+    add $4, %esp
+    iret
 
-        # last 1 byte of base address
-        .byte 0x0
-    
-    kernel_stack_descriptor:
-        # first 2 bytes of the limit
-        .2byte 0xffff
+NP_fault_as:
+    push %eax
+    push %ebx
+    push %ecx
+    push %edx
+    push %esp
+    push %ebp
+    push %esi
+    push %edi
+    call NP_fault
+    pop %edi
+    pop %esi
+    pop %ebp
+    pop %esp
+    pop %edx
+    pop %ecx
+    pop %ebx
+    pop %eax
+    add $4, %esp
+    iret
 
-        # first 3 bytes of base address
-        .2byte 0x0
-        .byte 0x0
+SS_fault_as:
+    push %eax
+    push %ebx
+    push %ecx
+    push %edx
+    push %esp
+    push %ebp
+    push %esi
+    push %edi
+    call SS_fault
+    pop %edi
+    pop %esi
+    pop %ebp
+    pop %esp
+    pop %edx
+    pop %ecx
+    pop %ebx
+    pop %eax
+    add $4, %esp
+    iret
 
-        # access/type byte
-        .byte 0b10010010
+GP_fault_as:
+    push %eax
+    push %ebx
+    push %ecx
+    push %edx
+    push %esp
+    push %ebp
+    push %esi
+    push %edi
+    call GP_fault
+    pop %edi
+    pop %esi
+    pop %ebp
+    pop %esp
+    pop %edx
+    pop %ecx
+    pop %ebx
+    pop %eax
+    add $4, %esp
+    iret
 
-        # 4 bit flag and last 4 bits of limit
-        .byte 0b11001111
+PF_fault_as:
+    push %eax
+    push %ebx
+    push %ecx
+    push %edx
+    push %esp
+    push %ebp
+    push %esi
+    push %edi
+    call PF_fault
+    pop %edi
+    pop %esi
+    pop %ebp
+    pop %esp
+    pop %edx
+    pop %ecx
+    pop %ebx
+    pop %eax
+    add $4, %esp
+    iret
 
-        # last 1 byte of base address
-        .byte 0x0
-    
-    user_code_descriptor:
-        # first 2 bytes of the limit
-        .2byte 0xffff
+MF_fault_as:
+    push %eax
+    push %ebx
+    push %ecx
+    push %edx
+    push %esp
+    push %ebp
+    push %esi
+    push %edi
+    call MF_fault
+    pop %edi
+    pop %esi
+    pop %ebp
+    pop %esp
+    pop %edx
+    pop %ecx
+    pop %ebx
+    pop %eax
+    iret
 
-        # first 3 bytes of base address
-        .2byte 0x00
-        .byte 0x0
+AC_fault_as:
+    push %eax
+    push %ebx
+    push %ecx
+    push %edx
+    push %esp
+    push %ebp
+    push %esi
+    push %edi
+    call AC_fault
+    pop %edi
+    pop %esi
+    pop %ebp
+    pop %esp
+    pop %edx
+    pop %ecx
+    pop %ebx
+    pop %eax
+    add $4, %esp
+    iret
 
-        # access/type byte
-        .byte 0b11111110
+MC_fault_as:
+    push %eax
+    push %ebx
+    push %ecx
+    push %edx
+    push %esp
+    push %ebp
+    push %esi
+    push %edi
+    call MC_fault
+    pop %edi
+    pop %esi
+    pop %ebp
+    pop %esp
+    pop %edx
+    pop %ecx
+    pop %ebx
+    pop %eax
+    iret
 
-        # 4 bit flag and last 4 bits of limit
-        .byte 0b11001111
+XM_fault_as:
+    push %eax
+    push %ebx
+    push %ecx
+    push %edx
+    push %esp
+    push %ebp
+    push %esi
+    push %edi
+    call XM_fault
+    pop %edi
+    pop %esi
+    pop %ebp
+    pop %esp
+    pop %edx
+    pop %ecx
+    pop %ebx
+    pop %eax
+    iret
 
-        # last 1 byte of base address
-        .byte 0x0
-    
-    user_data_descriptor:
-        # first 2 bytes of the limit
-        .2byte 0xffff
+keyboard_handler_as:
+    push %eax
+    push %ebx
+    push %ecx
+    push %edx
+    push %esp
+    push %ebp
+    push %esi
+    push %edi
+    call keyboard_handler
+    pop %edi
+    pop %esi
+    pop %ebp
+    pop %esp
+    pop %edx
+    pop %ecx
+    pop %ebx
+    pop %eax 
+    iret
 
-        # first 3 bytes of base address
-        .2byte 0x00
-        .byte 0x0
-
-        # access/type byte
-        .byte 0b11110010
-
-        # 4 bit flag and last 4 bits of limit
-        .byte 0b11001111
-
-        # last 1 byte of base address
-        .byte 0x0
-    
-    user_stack_descriptor:
-        # first 2 bytes of the limit
-        .2byte 0xffff
-
-        # first 3 bytes of base address
-        .2byte 0x0
-        .byte 0x0
-
-        # access/type byte
-        .byte 0b11110010
-
-        # 4 bit flag and last 4 bits of limit
-        .byte 0b11001111
-
-        # last 1 byte of base address
-        .byte 0x0
-GDT_end:
+load_idt:
+    lidt [idt_descriptor_ptr]
+    ret
 
 GDT_descriptor:
-    .2byte  GDT_end - GDT_start - 1
-    .4byte  GDT_start
+    .2byte  31
+    .4byte  0x1000
