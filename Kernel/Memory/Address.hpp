@@ -5,7 +5,7 @@
 
 class Address
 {
-    private:
+    protected:
         void *m_ptr;
 
     public:

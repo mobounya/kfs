@@ -111,13 +111,14 @@ namespace Memory
             pde_entry = page_directory.page_directory[directory_index];
 
             // Get the address of the page table.
-            uint32_t page_table_address = pde_entry->physical_address;
+            
+            PhysicalAddress page_table_address = pde_entry->physical_address;
             page_table_address = (page_table_address << 12); // Page address is 0x1000 (PAGE_SIZE) aligned.
 
             // Go to page_table_address and map the corresponding entry to (physical_address), now (virtual_address) will map to the same (physical_address)
-            uint32_t physical_address = (uint32_t)page.ptr();
-            PageTable *page_table = (PageTable *)page_table_address;
-            page_table->page_table[table_index].set_present(true)->set_read_write(true)->set_pwt(true)->set_cache_disbled(true)->set_physical_address(physical_address);
+            PhysicalAddress address = page.ptr();
+            PageTable *page_table = (PageTable *)page_table_address.ptr();
+            page_table->page_table[table_index].set_present(true)->set_read_write(true)->set_pwt(true)->set_cache_disbled(true)->set_physical_address((uint32_t)(address.ptr()));
             page_directory.page_table_info[directory_index].size++;
             page_directory.page_table_info[directory_index].entry_used[table_index] = true;
         } else

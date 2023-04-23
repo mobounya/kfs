@@ -4,6 +4,7 @@
 
 #include <Kernel/Memory/PhysicalMemoryManager.hpp>
 #include <Kernel/Memory/VirtualAddress.hpp>
+#include <Kernel/Memory/PhysicalAddress.hpp>
 
 #define VIRTUAL_ADDRESS_OFFSET_FLAG 0xFFF
 #define VIRTUAL_ADDRESS_TABLE_FLAG 0x3FF000

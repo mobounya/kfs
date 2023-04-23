@@ -9,6 +9,8 @@
 #include <Kernel/Memory/PageTable.hpp>
 #include <Kernel/Memory/MemoryPage.hpp>
 
+#include <Kernel/Memory/PhysicalAddress.hpp>
+
 namespace Memory
 {
     class PhysicalMemoryManager
@@ -39,7 +41,7 @@ namespace Memory
             void                                kfree_physical_memory_page(const MemoryPage &page);
             void                                ufree_physical_memory_page(const MemoryPage &page);
             static uint32_t                     find_aligned_address(uint32_t address, uint32_t alignment);
-            void                                reserve_physical_memory(uint32_t physical_address_start, uint32_t physical_address_end);
+            void                                reserve_physical_memory(const PhysicalAddress &start, const PhysicalAddress &end);
             static MemoryRegion                 get_overlapping_memory_region(const MemoryRegion &region_1, const MemoryRegion &region_2);
             void                                print_physical_memory_regions(void) const;
             void                                print_kallocated_memory_pages(uint8_t max) const;

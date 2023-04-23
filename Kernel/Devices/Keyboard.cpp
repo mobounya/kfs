@@ -1,5 +1,6 @@
 #include <Kernel/Devices/Keyboard.hpp>
 #include <Kernel/CPU/CPU.hpp>
+#include <Kernel/Display/Screen.hpp>
 
 bool                                    Keyboard::instantiated = false;
 Keyboard                                Keyboard::keyboard_driver;
@@ -9,6 +10,8 @@ bool                                    Keyboard::caps_on = false;
 
 Keyboard::Keyboard()
 {
+    Screen cout;
+
     scan_code_set = std::unordered_map<int, char>();
     key_handlers = std::unordered_map<int, key_handler>();
     scan_code_set[0x01] = '?'; // escape
@@ -39,7 +42,7 @@ Keyboard::Keyboard()
     scan_code_set[0x1A] = '[';
     scan_code_set[0x1B] = ']';
     scan_code_set[0x1C] = '\n'; // Enter
-    scan_code_set[0x1D] = '\0'; // Left control 
+    scan_code_set[0x1D] = '\0'; // Left control
     scan_code_set[0x1E] = 'a';
     scan_code_set[0x1F] = 's';
     scan_code_set[0x20] = 'd';

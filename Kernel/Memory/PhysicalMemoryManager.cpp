@@ -197,7 +197,7 @@ namespace Memory
     }
 
     // MAYBE_FIXME: reserved physical memory are not stored anywhere, maybe store it somewhere.
-    void    PhysicalMemoryManager::reserve_physical_memory(uint32_t physical_address_start, uint32_t physical_address_end)
+    void    PhysicalMemoryManager::reserve_physical_memory(const PhysicalAddress &start, const PhysicalAddress &end)
     {
         Screen cout;
         for (uint32_t i = 0; i < physical_memory.size(); i++)
@@ -207,10 +207,10 @@ namespace Memory
             uint32_t base_ptr = region.get_base_addr();
             uint32_t length = region.get_length();
 
-            if (physical_address_start >= base_ptr && physical_address_start < (base_ptr + length))
+            if ((uint32_t)start.ptr() >= base_ptr && start < (base_ptr + length))
             {
-                int64_t first_region_length = physical_address_start - base_ptr;
-                int64_t second_region_length = (base_ptr + length) - physical_address_end;
+                uint32_t first_region_length = (uint32_t)start.ptr() - base_ptr;
+                uint32_t second_region_length = (base_ptr + length) - (uint32_t)end.ptr();
 
                 if (first_region_length > 0)
                 {
@@ -219,7 +219,7 @@ namespace Memory
                 }
                 if (second_region_length > 0)
                 {
-                    MemoryRegion region(physical_address_end, second_region_length, MULTIBOOT_MEMORY_AVAILABLE);
+                    MemoryRegion region((uint32_t)end.ptr(), second_region_length, MULTIBOOT_MEMORY_AVAILABLE);
                     physical_memory.push_memory_region(region);
                 }
 

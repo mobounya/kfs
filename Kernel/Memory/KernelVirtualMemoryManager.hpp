@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Kernel/Memory/VirtualMemoryManager.hpp>
+#include <Kernel/Memory/PhysicalAddress.hpp>
 
 namespace Memory
 {

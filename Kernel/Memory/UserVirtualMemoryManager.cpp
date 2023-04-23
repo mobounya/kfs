@@ -1,5 +1,7 @@
 #include <Kernel/Memory/UserVirtualMemoryManager.hpp>
 #include <Kernel/Display/Screen.hpp>
+#include <Kernel/Memory/PhysicalAddress.hpp>
+
 #include <cstring.h>
 
 namespace Memory
@@ -89,8 +91,9 @@ namespace Memory
                 if (page_directory.page_table_info[translated_address.page_directory_index].entry_used[translated_address.page_table_index] == true)
                 {
                     PageTable *page_table = (PageTable *)(page_directory.page_directory[translated_address.page_directory_index]->physical_address << 12);
-                    uint32_t physical_address = (page_table->page_table[translated_address.page_table_index].physical_address << 12);
-                    memory_manager.ufree_physical_memory_page(MemoryPage(physical_address));
+                    PhysicalAddress address = page_table->page_table[translated_address.page_table_index].physical_address;
+                    address = address << 12;
+                    memory_manager.ufree_physical_memory_page(MemoryPage((uint32_t)address.ptr()));
                     page_directory.page_table_info[translated_address.page_directory_index].entry_used[translated_address.page_table_index] = false;
                     page_directory.page_table_info[translated_address.page_directory_index].size--;
                     memset(&(page_table->page_table[translated_address.page_table_index]), 0x0, sizeof(PageTableEntry));
