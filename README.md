@@ -46,3 +46,24 @@ kfs-3 is all about memory and memory managment, this module will introduce you t
 ### Additional resources
 * [Code Tour: Kernel virtual memory system in SerenityOS](https://www.youtube.com/watch?v=3xgOybGlYes&t=2089s)
 * https://wiki.osdev.org/Page_Frame_Allocation
+
+# [KFS_4](https://cdn.intra.42.fr/pdf/pdf/64577/en.subject.pdf)
+
+kfs-4 is all about interrupts in the IA-32 architecture, in this project we will setup exception handling as described in the IA-32 architecture manual, a basic keyboard driver and a simple signals interface that uses interrupts.
+
+### Inerrupts and the Interrupt Descriptor Table (IDT)
+* The interrupt videos in [Architecture 2001: Intel x86-64 OS Internals](https://www.youtube.com/playlist?list=PLUFkSN0XLZ-myVyCmMvfz_W5Z5SauI3cN)
+* https://wiki.osdev.org/Interrupts
+* https://wiki.osdev.org/Interrupt_Descriptor_Table
+* https://wiki.osdev.org/IDT_problems#Problems_with_IDTs
+* Interrupt and exception handling in the [Intel® 64 and IA-32 Architectures Developer's Manual: Vol. 3A](https://www.intel.com/content/www/us/en/architecture-and-technology/64-ia-32-architectures-software-developer-vol-3a-part-1-manual.html)
+
+### Keyboard
+* https://wiki.osdev.org/PS/2_Keyboard
+
+### Programmable Interrupt Controller (PIC)
+* https://wiki.osdev.org/PIC
+
+### Additional resources
+* [Program, Interrupted - Computerphile](https://www.youtube.com/watch?v=54BrU82ANww)
+* [Crashes, Cosmic Rays and Kernel Panic - Computerphile](https://www.youtube.com/watch?v=nr9auoHtvzM)
