@@ -9,7 +9,7 @@ namespace Memory
     {
         typedef const T&    const_reference;
         typedef uint32_t    size_type;
-        typedef uint64_t    size_t;
+        typedef uint32_t    size_t;
 
         private:
             std::vector<T> memory_regions;

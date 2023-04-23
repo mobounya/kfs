@@ -35,10 +35,10 @@ namespace std
         public:
             unordered_map()
             {
-                m_first = (Key *)quick_dirty_kmalloc(sizeof(Key) * 30);
-                m_second = (T *)quick_dirty_kmalloc(sizeof(T) * 30);
+                m_first = (Key *)quick_dirty_kmalloc(sizeof(Key) * 100);
+                m_second = (T *)quick_dirty_kmalloc(sizeof(T) * 100);
                 m_size = 0;
-                m_capacity = 30;
+                m_capacity = 100;
             }
 
             T& operator[](const Key& key)
@@ -57,7 +57,6 @@ namespace std
 
             T& at(const Key& key)
             {
-                T temp;
                 size_type key_index = get_index_of_key(key);
                 if (key_index == -1)
                     return m_second[m_size - 1];
@@ -104,6 +103,11 @@ namespace std
             bool contains(const Key& key) const
             {
                 return (count(key) == 1);
+            }
+
+            size_type capacity(void)
+            {
+                return m_capacity;
             }
     };
 }

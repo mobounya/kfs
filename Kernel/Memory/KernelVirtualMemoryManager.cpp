@@ -66,7 +66,7 @@ namespace Memory
 
             page_table->add_new_entry(pt_entry, page_table_index);
             if (first_page_ptr == NULL)
-                first_page_ptr = (void *)construct_virtual_address(page_directory_index, page_table_index, 0x0);
+                first_page_ptr = construct_virtual_address(page_directory_index, page_table_index, 0x0).ptr();
             page_directory.page_table_info[page_directory_index].entry_used[page_table_index] = true;
             page_directory.page_table_info[page_directory_index].size++;
             page_table_index++;
@@ -77,8 +77,9 @@ namespace Memory
     int     KernelVirtualMemoryManager::kfree(void *addr, size_t len)
     {
         Screen cout;
+        VirtualAddress v_addr(addr);
 
-        if (addr == NULL || PhysicalMemoryManager::find_aligned_address((uint64_t)addr, PAGE_SIZE) != (uint64_t)addr)
+        if (addr == NULL || PhysicalMemoryManager::find_aligned_address((uint32_t)addr, PAGE_SIZE) != (uint32_t)addr)
         {
             cout << "KernelVirtualMemoryManager::kfree: Virtual address is not page aligned." << "\n";
             return -1;
@@ -91,20 +92,21 @@ namespace Memory
 
         for (uint8_t pages_freed = 0; pages_freed < (len / PAGE_SIZE); pages_freed++)
         {
-            TranslatedLinearAddress translated_address = TranslatedLinearAddress::get_translated_address(addr);
+            TranslatedLinearAddress translated_address = TranslatedLinearAddress::get_translated_address(v_addr);
             if (page_directory.page_directory[translated_address.page_directory_index] != NULL)
             {
                 if (page_directory.page_table_info[translated_address.page_directory_index].entry_used[translated_address.page_table_index] == true)
                 {
                     PageTable *page_table = (PageTable *)(page_directory.page_directory[translated_address.page_directory_index]->physical_address << 12);
-                    uint32_t physical_address = (page_table->page_table[translated_address.page_table_index].physical_address << 12);
-                    memory_manager.kfree_physical_memory_page(MemoryPage(physical_address));
+                    PhysicalAddress address = page_table->page_table[translated_address.page_table_index].physical_address;
+                    address = address << 12;
+                    memory_manager.kfree_physical_memory_page(MemoryPage((uint32_t)address.ptr()));
                     page_directory.page_table_info[translated_address.page_directory_index].entry_used[translated_address.page_table_index] = false;
                     page_directory.page_table_info[translated_address.page_directory_index].size--;
                     page_table->page_table[translated_address.page_table_index].set_present(false);
                 }
             }
-            addr = (void *)(((uint8_t *)addr) + PAGE_SIZE);
+            v_addr += PAGE_SIZE;
         }
         return 0;
     }
@@ -113,10 +115,12 @@ namespace Memory
     {
         if (addr == NULL)
             return 0;
+
+        VirtualAddress v_addr(addr);
         bool contiguous_memory = true;
         size_t size = 0;
 
-        TranslatedLinearAddress translated_address = TranslatedLinearAddress::get_translated_address(addr);
+        TranslatedLinearAddress translated_address = TranslatedLinearAddress::get_translated_address(v_addr);
         while (contiguous_memory)
         {
             if (page_directory.page_directory[translated_address.page_directory_index] == NULL)

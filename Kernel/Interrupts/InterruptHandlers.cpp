@@ -192,7 +192,7 @@ extern "C" void keyboard_handler(void)
     char str[2] = { '\0' };
     Keyboard &keyboard_driver = Keyboard::instantiate();
     int scan_code             = keyboard_driver.scan_code();
-    key_handler fn = keyboard_driver.get_key_handler(scan_code);
+    key_handler fn            = keyboard_driver.get_key_handler(scan_code);
 
     if (fn != NULL)
         fn();
@@ -202,8 +202,13 @@ extern "C" void keyboard_handler(void)
         keyboard_driver.execute_key(scan_code);
     else
     {
-        str[0] = keyboard_driver.get_key_pressed(scan_code);
-        cout << str;
+        char c = '\0';
+        c = keyboard_driver.get_key_pressed(scan_code);
+        if (c != '\0')
+        {
+            str[0] = c;
+            cout << str;
+        }
     }
     CPU::outb(0x20, 0x20);
 }

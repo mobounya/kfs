@@ -9,6 +9,7 @@
 #include <Kernel/Memory/MemoryPage.hpp>
 #include <Kernel/Memory/KernelVirtualMemoryManager.hpp>
 #include <Kernel/Memory/UserVirtualMemoryManager.hpp>
+#include <Kernel/Memory/VirtualAddress.hpp>
 #include <Kernel/Interrupts/IDT.hpp>
 #include <Kernel/Interrupts/PIC.hpp>
 #include <Kernel/GDT/GDT.hpp>
@@ -110,7 +111,7 @@ extern "C" void setup_gdt(void *stack_ptr)
 {
     Kernel::GDT_Table   *gdt_table_ptr = (Kernel::GDT_Table *)0x1000;
     // Store the tss right after the GDT.
-    Kernel::TSS         *tss_ptr = (Kernel::TSS *)(((Kernel::GDT_Table *)0x1000) + 1);
+    // Kernel::TSS         *tss_ptr = (Kernel::TSS *)(((Kernel::GDT_Table *)0x1000) + 1);
     Kernel::GDT_Table gdt_table;
 
     size_t  gdt_size = 0;
@@ -200,15 +201,15 @@ extern "C" void kernel_main(void *kernel_page_tables, void *interrupt_descriptor
     */
 
     // Identity map the first 1 Mib (Mebibyte), 0x0 --> 0x100000
-    kernel_vm.identity_map_memory(0x0, 0x100000);
+    kernel_vm.identity_map_memory(VirtualAddress((void *)0x0), VirtualAddress((void *)0x100000));
 
     // Identity map the Kernel image, 0x100000 --> 0x400000
-    kernel_vm.identity_map_memory(0x100000, 0x300000);
+    kernel_vm.identity_map_memory(VirtualAddress((void *)0x100000), VirtualAddress((void *)0x300000));
 
     kernel_vm.load_page_directory();
 
     // Disable first page so de-refrencing a NULL ptr would not work.
-    kernel_vm.disable_page(0x0, PAGE_SIZE);
+    kernel_vm.disable_page(VirtualAddress((void *)0x0), PAGE_SIZE);
 
     Interrupts::PIC::PIC_remap(0x20, 0x28);
 
@@ -290,4 +291,14 @@ extern "C" void kernel_main(void *kernel_page_tables, void *interrupt_descriptor
     keybrd.map_key(0x3C, [](){
         Signals::send_signal(SIGNAL_2);
     });
+
+    char *ptr = (char *)kernel_vm.kmalloc(PAGE_SIZE);
+
+    ptr[0] = 'a';
+    ptr[1] = 'b';
+    ptr[2] = 'c';
+    ptr[3] = '\0';
+    cout.set_base(BASE::HEX);
+    cout << "Address: " << "0x" << (uint32_t)ptr << "\n";
+    cout << "Content: " << ptr << "\n";
 }

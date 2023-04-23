@@ -1,5 +1,7 @@
 #include <Kernel/Memory/UserVirtualMemoryManager.hpp>
 #include <Kernel/Display/Screen.hpp>
+#include <Kernel/Memory/PhysicalAddress.hpp>
+
 #include <cstring.h>
 
 namespace Memory
@@ -58,7 +60,7 @@ namespace Memory
 
             page_table->add_new_entry(pt_entry, page_table_index);
             if (first_page_ptr == NULL)
-                first_page_ptr = (void *)construct_virtual_address(page_directory_index, page_table_index, 0x0);
+                first_page_ptr = construct_virtual_address(page_directory_index, page_table_index, 0x0).ptr();
             page_directory.page_table_info[page_directory_index].entry_used[page_table_index] = true;
             page_directory.page_table_info[page_directory_index].size++;
             page_table_index++;
@@ -70,7 +72,7 @@ namespace Memory
     {
         Screen cout;
 
-        if (addr == NULL || PhysicalMemoryManager::find_aligned_address((uint64_t)addr, PAGE_SIZE) != (uint64_t)addr)
+        if (addr == NULL || PhysicalMemoryManager::find_aligned_address((uint32_t)addr, PAGE_SIZE) != (uint32_t)addr)
         {
             cout << "UserVirtualMemoryManager::free_virtual_memory: Virtual address is not page aligned." << "\n";
             return -1;
@@ -89,8 +91,9 @@ namespace Memory
                 if (page_directory.page_table_info[translated_address.page_directory_index].entry_used[translated_address.page_table_index] == true)
                 {
                     PageTable *page_table = (PageTable *)(page_directory.page_directory[translated_address.page_directory_index]->physical_address << 12);
-                    uint32_t physical_address = (page_table->page_table[translated_address.page_table_index].physical_address << 12);
-                    memory_manager.ufree_physical_memory_page(MemoryPage(physical_address));
+                    PhysicalAddress address = page_table->page_table[translated_address.page_table_index].physical_address;
+                    address = address << 12;
+                    memory_manager.ufree_physical_memory_page(MemoryPage((uint32_t)address.ptr()));
                     page_directory.page_table_info[translated_address.page_directory_index].entry_used[translated_address.page_table_index] = false;
                     page_directory.page_table_info[translated_address.page_directory_index].size--;
                     memset(&(page_table->page_table[translated_address.page_table_index]), 0x0, sizeof(PageTableEntry));
