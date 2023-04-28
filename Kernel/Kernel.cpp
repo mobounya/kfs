@@ -291,14 +291,4 @@ extern "C" void kernel_main(void *kernel_page_tables, void *interrupt_descriptor
     keybrd.map_key(0x3C, [](){
         Signals::send_signal(SIGNAL_2);
     });
-
-    char *ptr = (char *)kernel_vm.kmalloc(PAGE_SIZE);
-
-    ptr[0] = 'a';
-    ptr[1] = 'b';
-    ptr[2] = 'c';
-    ptr[3] = '\0';
-    cout.set_base(BASE::HEX);
-    cout << "Address: " << "0x" << (uint32_t)ptr << "\n";
-    cout << "Content: " << ptr << "\n";
 }
